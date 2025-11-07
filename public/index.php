@@ -38,9 +38,13 @@ $router->post('/api/surveys/publish', [App\Controllers\SurveyController::class, 
 $router->post('/api/surveys/approve', [App\Controllers\SurveyController::class, 'approve']);
 
 // Question API routes
-$router->post('/api/questions', [App\Controllers\SurveyController::class, 'addQuestion']);
-$router->put('/api/questions', [App\Controllers\SurveyController::class, 'updateQuestion']);
-$router->delete('/api/questions', [App\Controllers\SurveyController::class, 'deleteQuestion']);
+$router->get('/api/questions', [App\Controllers\QuestionController::class, 'index']); // Lấy danh sách tất cả câu hỏi 
+$router->get('/api/questions/by-survey', [App\Controllers\QuestionController::class, 'getBySurvey']); // Lấy câu hỏi theo khảo sát
+$router->get('/api/questions/show', [App\Controllers\QuestionController::class, 'show']); // Lấy chi tiết một câu hỏi
+
+$router->post('/api/questions', [App\Controllers\QuestionController::class, 'create']); // Tạo câu hỏi mới
+$router->put('/api/questions', [App\Controllers\QuestionController::class, 'update']); // Cập nhật câu hỏi
+$router->delete('/api/questions', [App\Controllers\QuestionController::class, 'delete']); // Xóa câu hỏi
 
 
 $request = Request::capture();
