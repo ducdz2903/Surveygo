@@ -40,7 +40,7 @@ Dự an PHP thuần theo hướng MVC (không framework) với Router/Controller
 ### Cài đặt & Quick Start
 1) Sao chép mã nguồn vào `C:\xampp\htdocs\Surveyon` (hoặc thư mục bạn muốn)
 2) Mở XAMPP, bật Apache và MySQL
-3) Tạo database trống (ví dụ `mvc_app`), cập nhật `config/app.php` mục `db`
+3) Tạo database trống với tên mvc_app
 4) Truy cập `http://localhost/Surveyon/` (`.htaccess` sẽ tự forward về `public/index.php`)
    - Hoặc dùng PHP built‑in server:
      ```bash
