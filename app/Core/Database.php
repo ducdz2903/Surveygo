@@ -32,6 +32,23 @@ class Database
                         $options
                     );
                     break;
+                    case 'mariadb':
+                    $host = $config['host'] ?? '127.0.0.1';
+                    $database = $config['database'] ?? '';
+                    if ($database === '') {
+                        throw new \InvalidArgumentException('MySQL database name is required.');
+                    }
+                    $charset = $config['charset'] ?? 'utf8mb4';
+                    $port = $config['port'] ?? 3306;
+                    $dsn = "mysql:host={$host};port={$port};dbname={$database};charset={$charset}";
+                    $options = $config['options'] ?? [];
+                    $pdo = new PDO(
+                        $dsn,
+                        $config['username'] ?? null,
+                        $config['password'] ?? null,
+                        $options
+                    );
+                    break;
                 default:
                     throw new \InvalidArgumentException("Unsupported database driver {$driver}. Only 'mysql' is supported.");
             }
