@@ -2,8 +2,8 @@ name: Deploy Surveyon via FTP
 
 on:
   push:
-    branches: [ "main" ]        # merge vào main là deploy
-  workflow_dispatch:             # cho phép chạy tay
+    branches: ["main"]
+  workflow_dispatch:
 
 concurrency:
   group: deploy-surveyon
@@ -20,22 +20,17 @@ jobs:
       - name: FTP Deploy
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
-          # Server + credential
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           port: ${{ secrets.FTP_PORT }}
+          protocol: ftp
 
-          # Thư mục local cần upload (root project)
           local-dir: ./
-
-          # Thư mục trên server (public_html của domain)
           server-dir: ${{ secrets.FTP_REMOTE_PATH }}/
 
-          # Xóa file trên server nếu không còn trong repo
           dangerous-clean-slate: true
 
-          # Không bao giờ đụng vào .htaccess và config/**
           exclude: |
             **/.git*
             **/.github/**
@@ -44,5 +39,11 @@ jobs:
             **/tests/**
             **/README.md
             **/.env
+
+            # GIỮ NGUYÊN config TRÊN SERVER
+            config/**
             **/config/**
+            
+            # GIỮ NGUYÊN MỌI FILE .htaccess TRÊN SERVER
+            .htaccess
             **/.htaccess
