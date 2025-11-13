@@ -1,20 +1,9 @@
-<IfModule mod_rewrite.c>
-    RewriteEngine On
+RewriteEngine On
 
-    # Serve static files stored in /public
-    RewriteCond %{REQUEST_URI} !^/public/
-    RewriteCond %{DOCUMENT_ROOT}/public%{REQUEST_URI} -f
-    RewriteRule ^ public%{REQUEST_URI} [L]
+# Nếu file hoặc folder tồn tại thì không rewrite
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
 
-    RewriteCond %{REQUEST_URI} !^/public/
-    RewriteCond %{DOCUMENT_ROOT}/public%{REQUEST_URI} -d
-    RewriteRule ^ public%{REQUEST_URI}/ [L]
-
-    # Let existing root files/directories through
-    RewriteCond %{REQUEST_FILENAME} -f [OR]
-    RewriteCond %{REQUEST_FILENAME} -d
-    RewriteRule ^ - [L]
-
-    # Everything else handled by front controller in /public
-    RewriteRule ^ public/index.php [QSA,L]
-</IfModule>
+# Còn lại thì đẩy vào /public/index.php
+RewriteRule ^ public/index.php [L]
