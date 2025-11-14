@@ -89,38 +89,36 @@
 /* Tính năng */
 .features-section {
     padding: 6rem 0;
-    background: #f8f9fa;
+    background: var(--background-light); /* Dùng màu xám nhạt mới */
 }
 
 .section-title {
     font-size: 2.5rem;
     margin-bottom: 1rem;
-    color: #333;
+    color: var(--text-primary); /* Dùng màu text chính mới */
     font-weight: 700;
 }
 
 .section-subtitle {
     font-size: 1.2rem;
-    color: #666;
+    color: var(--text-secondary); /* Dùng màu text phụ mới */
     margin-bottom: 4rem;
 }
 
 .feature-card {
-    background: white;
+    background: var(--card-bg);
     padding: 2.5rem;
     border-radius: 15px;
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+    box-shadow: var(--card-shadow); /* Dùng biến shadow */
     transition: transform 0.3s, box-shadow 0.3s, border 0.3s;
     height: 100%;
-    /* Thêm viền nhẹ màu accent */
-    border: 1px solid rgba(255, 179, 71, 0.1); 
+    border: 1px solid var(--border-color); /* Dùng màu viền xám mới */
 }
 
 .feature-card:hover {
     transform: translateY(-10px);
     box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
-    /* Viền màu primary khi hover */
-    border: 1px solid var(--primary-color);
+    border: 1px solid var(--accent-color); /* Viền màu accent khi hover */
 }
 
 .feature-icon {
@@ -133,26 +131,66 @@
     justify-content: center;
     margin-bottom: 1.5rem;
     font-size: 2rem;
-    /* Đổ bóng màu accent */
-    box-shadow: 0 10px 30px rgba(255, 179, 71, 0.3);
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3); /* Shadow primary */
+    transition: background 0.3s, box-shadow 0.3s; /* Thêm transition */
 }
+
+.feature-card:hover .feature-icon {
+    background: var(--accent-gradient); /* Đổi sang gradient accent khi hover */
+    box-shadow: 0 10px 30px rgba(255, 179, 71, 0.3); /* Shadow accent khi hover */
+}
+
+.feature-icon--secondary { /* Icon thứ cấp dùng màu hồng */
+    background: linear-gradient(45deg, var(--secondary-accent) 0%, #d946ef 100%); /* Gradient hồng */
+    box-shadow: 0 10px 30px rgba(236, 72, 153, 0.3); /* Shadow hồng */
+}
+
+.feature-card:hover .feature-icon--secondary {
+    background: var(--primary-gradient); /* Đổi sang primary khi hover */
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3); /* Shadow primary khi hover */
+}
+
 
 .feature-card h3 {
     font-size: 1.5rem;
-    /* Tiêu đề card dùng màu accent */
-    color: var(--accent-color);
+    color: var(--text-primary); /* Tiêu đề card dùng màu text chính */
 }
 
 /* Cách hoạt động */
 .steps-section {
     padding: 6rem 0;
-    background: white;
+    background: var(--background-light); /* Dùng màu xám nhạt mới */
+}
+
+.step {
+    transition: all 0.3s ease;
+    padding: 2rem;
+    border-radius: 15px;
+    border: 1px solid var(--border-color); /* Dùng viền xám mặc định */
+    background: white; /* Nền trắng */
+}
+
+.step:hover {
+    transform: translateY(-10px);
+    border: 1px solid var(--secondary-accent); /* Viền màu hồng khi hover */
+    background: rgba(236, 72, 153, 0.05); /* Nền hồng nhạt khi hover */
+    box-shadow: 0 15px 40px rgba(236, 72, 153, 0.2); /* Shadow hồng khi hover */
+}
+
+.step h3 {
+    color: var(--text-primary); /* Dùng màu text chính */
+    margin: 1rem 0;
+    font-weight: 700;
+}
+
+.step p {
+    color: var(--text-secondary); /* Dùng màu text phụ */
 }
 
 .step-number {
     width: 80px;
     height: 80px;
-    background: var(--primary-gradient);
+    background: var(--accent-gradient); /* Mặc định là accent (vàng cam) */
     color: white;
     border-radius: 50%;
     display: flex;
@@ -161,7 +199,23 @@
     font-size: 2rem;
     font-weight: 700;
     margin: 0 auto 1.5rem;
-    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 10px 30px rgba(255, 179, 71, 0.4);
+    transition: all 0.3s ease;
+}
+
+.step-number--secondary { /* Số bước dùng màu hồng */
+    background: linear-gradient(45deg, var(--secondary-accent) 0%, #d946ef 100%); /* Gradient hồng */
+    box-shadow: 0 10px 30px rgba(236, 72, 153, 0.4); /* Shadow hồng */
+}
+
+.step:hover .step-number {
+    transform: scale(1.1) rotate(5deg);
+    box-shadow: 0 15px 40px rgba(255, 179, 71, 0.6);
+}
+
+.step:hover .step-number--secondary {
+    transform: scale(1.1) rotate(-5deg); /* Thêm hiệu ứng rotate ngược cho hồng */
+    box-shadow: 0 15px 40px rgba(236, 72, 153, 0.6);
 }
 
 /* Kêu gọi hành động */
@@ -181,4 +235,103 @@
     font-size: 1.2rem;
     margin-bottom: 2rem;
     opacity: 0.8;
+}
+
+/* Responsive adjustments */
+@media (max-width: 991.98px) {
+    .hero-section {
+        padding-top: 80px;
+        padding-bottom: 60px;
+        min-height: auto; /* Allow height to adjust */
+    }
+
+    .hero-section h1 {
+        font-size: 2.8rem;
+    }
+
+    .hero-section p {
+        font-size: 1.1rem;
+    }
+
+    .hero-image svg {
+        max-width: 400px;
+    }
+
+    .features-section,
+    .steps-section,
+    .cta-section {
+        padding: 4rem 0;
+    }
+
+    .section-title {
+        font-size: 2rem;
+    }
+
+    .section-subtitle {
+        font-size: 1rem;
+        margin-bottom: 3rem;
+    }
+
+    .feature-card, .step {
+        padding: 2rem;
+    }
+
+    .feature-icon, .step-number {
+        width: 50px;
+        height: 50px;
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .feature-card h3, .step h3 {
+        font-size: 1.3rem;
+    }
+
+    .cta-section h2 {
+        font-size: 2rem;
+    }
+
+    .cta-section p {
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .hero-section h1 {
+        font-size: 2.2rem;
+    }
+    .hero-section p {
+        font-size: 1rem;
+    }
+    .hero-buttons {
+        flex-direction: column;
+    }
+    .hero-buttons .btn {
+        width: 100%;
+        text-align: center;
+    }
+    .section-title {
+        font-size: 1.8rem;
+    }
+    .section-subtitle {
+        font-size: 0.9rem;
+        margin-bottom: 2rem;
+    }
+    .feature-card, .step {
+        padding: 1.5rem;
+    }
+    .feature-icon, .step-number {
+        width: 45px;
+        height: 45px;
+        font-size: 1.3rem;
+    }
+    .feature-card h3, .step h3 {
+        font-size: 1.2rem;
+    }
+    .cta-section h2 {
+        font-size: 1.8rem;
+    }
+    .cta-section p {
+        font-size: 0.95rem;
+    }
 }

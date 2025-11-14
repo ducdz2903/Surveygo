@@ -151,7 +151,7 @@
     position: absolute;
     top: 1rem;
     right: 1rem;
-    background: var(--primary-gradient);
+    background: var(--secondary-accent-gradient);
     color: white;
     padding: 0.3rem 0.8rem;
     border-radius: 15px;

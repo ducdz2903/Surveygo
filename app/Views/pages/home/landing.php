@@ -15,6 +15,7 @@ $urls['home'] = $urls['home'] ?? $__mk($__base, '/');
 $urls['features'] = $urls['features'] ?? $__mk($__base, '/features');
 $urls['login'] = $urls['login'] ?? $__mk($__base, '/login');
 $urls['register'] = $urls['register'] ?? $__mk($__base, '/register');
+$urls['dashboard'] = $urls['dashboard'] ?? $__mk($__base, '/dashboard'); // Thêm dashboard URL
 
 // Hàm trợ giúp cho URL, giả định hàm này được định nghĩa ở đâu đó
 // hoặc chúng ta có thể sử dụng biến $urls trực tiếp
@@ -44,7 +45,7 @@ $url = static fn($urls_array, $key, $default) => $urls_array[$key] ?? $default;
                     <h1 class="test">Chia sẻ ý kiến của bạn vì một thế giới tốt đẹp hơn</h1>
                     <p>Trả lời khảo sát và trở thành một phần của surveygo. Kiếm thêm thu nhập dễ dàng!</p>
                     <div class="hero-buttons d-flex gap-3 flex-wrap">
-                        <a href="#" id="btn-start" class="btn btn-gradient">Bắt đầu ngay</a>
+                        <a href="#" id="btn-start" class="btn btn-outline-gradient">Bắt đầu ngay, miễn phí!</a>
                         <a href="#features" class="btn btn-outline-accent">Tìm hiểu thêm</a>
                     </div>
                 </div>
@@ -55,14 +56,21 @@ $url = static fn($urls_array, $key, $default) => $urls_array[$key] ?? $default;
                                 <stop offset="0%" style="stop-color:rgba(255,255,255,0.9);stop-opacity:1" />
                                 <stop offset="100%" style="stop-color:rgba(255,255,255,0.7);stop-opacity:1" />
                             </linearGradient>
+                            <linearGradient id="circleGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#ec4899" />
+                                <stop offset="100%" stop-color="#d946ef" />
+                            </linearGradient>
+                            <linearGradient id="circleGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#ffb347" />
+                                <stop offset="100%" stop-color="#ff9f57" />
+                            </linearGradient>
                         </defs>
                         <rect x="50" y="50" width="400" height="300" rx="20" fill="url(#grad1)" />
-                        <circle cx="150" cy="120" r="30" fill="#667eea" opacity="0.8" />
-                        <circle cx="350" cy="120" r="30" fill="#764ba2" opacity="0.8" />
+                        <circle cx="150" cy="120" r="30" fill="url(#circleGrad1)" opacity="0.9" />
+                        <circle cx="350" cy="120" r="30" fill="url(#circleGrad2)" opacity="0.9" />
                         <rect x="100" y="180" width="300" height="15" rx="7" fill="#667eea" opacity="0.6" />
                         <rect x="100" y="220" width="250" height="15" rx="7" fill="#764ba2" opacity="0.6" />
-                        <rect x="100" y="260" width="280" height="15" rx="7" fill="#667eea" opacity="0.6" />
-                    </svg>
+                        <rect x="100" y="260" width="280" height="15" rx="7" fill="#ec4899" opacity="0.6" /> </svg>
                 </div>
             </div>
         </div>
@@ -86,8 +94,7 @@ $url = static fn($urls_array, $key, $default) => $urls_array[$key] ?? $default;
                 </div>
                 <div class="col-lg-4">
                     <div class="feature-card">
-                        <div class="feature-icon">
-                            <i class="fas fa-bolt text-white"></i>
+                        <div class="feature-icon feature-icon--secondary"> <i class="fas fa-bolt text-white"></i>
                         </div>
                         <h3>Linh hoạt thời gian</h3>
                         <p>Làm việc mọi lúc mọi nơi, theo lịch trình của riêng bạn. Chỉ cần kết nối internet.</p>
@@ -104,8 +111,7 @@ $url = static fn($urls_array, $key, $default) => $urls_array[$key] ?? $default;
                 </div>
                 <div class="col-lg-4">
                     <div class="feature-card">
-                        <div class="feature-icon">
-                            <i class="fas fa-lock text-white"></i>
+                        <div class="feature-icon feature-icon--secondary"> <i class="fas fa-lock text-white"></i>
                         </div>
                         <h3>Bảo mật tuyệt đối</h3>
                         <p>Thông tin cá nhân được bảo vệ an toàn với công nghệ mã hóa hiện đại.</p>
@@ -122,8 +128,7 @@ $url = static fn($urls_array, $key, $default) => $urls_array[$key] ?? $default;
                 </div>
                 <div class="col-lg-4">
                     <div class="feature-card">
-                        <div class="feature-icon">
-                            <i class="fas fa-mobile-alt text-white"></i>
+                        <div class="feature-icon feature-icon--secondary"> <i class="fas fa-mobile-alt text-white"></i>
                         </div>
                         <h3>Đa nền tảng</h3>
                         <p>Sử dụng trên mọi thiết bị: điện thoại, máy tính bảng hay laptop.</p>
@@ -142,22 +147,28 @@ $url = static fn($urls_array, $key, $default) => $urls_array[$key] ?? $default;
             <div class="row g-4 mt-4">
                 <div class="col-md-4">
                     <div class="step text-center">
-                        <div class="step-number">1</div>
-                        <h3>Đăng ký tài khoản</h3>
+                        <div class="step-number">
+                            <i class="fa-regular fa-address-card"></i>
+                        </div>
+                        <h3>1. Đăng ký tài khoản</h3>
                         <p>Tạo tài khoản miễn phí chỉ trong vài phút với email của bạn.</p>
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="step text-center">
-                        <div class="step-number">2</div>
-                        <h3>Hoàn thành khảo sát</h3>
+                        <div class="step-number step-number--secondary">
+                            <i class="fa-regular fa-clipboard"></i>
+                        </div>
+                        <h3>2. Hoàn thành khảo sát</h3>
                         <p>Chọn và trả lời các khảo sát phù hợp với bạn. Mỗi khảo sát chỉ mất 5-15 phút.</p>
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="step text-center">
-                        <div class="step-number">3</div>
-                        <h3>Nhận thưởng</h3>
+                        <div class="step-number">
+                            <i class="fa-solid fa-hand-holding-dollar"></i>
+                        </div>
+                        <h3>3. Nhận thưởng</h3>
                         <p>Tích lũy điểm và đổi thành tiền mặt hoặc thẻ quà tặng. Rút tiền dễ dàng!</p>
                     </div>
                 </div>
@@ -169,7 +180,7 @@ $url = static fn($urls_array, $key, $default) => $urls_array[$key] ?? $default;
         <div class="container d-flex flex-column align-items-center text-center">
             <h2>Sẵn sàng bắt đầu?</h2>
             <p>Tham gia cùng hàng ngàn thành viên đang kiếm tiền từ ý kiến của họ</p>
-            <a href="<?= $url($urls, 'register', '/register') ?>" class="btn btn-outline-accent">Đăng ký miễn phí</a>
+            <a href="<?= $url($urls, 'register', '/register') ?>" class="btn btn-secondary-accent">Đăng ký miễn phí</a>
         </div>
     </section>
 
@@ -188,7 +199,7 @@ $url = static fn($urls_array, $key, $default) => $urls_array[$key] ?? $default;
                         var user = localStorage.getItem('app.user');
                         if (user) {
                             // Nếu đã đăng nhập, chuyển hướng đến dashboard
-                            window.location.href = '<?= $urls['home'] ?? '/home' ?>';
+                            window.location.href = '<?= $urls['dashboard'] ?? '/dashboard' ?>';
                         } else {
                             // Nếu chưa đăng nhập, chuyển hướng đến trang login
                             window.location.href = '<?= $urls['login'] ?? '/login' ?>';
