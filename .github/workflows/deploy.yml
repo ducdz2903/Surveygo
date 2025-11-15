@@ -43,7 +43,3 @@ jobs:
             # GIỮ NGUYÊN config TRÊN SERVER
             config/**
             **/config/**
-            
-            # GIỮ NGUYÊN MỌI FILE .htaccess TRÊN SERVER
-            .htaccess
-            **/.htaccess
