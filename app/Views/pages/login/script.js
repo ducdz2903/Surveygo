@@ -47,7 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
       showMsg('Đăng nhập thành công. Đang chuyển hướng...', 'success');
       // Redirect to /home
       setTimeout(() => {
-        window.location.href = '/Surveygo/home';
+        window.location.href = '/home';
       }, 800);
     } catch (err) {
       showMsg('Có lỗi xảy ra. Vui lòng thử lại.', 'danger');

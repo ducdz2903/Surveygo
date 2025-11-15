@@ -118,7 +118,7 @@ $url = static function (array $urls, string $key, string $fallbackPath = '/') us
             if (logoutBtn) {
                 logoutBtn.addEventListener('click', function () {
                     try { localStorage.removeItem('app.user'); } catch (e) { }
-                    window.location.href = window.location.origin + '/Surveygo/login';
+                    window.location.href = window.location.origin + '/login';
                 });
             }
         } catch (e) { }

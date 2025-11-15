@@ -18,7 +18,7 @@
                 <h3>Hỗ trợ</h3>
                 <ul>
                     <li><a href="#">Trung tâm trợ giúp</a></li>
-                    <li><a href="/surveygo/terms-of-use">Điều khoản sử dụng</a></li>
+                    <li><a href="/terms-of-use">Điều khoản sử dụng</a></li>
                     <li><a href="#">Chính sách bảo mật</a></li>
                     <li><a href="#">Liên hệ</a></li>
                 </ul>

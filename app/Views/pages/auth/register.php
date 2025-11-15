@@ -91,7 +91,7 @@ $urls = $urls ?? [];
                             <div class="form-check mb-3">
                                 <input class="form-check-input" type="checkbox" id="terms" required>
                                 <label class="form-check-label" for="terms">
-                                    Tôi đồng ý với <a href="/Surveygo/terms-of-use" class="terms-link">Điều khoản sử dụng</a> và <a href="#"
+                                    Tôi đồng ý với <a href="/terms-of-use" class="terms-link">Điều khoản sử dụng</a> và <a href="#"
                                         class="terms-link">Chính sách bảo mật</a>
                                 </label>
                             </div>
