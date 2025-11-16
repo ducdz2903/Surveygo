@@ -6,16 +6,16 @@ $appName = $appName ?? 'Surveygo';
 $urls = $urls ?? [];
 
 // Ensure URLs have absolute base prefix
-$__base = rtrim((string)($baseUrl ?? ''), '/');
+$__base = rtrim((string) ($baseUrl ?? ''), '/');
 $__mk = static function (string $base, string $path): string {
     $p = '/' . ltrim($path, '/');
     return $base === '' ? $p : ($base . $p);
 };
 $urls['home'] = $urls['home'] ?? $__mk($__base, '/');
-$urls['features'] = $urls['features'] ?? $__mk($__base, '/features');
 ?>
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -28,6 +28,7 @@ $urls['features'] = $urls['features'] ?? $__mk($__base, '/features');
     <link rel="stylesheet" href="public/assets/css/footer.css">
     <link rel="stylesheet" href="public/assets/css/term-of-use.css">
 </head>
+
 <body class="page page--terms">
     <?php include BASE_PATH . '/app/Views/partials/_navbar.php'; ?>
 
@@ -95,7 +96,8 @@ $urls['features'] = $urls['features'] ?? $__mk($__base, '/features');
                             <ul class="terms-list">
                                 <li>Cung cấp thông tin chính xác, đầy đủ và hiện tại</li>
                                 <li>Duy trì bảo mật mật khẩu của bạn</li>
-                                <li>Chấp nhận trách nhiệm pháp lý cho tất cả các hoạt động xảy ra dưới tài khoản của bạn</li>
+                                <li>Chấp nhận trách nhiệm pháp lý cho tất cả các hoạt động xảy ra dưới tài khoản của bạn
+                                </li>
                                 <li>Thông báo ngay cho chúng tôi về bất kỳ sử dụng trái phép nào</li>
                             </ul>
                             <p>Chúng tôi có quyền từ chối, hủy bỏ hoặc tạm dừng tài khoản của bạn nếu bạn vi phạm các
@@ -188,7 +190,8 @@ $urls['features'] = $urls['features'] ?? $__mk($__base, '/features');
                             <p>Nếu bạn có bất kỳ câu hỏi nào về các Điều khoản sử dụng này hoặc muốn báo cáo sự cố, vui
                                 lòng liên hệ với chúng tôi:</p>
                             <div class="contact-info">
-                                <p><strong>Email: </strong><a href="mailto:support@surveygo.com">support@surveygo.com</a></p>
+                                <p><strong>Email: </strong><a
+                                        href="mailto:support@surveygo.com">support@surveygo.com</a></p>
                                 <p><strong>Địa chỉ:</strong> 448 Lạch Tray, Lê Chân, Hải Phòng, Việt Nam</p>
                                 <p><strong>Điện thoại: </strong><a href="tel:0382116948">0382116948</a></p>
                             </div>
@@ -266,4 +269,5 @@ $urls['features'] = $urls['features'] ?? $__mk($__base, '/features');
         updateCurrentId();
     </script>
 </body>
+
 </html>

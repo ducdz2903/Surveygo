@@ -38,18 +38,12 @@ $url = static function (array $urls, string $key, string $fallbackPath = '/') us
         <div class="collapse navbar-collapse" id="mainNav">
             <ul class="navbar-nav ms-auto align-items-center">
                 <li class="nav-item">
-                    <a class="nav-link <?= $current === '/features' ? 'active' : '' ?>"
-                        href="<?= $url($urls, 'features', '/features') ?>">
-                        <i class="fas fa-poll me-1"></i>Khảo sát
-                    </a>
-                </li>
-                <li class="nav-item">
                     <a class="nav-link" href="#how-it-works">
                         <i class="fas fa-bolt me-1"></i>Quick Poll
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link">
+                    <a class="nav-link" href="<?= rtrim($baseUrl, '/') ?>/rewards">
                         <i class="fas fa-gift me-1"></i>Đổi điểm
                     </a>
                 </li>

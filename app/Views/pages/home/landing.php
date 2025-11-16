@@ -6,23 +6,23 @@ $appName = $appName ?? 'PHP Application';
 $urls = $urls ?? [];
 
 // Ensure URLs have absolute base prefix even if controller didn't pass them.
-$__base = rtrim((string)($baseUrl ?? ''), '/');
+$__base = rtrim((string) ($baseUrl ?? ''), '/');
 $__mk = static function (string $base, string $path): string {
     $p = '/' . ltrim($path, '/');
     return $base === '' ? $p : ($base . $p);
 };
 $urls['home'] = $urls['home'] ?? $__mk($__base, '/');
-$urls['features'] = $urls['features'] ?? $__mk($__base, '/features');
 $urls['login'] = $urls['login'] ?? $__mk($__base, '/login');
 $urls['register'] = $urls['register'] ?? $__mk($__base, '/register');
 $urls['dashboard'] = $urls['dashboard'] ?? $__mk($__base, '/dashboard'); // Thêm dashboard URL
 
 // Hàm trợ giúp cho URL, giả định hàm này được định nghĩa ở đâu đó
 // hoặc chúng ta có thể sử dụng biến $urls trực tiếp
-$url = static fn($urls_array, $key, $default) => $urls_array[$key] ?? $default; 
+$url = static fn($urls_array, $key, $default) => $urls_array[$key] ?? $default;
 ?>
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -35,6 +35,7 @@ $url = static fn($urls_array, $key, $default) => $urls_array[$key] ?? $default;
     <link rel="stylesheet" href="public/assets/css/footer.css">
     <link rel="stylesheet" href="public/assets/css/navbar.css">
 </head>
+
 <body class="page page--home">
     <?php include BASE_PATH . '/app/Views/partials/_navbar.php'; ?>
 
@@ -70,7 +71,8 @@ $url = static fn($urls_array, $key, $default) => $urls_array[$key] ?? $default;
                         <circle cx="350" cy="120" r="30" fill="url(#circleGrad2)" opacity="0.9" />
                         <rect x="100" y="180" width="300" height="15" rx="7" fill="#667eea" opacity="0.6" />
                         <rect x="100" y="220" width="250" height="15" rx="7" fill="#764ba2" opacity="0.6" />
-                        <rect x="100" y="260" width="280" height="15" rx="7" fill="#ec4899" opacity="0.6" /> </svg>
+                        <rect x="100" y="260" width="280" height="15" rx="7" fill="#ec4899" opacity="0.6" />
+                    </svg>
                 </div>
             </div>
         </div>
@@ -190,10 +192,10 @@ $url = static fn($urls_array, $key, $default) => $urls_array[$key] ?? $default;
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         // handle nút bắt đầu ngay
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             var btnStart = document.getElementById('btn-start');
             if (btnStart) {
-                btnStart.addEventListener('click', function(e) {
+                btnStart.addEventListener('click', function (e) {
                     e.preventDefault();
                     try {
                         var user = localStorage.getItem('app.user');
@@ -204,7 +206,7 @@ $url = static fn($urls_array, $key, $default) => $urls_array[$key] ?? $default;
                             // Nếu chưa đăng nhập, chuyển hướng đến trang login
                             window.location.href = '<?= $urls['login'] ?? '/login' ?>';
                         }
-                    } catch(err) {
+                    } catch (err) {
                         // Nếu có lỗi, mặc định chuyển hướng đến login
                         window.location.href = '<?= $urls['login'] ?? '/login' ?>';
                     }
@@ -213,4 +215,5 @@ $url = static fn($urls_array, $key, $default) => $urls_array[$key] ?? $default;
         });
     </script>
 </body>
+
 </html>

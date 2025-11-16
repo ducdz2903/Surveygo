@@ -15,11 +15,6 @@ class HomeController extends Controller
         return $this->view('pages/home/landing', $this->pageData($request));
     }
 
-    public function features(Request $request)
-    {
-        return $this->view('pages/features/list', $this->pageData($request));
-    }
-
     public function homeAfterLogin(Request $request)
     {
         return $this->view('pages/home/home', $this->pageData($request));
@@ -68,7 +63,6 @@ class HomeController extends Controller
             'currentPath' => $request->uri(),
             'urls' => [
                 'home' => $this->urlFor($baseUrl, '/home'),
-                'features' => $this->urlFor($baseUrl, '/features'),
                 'login' => $this->urlFor($baseUrl, '/login'),
                 'register' => $this->urlFor($baseUrl, '/register'),
             ],
