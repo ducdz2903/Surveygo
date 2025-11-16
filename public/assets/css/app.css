@@ -165,9 +165,14 @@ code {
     }
 }
 
-/* === BỘ NÚT MỚI === */
 
-/* 1. NÚT PRIMARY (Xanh/Tím) */
+.btn{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* nút primary */
 .btn-primary-gradient {
     background: var(--primary-gradient);
     color: white;
@@ -207,8 +212,7 @@ code {
     box-shadow: 0 5px 15px rgba(102, 126, 234, 0.5);
 }
 
-
-/* 2. NÚT ACCENT (Vàng Cam) */
+/* nút accent */
 .btn-accent {
     background: var(--accent-gradient);
     color: white;
@@ -249,7 +253,7 @@ code {
 }
 
 
-/* 3. NÚT SECONDARY ACCENT (Hồng) */
+/* nút secondary accent */
 .btn-secondary-accent {
     background: var(--secondary-accent-gradient);
     color: white;

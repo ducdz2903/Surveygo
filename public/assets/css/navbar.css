@@ -1,9 +1,3 @@
-:root {
-    --primary-gradient: linear-gradient(135deg, #10BCD3 0%, #0B99B8 100%);
-    --primary-color: #10BCD3;
-    --secondary-color: #0B99B8;
-}
-
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
 }
@@ -49,10 +43,11 @@ body {
 .navbar-brand {
     font-size: 1.8rem;
     font-weight: 700;
-    background: linear-gradient(135deg, #10BCD3 0%, #FFB347 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
+    background: none;
+    -webkit-background-clip: unset;
+    background-clip: unset;
+    -webkit-text-fill-color: unset;
+    color: var(--accent-color) !important;
 }
 
 .nav-link {
@@ -64,7 +59,7 @@ body {
 }
 
 .nav-link:hover {
-    color: var(--accent-color) !important;
+    color: var(--success-color) !important;
 }
 
 .nav-link.active {

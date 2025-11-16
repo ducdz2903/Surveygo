@@ -72,7 +72,7 @@
 }
 
 .points-balance-card {
-    background: linear-gradient(135deg, var(--primary-color), var(--secondary-accent));
+    background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
     border-radius: 20px;
     padding: 2.5rem;
     color: white;

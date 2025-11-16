@@ -43,7 +43,8 @@ $url = static function (array $urls, string $key, string $fallbackPath = '/') us
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="<?= rtrim($baseUrl, '/') ?>/rewards">
+                    <a class="nav-link <?= $current === '/rewards' ? 'active' : '' ?>"
+                        href="<?= rtrim($baseUrl, '/') ?>/rewards">
                         <i class="fas fa-gift me-1"></i>Đổi điểm
                     </a>
                 </li>
