@@ -50,29 +50,11 @@ $url = static fn($urls_array, $key, $default) => $urls_array[$key] ?? $default;
                         <a href="#features" class="btn btn-outline-accent">Tìm hiểu thêm</a>
                     </div>
                 </div>
-                <div class="col-lg-6 text-center hero-image mt-5 mt-lg-0">
-                    <svg width="500" height="400" viewBox="0 0 500 400" xmlns="http://www.w3.org/2000/svg">
-                        <defs>
-                            <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
-                                <stop offset="0%" style="stop-color:rgba(255,255,255,0.9);stop-opacity:1" />
-                                <stop offset="100%" style="stop-color:rgba(255,255,255,0.7);stop-opacity:1" />
-                            </linearGradient>
-                            <linearGradient id="circleGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
-                                <stop offset="0%" stop-color="#ec4899" />
-                                <stop offset="100%" stop-color="#d946ef" />
-                            </linearGradient>
-                            <linearGradient id="circleGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
-                                <stop offset="0%" stop-color="#ffb347" />
-                                <stop offset="100%" stop-color="#ff9f57" />
-                            </linearGradient>
-                        </defs>
-                        <rect x="50" y="50" width="400" height="300" rx="20" fill="url(#grad1)" />
-                        <circle cx="150" cy="120" r="30" fill="url(#circleGrad1)" opacity="0.9" />
-                        <circle cx="350" cy="120" r="30" fill="url(#circleGrad2)" opacity="0.9" />
-                        <rect x="100" y="180" width="300" height="15" rx="7" fill="#667eea" opacity="0.6" />
-                        <rect x="100" y="220" width="250" height="15" rx="7" fill="#764ba2" opacity="0.6" />
-                        <rect x="100" y="260" width="280" height="15" rx="7" fill="#ec4899" opacity="0.6" />
-                    </svg>
+                <div class="col-lg-6 text-center hero-image mt-5 mt-lg-0 ps-4">
+                    <script src="https://unpkg.com/@lottiefiles/dotlottie-wc@0.8.5/dist/dotlottie-wc.js"
+                        type="module"></script>
+                    <dotlottie-wc src="https://lottie.host/d8824ede-64af-459b-bf34-a7bcf2ad3c98/M48RP0nmWl.lottie"
+                        style="width: 600px; height: 480px; max-width: 100%;" autoplay loop></dotlottie-wc>
                 </div>
             </div>
         </div>
