@@ -1,0 +1,468 @@
+/* Rewards Page Styles */
+
+.rewards-hero {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(236, 72, 153, 0.1) 50%, rgba(255, 179, 71, 0.08) 100%);
+    padding: 5rem 0;
+    border-bottom: 1px solid var(--border-color);
+    position: relative;
+    overflow: hidden;
+}
+
+.rewards-hero::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -10%;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(102, 126, 234, 0.1) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.hero-content {
+    position: relative;
+    z-index: 1;
+}
+
+.rewards-title {
+    font-size: 3rem;
+    font-weight: 800;
+    background: var(--primary-gradient);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    margin-bottom: 1.25rem;
+    letter-spacing: -1px;
+}
+
+.rewards-subtitle {
+    font-size: 1.15rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 0;
+    max-width: 500px;
+}
+
+.hero-stats {
+    margin-top: 2rem !important;
+}
+
+.stat-item {
+    background: var(--card-bg);
+    padding: 1.5rem;
+    border-radius: 14px;
+    border: 1px solid var(--card-border);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.points-balance-card {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-accent));
+    border-radius: 20px;
+    padding: 2.5rem;
+    color: white;
+    box-shadow: 0 12px 40px rgba(102, 126, 234, 0.35);
+    position: relative;
+    overflow: hidden;
+    transform: translateY(0);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.points-balance-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+    border-radius: 50%;
+}
+
+.points-balance-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 16px 48px rgba(102, 126, 234, 0.4);
+}
+
+.points-balance-content {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    position: relative;
+    z-index: 1;
+}
+
+.balance-icon {
+    font-size: 3.5rem;
+    opacity: 0.9;
+    flex-shrink: 0;
+}
+
+.balance-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.balance-label {
+    font-size: 0.9rem;
+    opacity: 0.9;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.25rem;
+    font-weight: 600;
+}
+
+.balance-amount {
+    font-size: 2.2rem;
+    font-weight: 800;
+    margin-bottom: 0.25rem;
+    letter-spacing: -1px;
+}
+
+.balance-subtext {
+    font-size: 0.85rem;
+    opacity: 0.85;
+}
+
+.balance-decoration {
+    margin-left: auto;
+    flex-shrink: 0;
+}
+
+.decoration-badge {
+    background: rgba(255, 255, 255, 0.25);
+    padding: 0.75rem 1.25rem;
+    border-radius: 25px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    backdrop-filter: blur(10px);
+}
+
+/* Rewards Content */
+.rewards-content {
+    background: var(--background-light);
+    padding: 3rem 0;
+}
+
+/* Tabs Navigation */
+.rewards-tabs {
+    gap: 1rem;
+    justify-content: center;
+    border-bottom: 2px solid var(--border-color);
+    padding-bottom: 1rem;
+}
+
+.rewards-tabs .nav-link {
+    border-radius: 12px !important;
+    padding: 0.75rem 1.5rem !important;
+    font-weight: 500 !important;
+    color: var(--text-secondary) !important;
+    border: none !important;
+    background: transparent !important;
+    transition: all 0.3s ease !important;
+    cursor: pointer !important;
+}
+
+.rewards-tabs .nav-link:hover {
+    background: rgba(102, 126, 234, 0.1) !important;
+    color: var(--primary-color) !important;
+}
+
+.rewards-tabs .nav-link.active {
+    background: var(--primary-gradient) !important;
+    color: white !important;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3) !important;
+}
+
+/* Reward Cards */
+.reward-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    padding: 1.75rem;
+    text-align: center;
+    transition: all 0.3s ease;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-height: 380px;
+    box-shadow: var(--card-shadow);
+}
+
+.reward-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+}
+
+.reward-badge {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-accent));
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.reward-icon {
+    font-size: 3rem;
+    margin: 1rem 0;
+}
+
+.reward-card--cash .reward-icon {
+    color: var(--primary-color);
+}
+
+.reward-card--card .reward-icon {
+    color: var(--secondary-accent);
+}
+
+.reward-card--gift .reward-icon {
+    color: var(--accent-color);
+}
+
+.reward-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 1rem 0 0.5rem;
+    color: var(--text-primary);
+}
+
+.reward-price {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.75rem;
+}
+
+.reward-price strong {
+    font-size: 1.4rem;
+    color: var(--primary-color);
+}
+
+.reward-desc {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 1.5rem;
+    flex-grow: 1;
+}
+
+.reward-btn {
+    margin-top: auto;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.reward-btn:hover {
+    transform: scale(1.02);
+}
+
+/* Buttons Styling */
+.btn-primary {
+    background: var(--primary-gradient) !important;
+    border: none !important;
+    color: white !important;
+    font-weight: 600 !important;
+}
+
+.btn-primary:hover {
+    background: var(--primary-gradient) !important;
+    color: white !important;
+    opacity: 0.9 !important;
+}
+
+.btn-secondary-accent {
+    background: var(--secondary-accent-gradient) !important;
+    border: none !important;
+    color: white !important;
+    font-weight: 600 !important;
+}
+
+.btn-secondary-accent:hover {
+    background: var(--secondary-accent-gradient) !important;
+    color: white !important;
+    opacity: 0.9 !important;
+}
+
+.btn-warning {
+    background: linear-gradient(135deg, var(--accent-color), #ffb347) !important;
+    border: none !important;
+    color: white !important;
+    font-weight: 600 !important;
+}
+
+.btn-warning:hover {
+    background: linear-gradient(135deg, var(--accent-color), #ffb347) !important;
+    color: white !important;
+    opacity: 0.9 !important;
+}
+
+/* History Section */
+.history-section {
+    background: white;
+    padding: 3rem 0;
+}
+
+.section-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 2rem;
+}
+
+.history-table {
+    margin-bottom: 0;
+}
+
+.history-table thead th {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    font-weight: 600;
+    border: none;
+    padding: 1rem;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+}
+
+.history-table tbody tr {
+    border-bottom: 1px solid var(--border-color);
+    transition: all 0.2s ease;
+}
+
+.history-table tbody tr:hover {
+    background: var(--background-light);
+}
+
+.history-table tbody td {
+    padding: 1.25rem 1rem;
+    vertical-align: middle;
+}
+
+.badge {
+    padding: 0.5rem 0.875rem;
+    font-weight: 600;
+    font-size: 0.8rem;
+    border-radius: 8px;
+}
+
+.bg-secondary-accent {
+    background: var(--secondary-accent-gradient) !important;
+    color: white;
+}
+
+.bg-success {
+    background: var(--success-color) !important;
+    color: white;
+}
+
+.bg-info {
+    background: #3b82f6 !important;
+    color: white;
+}
+
+/* Modal Styling */
+.modal-header {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-accent));
+    color: white;
+    border: none;
+}
+
+.modal-header .btn-close {
+    filter: brightness(0) invert(1);
+}
+
+.modal-title {
+    font-weight: 700;
+    font-size: 1.25rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .rewards-title {
+        font-size: 2rem;
+    }
+
+    .points-balance-card {
+        padding: 2rem;
+        margin-top: 1.5rem;
+    }
+
+    .balance-amount {
+        font-size: 2rem;
+    }
+
+    .rewards-tabs {
+        flex-direction: column;
+        justify-content: flex-start;
+    }
+
+    .rewards-tabs .nav-link {
+        width: 100%;
+        text-align: left;
+    }
+
+    .reward-card {
+        min-height: auto;
+    }
+
+    .table-responsive {
+        font-size: 0.9rem;
+    }
+
+    .history-table tbody td {
+        padding: 0.75rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .rewards-hero {
+        padding: 2rem 0;
+    }
+
+    .rewards-title {
+        font-size: 1.75rem;
+    }
+
+    .balance-amount {
+        font-size: 1.5rem;
+    }
+
+    .reward-card {
+        padding: 1.25rem;
+    }
+
+    .reward-icon {
+        font-size: 2rem;
+    }
+
+    .reward-title {
+        font-size: 1.2rem;
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+    }
+}

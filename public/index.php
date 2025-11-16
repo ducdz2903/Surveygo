@@ -20,6 +20,7 @@ $router->get('/', [HomeController::class, 'home']);
 $router->get('/home', [HomeController::class, 'homeAfterLogin']);
 $router->get('/daily-rewards', [HomeController::class, 'dailyRewards']);
 $router->get('/events', [HomeController::class, 'events']);
+$router->get('/rewards', [HomeController::class, 'rewards']);
 $router->get('/terms-of-use', [HomeController::class, 'terms']);
 $router->get('/login', [HomeController::class, 'login']);
 $router->get('/register', [HomeController::class, 'register']);

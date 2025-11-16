@@ -63,34 +63,6 @@ $url = static fn($urls_array, $key, $default) => $urls_array[$key] ?? $default;
         </div>
     </section>
 
-    <section class="stats-section">
-        <div class="container">
-            <div class="row g-4 justify-content-center">
-                <div class="col-md-4 col-6">
-                    <div class="stat-card">
-                        <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
-                        <div class="stat-number">24</div>
-                        <div class="text-muted">Khảo sát hoàn thành</div>
-                    </div>
-                </div>
-                <div class="col-md-4 col-6">
-                    <div class="stat-card">
-                        <div class="stat-icon"><i class="fas fa-clock"></i></div>
-                        <div class="stat-number">5</div>
-                        <div class="text-muted">Khảo sát mới</div>
-                    </div>
-                </div>
-                <div class="col-md-4 col-6">
-                    <div class="stat-card">
-                        <div class="stat-icon"><i class="fas fa-trophy"></i></div>
-                        <div class="stat-number">Top 15%</div>
-                        <div class="text-muted">Xếp hạng</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
     <section class="charts-section">
         <div class="container">
             <div class="row g-4">

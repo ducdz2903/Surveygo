@@ -50,54 +50,6 @@
     font-weight: 700;
 }
 
-/* ========== STATS SECTION ========== */
-.stats-section {
-    padding: 2rem 0 3rem;
-}
-
-.stat-card {
-    background: white;
-    padding: 1.5rem;
-    border-radius: 15px;
-    text-align: center;
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
-    transition: transform 0.3s, box-shadow 0.3s;
-    /* THÊM VIỀN MÀU ACCENT NHẸ */
-    border: 1px solid rgba(255, 179, 71, 0.1); 
-}
-
-.stat-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    /* VIỀN MÀU ACCENT KHI HOVER */
-    border-color: var(--accent-color); 
-}
-
-.stat-icon {
-    width: 50px;
-    height: 50px;
-    /* DÙNG ACCENT GRADIENT */
-    background: var(--accent-gradient);
-    border-radius: 50%;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 1.3rem;
-    margin-bottom: 1rem;
-    /* ĐỔ BÓNG MÀU ACCENT */
-    box-shadow: 0 5px 15px rgba(255, 179, 71, 0.3);
-}
-
-.stat-number {
-    font-size: 2rem;
-    font-weight: 700;
-    /* SỐ LIỆU DÙNG MÀU ACCENT */
-    color: var(--accent-color); 
-    margin-bottom: 0.3rem;
-}
-
-
 /* ========== SURVEYS SECTION ========== */
 .surveys-section {
     padding: 3rem 0;

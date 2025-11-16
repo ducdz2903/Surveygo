@@ -45,6 +45,11 @@ class HomeController extends Controller
         return $this->view('pages/events/events', $this->pageData($request));
     }
 
+    public function rewards(Request $request)
+    {
+        return $this->view('pages/rewards/rewards', $this->pageData($request));
+    }
+
     public function terms(Request $request)
     {
         return $this->view('pages/terms-of-use/terms-of-use', $this->pageData($request));
