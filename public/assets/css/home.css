@@ -16,7 +16,7 @@
 }
 
 .welcome-text strong {
-    color: var(--primary-color);
+    color: #10BCD3;
 }
 
 .points-card {
@@ -27,7 +27,7 @@
     display: flex;
     align-items: center;
     gap: 1rem;
-    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 10px 30px rgba(16, 188, 211, 0.3);
 }
 
 .points-icon {
@@ -171,20 +171,26 @@
 .activity-icon {
     width: 45px;
     height: 45px;
-    background: rgba(102, 126, 234, 0.1);
+    background: rgba(16, 188, 211, 0.1);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--primary-color);
+    color: #10BCD3;
     font-size: 1.2rem;
     flex-shrink: 0;
 }
 
-/* ICON ĐỔI THƯỞNG DÙNG ACCENT COLOR */
-.activity-icon-reward {
-    background: var(--accent-soft-bg);
-    color: var(--accent-color);
+/* ICON HOÀN THÀNH - DÙNG SUCCESS COLOR */
+.activity-icon-success {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+}
+
+/* ICON ĐỔI THƯỞNG - DÙNG WARNING COLOR */
+.activity-icon-warning {
+    background: rgba(245, 158, 11, 0.1);
+    color: #f59e0b;
 }
 
 .activity-content {
@@ -223,6 +229,6 @@
 
 .btn-gradient:hover {
     transform: translateY(-2px);
-    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 10px 30px rgba(16, 188, 211, 0.4);
     color: white;
 }

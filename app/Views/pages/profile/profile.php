@@ -7,11 +7,12 @@ $urls = $urls ?? []; // Giả định $urls được truyền vào
 ?>
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Thông tin tài khoản - <?= htmlspecialchars($appName, ENT_QUOTES, 'UTF-8') ?></title>
-    
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
@@ -20,9 +21,10 @@ $urls = $urls ?? []; // Giả định $urls được truyền vào
     <link rel="stylesheet" href="public/assets/css/footer.css">
     <link rel="stylesheet" href="public/assets/css/profile.css">
 </head>
+
 <body class="page page--profile">
 
-    <?php  include BASE_PATH . '/app/Views/partials/_navbar.php'; ?>
+    <?php include BASE_PATH . '/app/Views/partials/_navbar.php'; ?>
 
     <div class="user-info-section">
         <div class="container">
@@ -30,10 +32,11 @@ $urls = $urls ?? []; // Giả định $urls được truyền vào
 
                 <div class="col-lg-4">
                     <div class="profile-card">
-                        
+
                         <div class="text-center avatar-section">
                             <div class="avatar-wrapper">
-                                <img src="https://ui-avatars.com/api/?name=T&background=ec4899&color=fff&size=150" alt="Avatar" class="avatar-img">
+                                <img src="https://ui-avatars.com/api/?name=T&background=ec4899&color=fff&size=150"
+                                    alt="Avatar" class="avatar-img">
                                 <label for="avatar-upload" class="avatar-upload-btn" title="Đổi avatar">
                                     <i class="fas fa-camera"></i>
                                     <input type="file" id="avatar-upload" class="d-none">
@@ -78,7 +81,7 @@ $urls = $urls ?? []; // Giả định $urls được truyền vào
 
                 <div class="col-lg-8">
                     <div class="tab-content">
-                        
+
                         <div class="tab-pane fade show active" id="account">
                             <div class="info-card">
                                 <div class="card-header-custom">
@@ -94,7 +97,8 @@ $urls = $urls ?? []; // Giả định $urls được truyền vào
                                             </div>
                                             <div class="col-md-6">
                                                 <label class="form-label">Email</label>
-                                                <input type="email" class="form-control" value="user@email.com" disabled>
+                                                <input type="email" class="form-control" value="user@email.com"
+                                                    disabled>
                                             </div>
                                             <div class="col-md-6">
                                                 <label class="form-label">Số điện thoại</label>
@@ -125,7 +129,8 @@ $urls = $urls ?? []; // Giả định $urls được truyền vào
                                         <div class="mb-3 password-wrapper">
                                             <label class="form-label">Mật khẩu hiện tại</label>
                                             <input type="password" class="form-control">
-                                            <button type="button" class="password-toggle"><i class="fas fa-eye"></i></button>
+                                            <button type="button" class="password-toggle"><i
+                                                    class="fas fa-eye"></i></button>
                                         </div>
                                         <div class="mb-3">
                                             <label class="form-label">Mật khẩu mới</label>
@@ -148,7 +153,7 @@ $urls = $urls ?? []; // Giả định $urls được truyền vào
                                 <div class="card-body">
                                     <div class="activity-timeline">
                                         <div class="activity-item">
-                                            <div class="activity-icon icon-accent"> <i class="fas fa-poll"></i>
+                                            <div class="activity-icon icon-success"> <i class="fas fa-poll"></i>
                                             </div>
                                             <div class="activity-content">
                                                 <h6>Hoàn thành khảo sát "Thói quen tiêu dùng"</h6>
@@ -156,7 +161,8 @@ $urls = $urls ?? []; // Giả định $urls được truyền vào
                                             </div>
                                         </div>
                                         <div class="activity-item">
-                                            <div class="activity-icon icon-secondary-accent"> <i class="fas fa-user-check"></i>
+                                            <div class="activity-icon icon-secondary-accent"> <i
+                                                    class="fas fa-user-check"></i>
                                             </div>
                                             <div class="activity-content">
                                                 <h6>Cập nhật thông tin cá nhân</h6>
@@ -164,7 +170,7 @@ $urls = $urls ?? []; // Giả định $urls được truyền vào
                                             </div>
                                         </div>
                                         <div class="activity-item">
-                                            <div class="activity-icon icon-primary"> <i class="fas fa-gift"></i>
+                                            <div class="activity-icon icon-warning"> <i class="fas fa-gift"></i>
                                             </div>
                                             <div class="activity-content">
                                                 <h6>Đổi 1000 điểm lấy thẻ cào 100k</h6>
@@ -183,16 +189,16 @@ $urls = $urls ?? []; // Giả định $urls được truyền vào
     </div>
 
     <?php include BASE_PATH . '/app/Views/partials/_footer.php'; ?>
-    
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         // Lấy thông tin user từ localStorage khi trang load
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             try {
                 const userJson = localStorage.getItem('app.user');
                 if (userJson) {
                     const user = JSON.parse(userJson);
-                    
+
                     // Cập nhật thông tin cá nhân
                     if (user.name) {
                         document.querySelector('.user-fullname').textContent = user.name;
@@ -201,14 +207,14 @@ $urls = $urls ?? []; // Giả định $urls được truyền vào
                             fullNameInput.value = user.name;
                         }
                     }
-                    
+
                     if (user.email) {
                         const emailInput = document.querySelector('input[type="email"]');
                         if (emailInput) {
                             emailInput.value = user.email;
                         }
                     }
-                    
+
                     // Cập nhật avatar với tên user
                     if (user.name) {
                         const avatarImg = document.querySelector('.avatar-img');
@@ -217,7 +223,7 @@ $urls = $urls ?? []; // Giả định $urls được truyền vào
                             avatarImg.src = `https://ui-avatars.com/api/?name=${encodedName}&background=ec4899&color=fff&size=150`;
                         }
                     }
-                    
+
                     // Cập nhật member since date
                     if (user.created_at) {
                         const createdDate = new Date(user.created_at);
@@ -227,7 +233,7 @@ $urls = $urls ?? []; // Giả định $urls được truyền vào
                             memberSince.textContent = `Thành viên từ ${monthYear}`;
                         }
                     }
-                    
+
                     console.log('Thông tin user đã được cập nhật:', user);
                 } else {
                     console.warn('Không tìm thấy thông tin user trong localStorage');
@@ -238,4 +244,5 @@ $urls = $urls ?? []; // Giả định $urls được truyền vào
         });
     </script>
 </body>
+
 </html>

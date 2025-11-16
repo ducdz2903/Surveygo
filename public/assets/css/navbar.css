@@ -1,7 +1,7 @@
 :root {
-    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    --primary-color: #667eea;
-    --secondary-color: #764ba2;
+    --primary-gradient: linear-gradient(135deg, #10BCD3 0%, #0B99B8 100%);
+    --primary-color: #10BCD3;
+    --secondary-color: #0B99B8;
 }
 
 body {
@@ -19,7 +19,7 @@ body {
 
 .btn-gradient:hover {
     transform: translateY(-2px);
-    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 10px 30px rgba(16, 188, 211, 0.4);
     color: white;
 }
 
@@ -42,14 +42,17 @@ body {
 
 /* navbar */
 .navbar {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-    box-shadow: 0 2px 10px rgba(102, 126, 234, 0.2);
+    background: linear-gradient(135deg, #10BCD3 0%, #0B99B8 100%) !important;
+    box-shadow: 0 2px 10px rgba(16, 188, 211, 0.2);
 }
 
 .navbar-brand {
     font-size: 1.8rem;
     font-weight: 700;
-    color: white !important;
+    background: linear-gradient(135deg, #10BCD3 0%, #FFB347 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
 .nav-link {

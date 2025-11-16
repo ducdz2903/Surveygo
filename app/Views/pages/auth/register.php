@@ -6,6 +6,7 @@ $urls = $urls ?? [];
 ?>
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -18,15 +19,18 @@ $urls = $urls ?? [];
     <link rel="stylesheet" href="public/assets/css/app.css">
     <link rel="stylesheet" href="public/assets/css/footer.css">
     <link rel="stylesheet" href="public/assets/css/navbar.css">
-    
-    <style><?php @include __DIR__ . '/../register/style.css'; ?></style>
+
+    <style>
+        <?php @include __DIR__ . '/../register/style.css'; ?>
+    </style>
 </head>
+
 <body class="page page--auth">
     <?php include BASE_PATH . '/app/Views/partials/_navbar.php'; ?>
 
     <section class="auth-section">
         <div class="container">
-            <div class="row">
+            <div class="row justify-content-center">
                 <div class="col-lg-5 col-md-7">
                     <div class="auth-card">
                         <div class="text-center">
@@ -36,16 +40,20 @@ $urls = $urls ?? [];
                             <h2 class="auth-title">Đăng ký tài khoản</h2>
                         </div>
 
-                        <form id="register-form" action="<?= htmlspecialchars(rtrim((string)($baseUrl ?? ''), '/') . '/api/register', ENT_QUOTES, 'UTF-8') ?>" method="post">
-                            <?php if (function_exists('csrf_field')) { echo csrf_field(); } ?>
-                            
+                        <form id="register-form"
+                            action="<?= htmlspecialchars(rtrim((string) ($baseUrl ?? ''), '/') . '/api/register', ENT_QUOTES, 'UTF-8') ?>"
+                            method="post">
+                            <?php if (function_exists('csrf_field')) {
+                                echo csrf_field();
+                            } ?>
+
                             <!-- Họ và tên -->
                             <div class="form-group mb-3">
                                 <label for="name" class="form-label">
                                     <i class="fas fa-user me-2"></i>Họ và tên
                                 </label>
-                                <input type="text" class="form-control" id="name" name="name" placeholder="Nhập họ và tên"
-                                    required autocomplete="name">
+                                <input type="text" class="form-control" id="name" name="name"
+                                    placeholder="Nhập họ và tên" required autocomplete="name">
                             </div>
 
                             <!-- Email -->
@@ -53,8 +61,8 @@ $urls = $urls ?? [];
                                 <label for="register-email" class="form-label">
                                     <i class="fas fa-envelope me-2"></i>Email
                                 </label>
-                                <input type="email" class="form-control" id="register-email" name="email" placeholder="Nhập email của bạn"
-                                    required autocomplete="email">
+                                <input type="email" class="form-control" id="register-email" name="email"
+                                    placeholder="Nhập email của bạn" required autocomplete="email">
                             </div>
 
                             <!-- Mật khẩu -->
@@ -64,8 +72,10 @@ $urls = $urls ?? [];
                                 </label>
                                 <div class="password-wrapper">
                                     <input type="password" class="form-control" id="register-password" name="password"
-                                        placeholder="Nhập mật khẩu (ít nhất 6 ký tự)" required minlength="6" autocomplete="new-password">
-                                    <button type="button" class="password-toggle" onclick="togglePassword('register-password', 'toggleIconPassword')">
+                                        placeholder="Nhập mật khẩu (ít nhất 6 ký tự)" required minlength="6"
+                                        autocomplete="new-password">
+                                    <button type="button" class="password-toggle"
+                                        onclick="togglePassword('register-password', 'toggleIconPassword')">
                                         <i class="fas fa-eye" id="toggleIconPassword"></i>
                                     </button>
                                 </div>
@@ -91,8 +101,8 @@ $urls = $urls ?? [];
                             <div class="form-check mb-3">
                                 <input class="form-check-input" type="checkbox" id="terms" required>
                                 <label class="form-check-label" for="terms">
-                                    Tôi đồng ý với <a href="/terms-of-use" class="terms-link">Điều khoản sử dụng</a> và <a href="#"
-                                        class="terms-link">Chính sách bảo mật</a>
+                                    Tôi đồng ý với <a href="/terms-of-use" class="terms-link">Điều khoản sử dụng</a> và
+                                    <a href="#" class="terms-link">Chính sách bảo mật</a>
                                 </label>
                             </div>
 
@@ -100,14 +110,15 @@ $urls = $urls ?? [];
                             <button type="submit" class="btn btn-gradient w-100 mb-3">
                                 <i class="fas fa-user-plus me-2"></i>Đăng ký
                             </button>
-                            
+
                             <!-- Form feedback -->
                             <div class="form-feedback mt-3" id="register-feedback"></div>
                         </form>
 
                         <!-- Liên kết đăng nhập -->
                         <div class="text-center mt-4">
-                            <p class="mb-0 small">Đã có tài khoản? <a href="<?= htmlspecialchars($urls['login'] ?? '/login', ENT_QUOTES, 'UTF-8') ?>"
+                            <p class="mb-0 small">Đã có tài khoản? <a
+                                    href="<?= htmlspecialchars($urls['login'] ?? '/login', ENT_QUOTES, 'UTF-8') ?>"
                                     class="signup-link">Đăng nhập ngay</a></p>
                         </div>
                     </div>
@@ -123,12 +134,12 @@ $urls = $urls ?? [];
 
     <!-- Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/vanta/dist/vanta.globe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vanta/dist/vanta.net.min.js"></script>
     <script>
-        // Khởi tạo Vanta Globe
-        window.addEventListener('load', function() {
+        // Khởi tạo Vanta Net
+        window.addEventListener('load', function () {
             if (typeof VANTA !== 'undefined') {
-                VANTA.GLOBE({
+                VANTA.NET({
                     el: "#vanta-bg",
                     mouseControls: true,
                     touchControls: true,
@@ -137,11 +148,11 @@ $urls = $urls ?? [];
                     minWidth: 200.00,
                     scale: 1.00,
                     scaleMobile: 1.00,
-                    color: 0x0077ff,
-                    shininess: 50.00,
-                    waveHeight: 20.00,
-                    waveSpeed: 1.00,
-                    zoom: 0.5
+                    color: 0x10BCD3,
+                    backgroundColor: 0x0a1428,
+                    points: 15.00,
+                    maxDistance: 20.00,
+                    spacing: 15.00
                 });
             }
         });
@@ -150,7 +161,7 @@ $urls = $urls ?? [];
         function togglePassword(inputId, iconId) {
             const passwordInput = document.getElementById(inputId);
             const toggleIcon = document.getElementById(iconId);
-            
+
             if (passwordInput.type === 'password') {
                 passwordInput.type = 'text';
                 toggleIcon.classList.remove('fa-eye');
@@ -182,4 +193,5 @@ $urls = $urls ?? [];
     <script><?php @include __DIR__ . '/../register/script.js'; ?></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>

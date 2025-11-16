@@ -34,7 +34,7 @@ body {
 .btn-gradient:hover {
     color: white;
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 4px 12px rgba(16, 188, 211, 0.4);
 }
 
 .btn-outline-gradient {

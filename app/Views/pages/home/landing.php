@@ -47,7 +47,7 @@ $url = static fn($urls_array, $key, $default) => $urls_array[$key] ?? $default;
                     <p>Trả lời khảo sát và trở thành một phần của surveygo. Kiếm thêm thu nhập dễ dàng!</p>
                     <div class="hero-buttons d-flex gap-3 flex-wrap">
                         <a href="#" id="btn-start" class="btn btn-outline-gradient">Bắt đầu ngay, miễn phí!</a>
-                        <a href="#features" class="btn btn-outline-accent">Tìm hiểu thêm</a>
+                        <a href="#features" class="btn btn-accent">Tìm hiểu thêm</a>
                     </div>
                 </div>
                 <div class="col-lg-6 text-center hero-image mt-5 mt-lg-0 ps-4">
