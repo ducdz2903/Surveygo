@@ -1,7 +1,7 @@
 /* Rewards Page Styles */
 
 .rewards-hero {
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(236, 72, 153, 0.1) 50%, rgba(255, 179, 71, 0.08) 100%);
+    background: linear-gradient(135deg, rgba(16, 188, 211, 0.15) 0%, rgba(255, 179, 71, 0.1) 50%, rgba(236, 72, 153, 0.08) 100%);
     padding: 5rem 0;
     border-bottom: 1px solid var(--border-color);
     position: relative;
@@ -15,7 +15,7 @@
     right: -10%;
     width: 400px;
     height: 400px;
-    background: radial-gradient(circle, rgba(102, 126, 234, 0.1) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(16, 188, 211, 0.1) 0%, transparent 70%);
     border-radius: 50%;
     pointer-events: none;
 }
@@ -72,11 +72,11 @@
 }
 
 .points-balance-card {
-    background: linear-gradient(135deg, var(--primary-color), var(--secondary-accent));
+    background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
     border-radius: 20px;
     padding: 2.5rem;
     color: white;
-    box-shadow: 0 12px 40px rgba(102, 126, 234, 0.35);
+    box-shadow: 0 12px 40px rgba(16, 188, 211, 0.35);
     position: relative;
     overflow: hidden;
     transform: translateY(0);
@@ -96,7 +96,7 @@
 
 .points-balance-card:hover {
     transform: translateY(-8px);
-    box-shadow: 0 16px 48px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 16px 48px rgba(16, 188, 211, 0.4);
 }
 
 .points-balance-content {
@@ -181,14 +181,14 @@
 }
 
 .rewards-tabs .nav-link:hover {
-    background: rgba(102, 126, 234, 0.1) !important;
+    background: rgba(16, 188, 211, 0.1) !important;
     color: var(--primary-color) !important;
 }
 
 .rewards-tabs .nav-link.active {
     background: var(--primary-gradient) !important;
     color: white !important;
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3) !important;
+    box-shadow: 0 4px 12px rgba(16, 188, 211, 0.3) !important;
 }
 
 /* Reward Cards */

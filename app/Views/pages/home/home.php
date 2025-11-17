@@ -212,7 +212,7 @@ $url = static fn($urls_array, $key, $default) => $urls_array[$key] ?? $default;
             <h2 class="section-title mb-3">Hoạt động gần đây</h2>
             <div class="activity-list">
                 <div class="activity-item">
-                    <div class="activity-icon">
+                    <div class="activity-icon activity-icon-success">
                         <i class="fas fa-check-circle"></i>
                     </div>
                     <div class="activity-content">
@@ -223,7 +223,7 @@ $url = static fn($urls_array, $key, $default) => $urls_array[$key] ?? $default;
                 </div>
 
                 <div class="activity-item">
-                    <div class="activity-icon activity-icon-reward">
+                    <div class="activity-icon activity-icon-warning">
                         <i class="fas fa-gift"></i>
                     </div>
                     <div class="activity-content">
@@ -234,7 +234,7 @@ $url = static fn($urls_array, $key, $default) => $urls_array[$key] ?? $default;
                 </div>
 
                 <div class="activity-item">
-                    <div class="activity-icon">
+                    <div class="activity-icon activity-icon-success">
                         <i class="fas fa-check-circle"></i>
                     </div>
                     <div class="activity-content">

@@ -1,25 +1,31 @@
 /* TỔNG QUAN VỀ TRANG */
 .user-info-section {
     padding: 3rem 0;
-    min-height: calc(100vh - 180px); /* Đảm bảo trang luôn có chiều cao */
+    min-height: calc(100vh - 180px);
+    /* Đảm bảo trang luôn có chiều cao */
     margin-top: 2rem;
-    background: var(--background-light); /* MÀU MỚI: Dùng nền xám nhạt */
+    background: var(--background-light);
+    /* MÀU MỚI: Dùng nền xám nhạt */
 }
 
 /* CỘT TRÁI: THẺ PROFILE */
 .profile-card {
     background: var(--card-bg);
-    border-radius: 18px; /* Đồng bộ với app.css */
-    padding: 2rem; /* Thêm padding */
+    border-radius: 18px;
+    /* Đồng bộ với app.css */
+    padding: 2rem;
+    /* Thêm padding */
     box-shadow: var(--card-shadow);
-    border: 1px solid var(--border-color); /* MÀU MỚI: Dùng viền xám */
+    border: 1px solid var(--border-color);
+    /* MÀU MỚI: Dùng viền xám */
     position: sticky;
     top: 100px;
 }
 
 .avatar-section {
     position: relative;
-    margin-bottom: 1.5rem; /* Thêm khoảng cách */
+    margin-bottom: 1.5rem;
+    /* Thêm khoảng cách */
 }
 
 .avatar-wrapper {
@@ -43,7 +49,7 @@
     width: 40px;
     height: 40px;
     /* MÀU MỚI: Dùng gradient HỒNG để tạo điểm nhấn */
-    background: var(--secondary-accent-gradient); 
+    background: var(--secondary-accent-gradient);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -63,30 +69,37 @@
 .user-fullname {
     font-size: 1.5rem;
     font-weight: 700;
-    color: var(--text-primary); /* MÀU MỚI: Dùng biến xám */
-    margin: 1rem 0 0.25rem; /* Giảm margin */
+    color: var(--text-primary);
+    /* MÀU MỚI: Dùng biến xám */
+    margin: 1rem 0 0.25rem;
+    /* Giảm margin */
 }
 
 .member-since {
-    color: var(--text-secondary); /* MÀU MỚI: Dùng biến xám */
+    color: var(--text-secondary);
+    /* MÀU MỚI: Dùng biến xám */
     font-size: 0.9rem;
     padding-bottom: 1.5rem;
-    border-bottom: 1px solid var(--border-color); /* MÀU MỚI: Dùng viền xám */
-    margin-bottom: 1.5rem; /* Thêm margin */
+    border-bottom: 1px solid var(--border-color);
+    /* MÀU MỚI: Dùng viền xám */
+    margin-bottom: 1.5rem;
+    /* Thêm margin */
 }
 
 .user-stats {
     display: flex;
     justify-content: space-around;
     gap: 1rem;
-    margin-bottom: 1.5rem; /* Thêm khoảng cách */
+    margin-bottom: 1.5rem;
+    /* Thêm khoảng cách */
 }
 
 .stat-item {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.25rem; /* Giảm gap */
+    gap: 0.25rem;
+    /* Giảm gap */
 }
 
 .stat-item i {
@@ -102,13 +115,17 @@
 .stat-value {
     font-size: 1.3rem;
     font-weight: 700;
-    color: var(--text-primary); /* MÀU MỚI: Dùng biến xám */
+    color: var(--text-primary);
+    /* MÀU MỚI: Dùng biến xám */
 }
 
 .stat-label {
-    font-size: 0.8rem; /* Cho chữ nhỏ lại */
-    color: var(--text-secondary); /* MÀU MỚI: Dùng biến xám */
-    text-transform: uppercase; /* Viết hoa */
+    font-size: 0.8rem;
+    /* Cho chữ nhỏ lại */
+    color: var(--text-secondary);
+    /* MÀU MỚI: Dùng biến xám */
+    text-transform: uppercase;
+    /* Viết hoa */
 }
 
 
@@ -121,7 +138,8 @@
 .profile-nav .nav-link {
     font-size: 0.95rem;
     font-weight: 600;
-    color: var(--text-secondary) !important; /* MÀU MỚI: Màu xám phụ */
+    color: var(--text-secondary) !important;
+    /* MÀU MỚI: Màu xám phụ */
     padding: 0.75rem 1.5rem;
     border-radius: 10px;
     margin-bottom: 0.5rem;
@@ -131,8 +149,10 @@
 }
 
 .profile-nav .nav-link:hover {
-    background: rgba(236, 72, 153, 0.05) !important; /* Nền hồng siêu nhạt */
-    color: var(--secondary-accent) !important; /* Chữ màu hồng */
+    background: rgba(236, 72, 153, 0.05) !important;
+    /* Nền hồng siêu nhạt */
+    color: var(--secondary-accent) !important;
+    /* Chữ màu hồng */
 }
 
 .profile-nav .nav-link.active {
@@ -144,7 +164,7 @@
 
 .profile-nav .nav-link i {
     /* Căn chỉnh icon cho đẹp */
-    width: 20px; 
+    width: 20px;
     text-align: center;
 }
 
@@ -152,16 +172,19 @@
 /* CỘT PHẢI: NỘI DUNG INFO CARD */
 .info-card {
     background: white;
-    border-radius: 18px; /* Đồng bộ */
+    border-radius: 18px;
+    /* Đồng bộ */
     box-shadow: var(--card-shadow);
-    border: 1px solid var(--border-color); /* MÀU MỚI: Dùng viền xám */
+    border: 1px solid var(--border-color);
+    /* MÀU MỚI: Dùng viền xám */
     overflow: hidden;
     margin-bottom: 1.5rem;
 }
 
 .card-header-custom {
     padding: 1.5rem 2rem;
-    border-bottom: 1px solid var(--border-color); /* MÀU MỚI: Dùng viền xám */
+    border-bottom: 1px solid var(--border-color);
+    /* MÀU MỚI: Dùng viền xám */
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -169,13 +192,18 @@
 
 .card-header-custom h5 {
     margin: 0;
-    font-weight: 700; /* Đậm hơn */
-    color: var(--text-primary); /* MÀU MỚI: Dùng biến xám */
-    font-size: 1.2rem; /* To hơn */
+    font-weight: 700;
+    /* Đậm hơn */
+    color: var(--text-primary);
+    /* MÀU MỚI: Dùng biến xám */
+    font-size: 1.2rem;
+    /* To hơn */
 }
+
 /* Icon trong header card */
 .card-header-custom h5 i {
-    color: var(--primary-color); /* MÀU MỚI: Dùng màu xanh primary */
+    color: var(--primary-color);
+    /* MÀU MỚI: Dùng màu xanh primary */
 }
 
 .card-body {
@@ -184,8 +212,10 @@
 
 /* FORM */
 .form-label {
-    font-weight: 600; /* Đậm hơn */
-    color: var(--text-primary); /* MÀU MỚI: Dùng biến xám */
+    font-weight: 600;
+    /* Đậm hơn */
+    color: var(--text-primary);
+    /* MÀU MỚI: Dùng biến xám */
     margin-bottom: 0.5rem;
     font-size: 0.9rem;
 }
@@ -196,7 +226,8 @@
 
 .form-control,
 .form-select {
-    border: 1px solid var(--border-color); /* MÀU MỚI: Dùng viền xám */
+    border: 1px solid var(--border-color);
+    /* MÀU MỚI: Dùng viền xám */
     border-radius: 10px;
     transition: all 0.3s;
     font-size: 0.95rem;
@@ -215,7 +246,8 @@
 
 .form-control:disabled,
 .form-select:disabled {
-    background-color: var(--background-light); /* MÀU MỚI: Dùng nền xám */
+    background-color: var(--background-light);
+    /* MÀU MỚI: Dùng nền xám */
     cursor: not-allowed;
 }
 
@@ -231,7 +263,8 @@
     transform: translateY(-50%);
     background: none;
     border: none;
-    color: var(--text-secondary); /* MÀU MỚI: Dùng biến xám */
+    color: var(--text-secondary);
+    /* MÀU MỚI: Dùng biến xám */
     cursor: pointer;
     transition: color 0.3s;
     padding: 0;
@@ -243,7 +276,8 @@
 }
 
 .password-toggle:hover {
-    color: var(--secondary-accent); /* MÀU MỚI: Dùng màu HỒNG */
+    color: var(--secondary-accent);
+    /* MÀU MỚI: Dùng màu HỒNG */
 }
 
 /* TAB HOẠT ĐỘNG (TIMELINE) */
@@ -265,10 +299,12 @@
     content: '';
     position: absolute;
     left: -30px;
-    top: 40px; /* Bắt đầu sau icon */
+    top: 40px;
+    /* Bắt đầu sau icon */
     width: 2px;
     height: calc(100% - 20px);
-    background: var(--border-color); /* MÀU MỚI: Dùng viền xám */
+    background: var(--border-color);
+    /* MÀU MỚI: Dùng viền xám */
 }
 
 .activity-item:last-child::before {
@@ -292,28 +328,48 @@
 
 /* MÀU MỚI: Đặt màu cho icon timeline */
 .activity-icon.icon-accent {
-    background: var(--accent-gradient); /* Vàng cam */
+    background: var(--accent-gradient);
+    /* Vàng cam */
     box-shadow: 0 5px 15px rgba(255, 179, 71, 0.4);
 }
+
 .activity-icon.icon-secondary-accent {
-    background: var(--secondary-accent-gradient); /* Hồng */
+    background: var(--secondary-accent-gradient);
+    /* Hồng */
     box-shadow: 0 5px 15px rgba(236, 72, 153, 0.4);
 }
+
 .activity-icon.icon-primary {
-    background: var(--primary-gradient); /* Xanh */
+    background: var(--primary-gradient);
+    /* Xanh */
     box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+/* SUCCESS - Hoàn thành */
+.activity-icon.icon-success {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    box-shadow: 0 5px 15px rgba(16, 185, 129, 0.4);
+}
+
+/* WARNING - Đổi điểm */
+.activity-icon.icon-warning {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    box-shadow: 0 5px 15px rgba(245, 158, 11, 0.4);
 }
 
 
 .activity-content h6 {
     font-size: 0.95rem;
     font-weight: 600;
-    color: var(--text-primary); /* MÀU MỚI: Dùng biến xám */
-    margin-bottom: 0.25rem; /* Giảm margin */
+    color: var(--text-primary);
+    /* MÀU MỚI: Dùng biến xám */
+    margin-bottom: 0.25rem;
+    /* Giảm margin */
 }
 
 .activity-content p {
     margin: 0;
     font-size: 0.85rem;
-    color: var(--text-secondary); /* MÀU MỚI: Dùng biến xám */
+    color: var(--text-secondary);
+    /* MÀU MỚI: Dùng biến xám */
 }
