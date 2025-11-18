@@ -26,7 +26,7 @@ $urls = $urls ?? [];
 </head>
 
 <body class="page page--auth">
-    <?php include BASE_PATH . '/app/Views/partials/_navbar.php'; ?>
+    <?php include BASE_PATH . '/app/Views/components/client/_navbar.php'; ?>
 
     <section class="auth-section">
         <div class="container">

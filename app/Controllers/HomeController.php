@@ -12,62 +12,62 @@ class HomeController extends Controller
 {
     public function home(Request $request)
     {
-        return $this->view('pages/home/landing', $this->pageData($request));
+        return $this->view('pages/client/home/landing', $this->pageData($request));
     }
 
     public function homeAfterLogin(Request $request)
     {
-        return $this->view('pages/home/home', $this->pageData($request));
+        return $this->view('pages/client/home/home', $this->pageData($request));
     }
 
     public function login(Request $request)
     {
-        return $this->view('pages/auth/login', $this->pageData($request));
+        return $this->view('pages/auth/login', $this->pageData($request), 200, []);
     }
 
     public function register(Request $request)
     {
-        return $this->view('pages/auth/register', $this->pageData($request));
+        return $this->view('pages/auth/register', $this->pageData($request), 200, []);
     }
 
     public function profile(Request $request)
     {
-        return $this->view('pages/user/profile', $this->pageData($request));
+        return $this->view('pages/client/profile/profile', $this->pageData($request));
     }
 
     public function dailyRewards(Request $request)
     {
-        return $this->view('pages/user/daily-rewards', $this->pageData($request));
+        return $this->view('pages/client/daily-rewards/daily-rewards', $this->pageData($request));
     }
 
     public function events(Request $request)
     {
-        return $this->view('pages/events/events', $this->pageData($request));
+        return $this->view('pages/client/events/events', $this->pageData($request));
     }
 
     public function rewards(Request $request)
     {
-        return $this->view('pages/user/rewards', $this->pageData($request));
+        return $this->view('pages/client/rewards/rewards', $this->pageData($request));
     }
 
     public function terms(Request $request)
     {
-        return $this->view('pages/info/terms-of-use', $this->pageData($request));
+        return $this->view('pages/client/terms/terms-of-use', $this->pageData($request));
     }
 
     public function contact(Request $request)
     {
-        return $this->view('pages/info/contact', $this->pageData($request));
+        return $this->view('pages/client/contact/contact', $this->pageData($request));
     }
 
     public function surveys(Request $request)
     {
-        return $this->view('pages/surveys/surveys', $this->pageData($request));
+        return $this->view('pages/client/surveys/surveys', $this->pageData($request));
     }
 
     public function quickPoll(Request $request)
     {
-        return $this->view('pages/surveys/quick-poll', $this->pageData($request));
+        return $this->view('pages/client/surveys/quick-poll', $this->pageData($request));
     }
 
     private function pageData(Request $request): array

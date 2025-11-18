@@ -5,6 +5,7 @@ declare(strict_types=1);
 require_once dirname(__DIR__) . '/bootstrap.php';
 
 use App\Controllers\HomeController;
+use App\Controllers\AdminController;
 use App\Core\Request;
 use App\Core\Response;
 use App\Core\Router;
@@ -28,6 +29,16 @@ $router->get('/terms-of-use', [HomeController::class, 'terms']);
 $router->get('/login', [HomeController::class, 'login']);
 $router->get('/register', [HomeController::class, 'register']);
 $router->get('/profile', [HomeController::class, 'profile']);
+
+// Admin routes
+$router->get('/admin', [AdminController::class, 'dashboard']);
+$router->get('/admin/dashboard', [AdminController::class, 'dashboard']);
+$router->get('/admin/surveys', [AdminController::class, 'surveys']);
+$router->get('/admin/users', [AdminController::class, 'users']);
+$router->get('/admin/questions', [AdminController::class, 'questions']);
+$router->get('/admin/reports', [AdminController::class, 'reports']);
+$router->get('/admin/events', [AdminController::class, 'events']);
+$router->get('/admin/settings', [AdminController::class, 'settings']);
 
 // Health check route.
 $router->get('/api/health', fn() => Response::json([
