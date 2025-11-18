@@ -27,18 +27,18 @@ class Survey
 
     public function __construct(array $attributes)
     {
-        $this->id = (int)($attributes['id'] ?? 0);
+        $this->id = (int) ($attributes['id'] ?? 0);
         $this->maKhaoSat = $attributes['maKhaoSat'] ?? '';
         $this->tieuDe = $attributes['tieuDe'] ?? '';
         $this->moTa = $attributes['moTa'] ?? null;
         $this->loaiKhaoSat = $attributes['loaiKhaoSat'] ?? null;
         $this->thoiGianBatDau = $attributes['thoiGianBatDau'] ?? null;
         $this->thoiGianKetThuc = $attributes['thoiGianKetThuc'] ?? null;
-        $this->maNguoiTao = (int)($attributes['maNguoiTao'] ?? 0);
+        $this->maNguoiTao = (int) ($attributes['maNguoiTao'] ?? 0);
         $this->trangThai = $attributes['trangThai'] ?? 'draft';
-        $this->diemThuong = (int)($attributes['diemThuong'] ?? 0);
-        $this->danhMuc = $attributes['danhMuc'] ? (int)$attributes['danhMuc'] : null;
-        $this->maSuKien = $attributes['maSuKien'] ? (int)$attributes['maSuKien'] : null;
+        $this->diemThuong = (int) ($attributes['diemThuong'] ?? 0);
+        $this->danhMuc = $attributes['danhMuc'] ? (int) $attributes['danhMuc'] : null;
+        $this->maSuKien = $attributes['maSuKien'] ? (int) $attributes['maSuKien'] : null;
         $this->trangThaiKiemDuyet = $attributes['trangThaiKiemDuyet'] ?? 'pending';
         $this->createdAt = $attributes['created_at'] ?? '';
         $this->updatedAt = $attributes['updated_at'] ?? '';
@@ -56,6 +56,82 @@ class Survey
         $rows = $statement->fetchAll();
 
         return array_map(fn($row) => new self($row), $rows);
+    }
+
+    /**
+     * Lấy danh sách khảo sát với phân trang và lọc
+     * 
+     * @param int $page Trang hiện tại (bắt đầu từ 1)
+     * @param int $limit Số khảo sát trên mỗi trang
+     * @param array $filters Mảng lọc: ['search' => '', 'trangThai' => '', 'danhMuc' => '']
+     * @return array ['surveys' => [...], 'total' => int, 'page' => int, 'limit' => int, 'totalPages' => int]
+     */
+    public static function paginate(int $page = 1, int $limit = 10, array $filters = []): array
+    {
+        /** @var PDO $db */
+        $db = Container::get('db');
+
+        // Validate page & limit
+        $page = max(1, (int) $page);
+        $limit = max(1, min(100, (int) $limit)); // Max 100 items per page
+        $offset = ($page - 1) * $limit;
+
+        // Build WHERE clause
+        $where = [];
+        $params = [];
+
+        if (!empty($filters['search'])) {
+            $where[] = "(tieuDe LIKE :search OR moTa LIKE :search)";
+            $params[':search'] = '%' . $filters['search'] . '%';
+        }
+
+        if (!empty($filters['trangThai'])) {
+            $where[] = "trangThai = :trangThai";
+            $params[':trangThai'] = $filters['trangThai'];
+        }
+
+        if (!empty($filters['danhMuc'])) {
+            $where[] = "danhMuc = :danhMuc";
+            $params[':danhMuc'] = (int) $filters['danhMuc'];
+        }
+
+        if (!empty($filters['quickPoll'])) {
+            $where[] = "soLuongCauHoi = 1";
+        }
+
+        $whereClause = !empty($where) ? 'WHERE ' . implode(' AND ', $where) : '';
+
+        // Get total count
+        $countSql = "SELECT COUNT(*) as total FROM surveys {$whereClause}";
+        $countStmt = $db->prepare($countSql);
+        $countStmt->execute($params);
+        $total = (int) $countStmt->fetch()['total'];
+
+        // Get paginated results
+        $sql = "SELECT * FROM surveys {$whereClause} ORDER BY created_at DESC LIMIT :offset, :limit";
+        $stmt = $db->prepare($sql);
+
+        // Bind params
+        foreach ($params as $key => $value) {
+            $stmt->bindValue($key, $value);
+        }
+        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+
+        $stmt->execute();
+        $rows = $stmt->fetchAll();
+
+        $surveys = array_map(fn($row) => new self($row), $rows);
+
+        $totalPages = (int) ceil($total / $limit);
+
+        return [
+            'surveys' => $surveys,
+            'total' => $total,
+            'page' => $page,
+            'limit' => $limit,
+            'totalPages' => $totalPages,
+        ];
     }
 
     /**
@@ -134,17 +210,17 @@ class Survey
                 ':end' => $data['thoiGianKetThuc'] ?? null,
                 ':user' => $data['maNguoiTao'],
                 ':status' => $data['trangThai'] ?? 'draft',
-                ':diem' => (int)($data['diemThuong'] ?? 0),
+                ':diem' => (int) ($data['diemThuong'] ?? 0),
                 ':danh' => $data['danhMuc'] ?? null,
                 ':soluong' => 0,
-                ':songuoi' => (int)($data['soNguoiThamGia'] ?? 0),
+                ':songuoi' => (int) ($data['soNguoiThamGia'] ?? 0),
                 ':sukien' => $data['maSuKien'] ?? null,
                 ':kiemduyet' => 'pending',
                 ':created' => $now,
                 ':updated' => $now,
             ]);
 
-            $id = (int)$db->lastInsertId();
+            $id = (int) $db->lastInsertId();
             return self::find($id);
         } catch (\PDOException $e) {
             return null; // Duplicate maKhaoSat hoặc lỗi DB
@@ -184,7 +260,7 @@ class Survey
             ':start' => $thoiGianBatDau,
             ':end' => $thoiGianKetThuc,
             ':status' => $trangThai,
-            ':diem' => (int)$diemThuong,
+            ':diem' => (int) $diemThuong,
             ':danh' => $danhMuc,
             ':sukien' => $maSuKien,
             ':kiemduyet' => $trangThaiKiemDuyet,
@@ -264,11 +340,32 @@ class Survey
     }
 
     // Getters
-    public function getId(): int { return $this->id; }
-    public function getMaKhaoSat(): string { return $this->maKhaoSat; }
-    public function getTieuDe(): string { return $this->tieuDe; }
-    public function getMoTa(): ?string { return $this->moTa; }
-    public function getMaNguoiTao(): int { return $this->maNguoiTao; }
-    public function getTrangThai(): string { return $this->trangThai; }
-    public function getTrangThaiKiemDuyet(): string { return $this->trangThaiKiemDuyet; }
+    public function getId(): int
+    {
+        return $this->id;
+    }
+    public function getMaKhaoSat(): string
+    {
+        return $this->maKhaoSat;
+    }
+    public function getTieuDe(): string
+    {
+        return $this->tieuDe;
+    }
+    public function getMoTa(): ?string
+    {
+        return $this->moTa;
+    }
+    public function getMaNguoiTao(): int
+    {
+        return $this->maNguoiTao;
+    }
+    public function getTrangThai(): string
+    {
+        return $this->trangThai;
+    }
+    public function getTrangThaiKiemDuyet(): string
+    {
+        return $this->trangThaiKiemDuyet;
+    }
 }

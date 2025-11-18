@@ -15,27 +15,53 @@ class SurveyController extends Controller
 {
     /**
      * GET /api/surveys
-     * Lấy danh sách khảo sát (hỗ trợ filter theo trangThai)
+     * Lấy danh sách khảo sát với phân trang và lọc
+     * 
+     * Query params:
+     * - page: int (default: 1)
+     * - limit: int (default: 10, max: 100)
+     * - search: string (tìm kiếm trong tiêu đề và mô tả)
+     * - trangThai: string (lọc theo trạng thái: hoạtĐộng, draft, published, etc.)
+     * - danhMuc: int (lọc theo danh mục ID)
+     * - quickPoll: bool (nếu true, chỉ lấy surveys có 1 câu hỏi)
+     * 
+     * Ví dụ: GET /api/surveys?page=1&limit=6&search=sức khỏe&trangThai=hoạtĐộng
+     *        GET /api/surveys?page=1&limit=6&quickPoll=true
      */
     public function index(Request $request)
     {
-        $trangThai = $request->query('trangThai', null);
+        $page = (int) ($request->query('page') ?? 1);
+        $limit = (int) ($request->query('limit') ?? 10);
 
-        if ($trangThai) {
-            // Filter by status
-            /** @var PDO $db */
-            $db = Container::get('db');
-            $stmt = $db->prepare('SELECT * FROM surveys WHERE trangThai = :status ORDER BY created_at DESC');
-            $stmt->execute([':status' => $trangThai]);
-            $rows = $stmt->fetchAll();
-            $surveys = array_map(fn($row) => new Survey($row), $rows);
-        } else {
-            $surveys = Survey::all();
+        $filters = [];
+
+        if ($search = $request->query('search')) {
+            $filters['search'] = $search;
         }
+
+        if ($trangThai = $request->query('trangThai')) {
+            $filters['trangThai'] = $trangThai;
+        }
+
+        if ($danhMuc = $request->query('danhMuc')) {
+            $filters['danhMuc'] = $danhMuc;
+        }
+
+        if ($request->query('quickPoll')) {
+            $filters['quickPoll'] = true;
+        }
+
+        $result = Survey::paginate($page, $limit, $filters);
 
         return $this->json([
             'error' => false,
-            'data' => array_map(fn($s) => $s->toArray(), $surveys),
+            'data' => array_map(fn($s) => $s->toArray(), $result['surveys']),
+            'meta' => [
+                'total' => $result['total'],
+                'page' => $result['page'],
+                'limit' => $result['limit'],
+                'totalPages' => $result['totalPages'],
+            ],
         ]);
     }
 
@@ -54,7 +80,7 @@ class SurveyController extends Controller
             ], 422);
         }
 
-        $survey = Survey::find((int)$id);
+        $survey = Survey::find((int) $id);
         if (!$survey) {
             return $this->json([
                 'error' => true,
@@ -122,7 +148,7 @@ class SurveyController extends Controller
             ], 422);
         }
 
-        $survey = Survey::find((int)$id);
+        $survey = Survey::find((int) $id);
         if (!$survey) {
             return $this->json([
                 'error' => true,
@@ -148,7 +174,7 @@ class SurveyController extends Controller
         }
 
         // Reload
-        $survey = Survey::find((int)$id);
+        $survey = Survey::find((int) $id);
 
         return $this->json([
             'error' => false,
@@ -172,7 +198,7 @@ class SurveyController extends Controller
             ], 422);
         }
 
-        $survey = Survey::find((int)$id);
+        $survey = Survey::find((int) $id);
         if (!$survey) {
             return $this->json([
                 'error' => true,
@@ -208,7 +234,7 @@ class SurveyController extends Controller
             ], 422);
         }
 
-        $survey = Survey::find((int)$id);
+        $survey = Survey::find((int) $id);
         if (!$survey) {
             return $this->json([
                 'error' => true,
@@ -233,7 +259,7 @@ class SurveyController extends Controller
         }
 
         // Reload
-        $survey = Survey::find((int)$id);
+        $survey = Survey::find((int) $id);
 
         return $this->json([
             'error' => false,
@@ -258,7 +284,7 @@ class SurveyController extends Controller
             ], 422);
         }
 
-        $survey = Survey::find((int)$id);
+        $survey = Survey::find((int) $id);
         if (!$survey) {
             return $this->json([
                 'error' => true,
@@ -282,7 +308,7 @@ class SurveyController extends Controller
         }
 
         // Reload
-        $survey = Survey::find((int)$id);
+        $survey = Survey::find((int) $id);
 
         return $this->json([
             'error' => false,
@@ -340,7 +366,7 @@ class SurveyController extends Controller
             ], 422);
         }
 
-        $question = Question::find((int)$id);
+        $question = Question::find((int) $id);
         if (!$question) {
             return $this->json([
                 'error' => true,
@@ -366,7 +392,7 @@ class SurveyController extends Controller
         }
 
         // Reload
-        $question = Question::find((int)$id);
+        $question = Question::find((int) $id);
 
         return $this->json([
             'error' => false,
@@ -390,7 +416,7 @@ class SurveyController extends Controller
             ], 422);
         }
 
-        $question = Question::find((int)$id);
+        $question = Question::find((int) $id);
         if (!$question) {
             return $this->json([
                 'error' => true,

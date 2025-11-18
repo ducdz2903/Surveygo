@@ -38,7 +38,14 @@ $url = static function (array $urls, string $key, string $fallbackPath = '/') us
         <div class="collapse navbar-collapse" id="mainNav">
             <ul class="navbar-nav ms-auto align-items-center">
                 <li class="nav-item">
-                    <a class="nav-link" href="#how-it-works">
+                    <a class="nav-link <?= $current === '/surveys' ? 'active' : '' ?>"
+                        href="<?= rtrim($baseUrl, '/') ?>/surveys">
+                        <i class="fas fa-list me-1"></i>Khảo sát
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link <?= $current === '/quick-poll' ? 'active' : '' ?>"
+                        href="<?= rtrim($baseUrl, '/') ?>/quick-poll">
                         <i class="fas fa-bolt me-1"></i>Quick Poll
                     </a>
                 </li>
@@ -87,12 +94,13 @@ $url = static function (array $urls, string $key, string $fallbackPath = '/') us
 </nav>
 <script>
     // Client-side navbar auth toggle using localStorage
-    (function () {
+    function updateNavbarAuth() {
         try {
             var user = null;
             try {
                 var raw = localStorage.getItem('app.user');
                 user = raw ? JSON.parse(raw) : null;
+                console.log('User data:', user);
             } catch (e) { }
 
             var userDropdown = document.getElementById('nav-user');
@@ -107,13 +115,13 @@ $url = static function (array $urls, string $key, string $fallbackPath = '/') us
                 if (registerBtn) registerBtn.style.display = 'none';
                 if (navUsername) navUsername.textContent = user.name || user.email || 'Tài khoản';
                 // Khi đăng nhập, logo đi tới /home
-                if (navBrand) navBrand.href = '<?= rtrim($baseUrl, '/') ?>/home';
+                if (navBrand) navBrand.href = window.location.origin + '/home';
             } else {
                 // User not logged in
                 if (userDropdown) userDropdown.style.display = 'none';
                 if (registerBtn) registerBtn.style.display = 'block';
                 // Khi chưa đăng nhập, logo đi tới landing page (/)
-                if (navBrand) navBrand.href = '<?= rtrim($baseUrl, '/') ?: '/' ?>';
+                if (navBrand) navBrand.href = window.location.origin + '/';
             }
 
             if (logoutBtn) {
@@ -123,5 +131,23 @@ $url = static function (array $urls, string $key, string $fallbackPath = '/') us
                 });
             }
         } catch (e) { }
-    })();
+    }
+
+    // Chạy ngay khi script load (không chờ DOM)
+    updateNavbarAuth();
+
+    // Chạy lại khi DOM ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', updateNavbarAuth);
+    }
+
+    // Chạy lại khi focus vào tab (người dùng quay lại)
+    window.addEventListener('focus', updateNavbarAuth);
+
+    // Lắng nghe thay đổi localStorage
+    window.addEventListener('storage', function (e) {
+        if (e.key === 'app.user' || e.key === null) {
+            updateNavbarAuth();
+        }
+    });
 </script>

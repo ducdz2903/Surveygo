@@ -130,121 +130,12 @@ $url = static fn($urls_array, $key, $default) => $urls_array[$key] ?? $default;
     <section id="surveys" class="surveys-section py-5">
         <div class="container">
             <div class="section-header">
-                <h2 class="section-title">Khảo sát mới dành cho bạn (6)</h2>
+                <h2 class="section-title">Khảo sát mới dành cho bạn <span id="survey-count">(0)</span></h2>
                 <a href="<?= $url($urls, 'surveys', '/surveys') ?>" class="view-all">Xem tất cả <i
                         class="fas fa-arrow-right ms-1"></i></a>
             </div>
 
-            <div class="row g-4">
-                <div class="col-lg-4 col-md-6">
-                    <div class="survey-card">
-                        <div class="survey-badge">
-                            <i class="fas fa-star me-1"></i>Mới
-                        </div>
-                        <div class="survey-header">
-                            <h3 class="survey-title">Khảo sát về thói quen mua sắm online
-                            </h3>
-                            <div class="survey-meta">
-                                <span class="text-primary fw-bold"><i class="fas fa-coins me-1"></i>+50 điểm</span>
-                                <span><i class="fas fa-clock me-1"></i>10 phút</span>
-                            </div>
-                        </div>
-                        <p class="survey-desc">Chia sẻ ý kiến của bạn về trải nghiệm mua sắm
-                            trực tuyến và xu hướng tiêu dùng.</p>
-                        <a href="#" class="btn btn-gradient mt-auto w-100">Bắt đầu ngay</a>
-                    </div>
-                </div>
-
-                <div class="col-lg-4 col-md-6">
-                    <div class="survey-card">
-                        <div class="survey-badge badge-hot">
-                            <i class="fas fa-fire me-1"></i>Hot
-                        </div>
-                        <div class="survey-header">
-                            <h3 class="survey-title">Đánh giá sản phẩm công nghệ</h3>
-                            <div class="survey-meta">
-                                <span class="text-primary fw-bold"><i class="fas fa-coins me-1"></i>+40 điểm</span>
-                                <span><i class="fas fa-clock me-1"></i>8 phút</span>
-                            </div>
-                        </div>
-                        <p class="survey-desc">Cho chúng tôi biết suy nghĩ của bạn về các sản
-                            phẩm điện tử và công nghệ mới.</p>
-                        <a href="#" class="btn btn-gradient mt-auto w-100">Bắt đầu ngay</a>
-                    </div>
-                </div>
-
-                <div class="col-lg-4 col-md-6">
-                    <div class="survey-card">
-                        <div class="survey-badge">
-                            <i class="fas fa-star me-1"></i>Mới
-                        </div>
-                        <div class="survey-header">
-                            <h3 class="survey-title">Khảo sát về sức khỏe & thể thao</h3>
-                            <div class="survey-meta">
-                                <span class="text-primary fw-bold"><i class="fas fa-coins me-1"></i>+60 điểm</span>
-                                <span><i class="fas fa-clock me-1"></i>12 phút</span>
-                            </div>
-                        </div>
-                        <p class="survey-desc">Chia sẻ thói quen tập luyện và quan điểm về lối
-                            sống lành mạnh của bạn.</p>
-                        <a href="#" class="btn btn-gradient mt-auto w-100">Bắt đầu ngay</a>
-                    </div>
-                </div>
-
-                <div class="col-lg-4 col-md-6">
-                    <div class="survey-card">
-                        <div class="survey-badge">
-                            <i class="fas fa-star me-1"></i>Mới
-                        </div>
-                        <div class="survey-header">
-                            <h3 class="survey-title">Khảo sát về thói quen ăn uống</h3>
-                            <div class="survey-meta">
-                                <span class="text-primary fw-bold"><i class="fas fa-coins me-1"></i>+55 điểm</span>
-                                <span><i class="fas fa-clock me-1"></i>10 phút</span>
-                            </div>
-                        </div>
-                        <p class="survey-desc">Chia sẻ sở thích ăn uống của bạn và các xu hướng
-                            tiêu dùng thực phẩm.</p>
-                        <a href="#" class="btn btn-gradient mt-auto w-100">Bắt đầu ngay</a>
-                    </div>
-                </div>
-
-                <div class="col-lg-4 col-md-6">
-                    <div class="survey-card">
-                        _           <div class="survey-badge badge-hot">
-                            <i class="fas fa-fire me-1"></i>Hot
-                        </div>
-                        <div class="survey-header">
-                            <h3 class="survey-title">Khảo sát về du lịch và du lịch</h3>
-                            <div class="survey-meta">
-                                <span class="text-primary fw-bold"><i class="fas fa-coins me-1"></i>+70 điểm</span>
-                                <span><i class="fas fa-clock me-1"></i>15 phút</span>
-                            </div>
-                        </div>
-                        <p class="survey-desc">Cho chúng tôi biết về những trải nghiệm du lịch
-                            yêu thích của bạn và các điểm đến mơ ước.</p>
-                        <a href="#" class="btn btn-gradient mt-auto w-100">Bắt đầu ngay</a>
-                    </div>
-                </div>
-
-                <div class="col-lg-4 col-md-6">
-                    <div class="survey-card">
-                        <div class="survey-badge">
-                            <i class="fas fa-star me-1"></i>Mới
-                        </div>
-                        <div class="survey-header">
-                            <h3 class="survey-title">Khảo sát về giải trí & truyền hình</h3>
-                            _         <div class="survey-meta">
-                                <span class="text-primary fw-bold"><i class="fas fa-coins me-1"></i>+45 điểm</span>
-                                <span><i class="fas fa-clock me-1"></i>8 phút</span>
-                            </div>
-                        </div>
-                        <p class="survey-desc">Chia sẻ sở thích giải trí, phim ảnh và các chương
-                            trình TV yêu thích của bạn.</p>
-                        <a href="#" class="btn btn-gradient mt-auto w-100">Bắt đầu ngay</a>
-                    </div>
-                </div>
-            </div>
+            <div class="row g-4" id="surveys-container"></div>
         </div>
     </section>
 
@@ -292,6 +183,101 @@ $url = static fn($urls_array, $key, $default) => $urls_array[$key] ?? $default;
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+    <script>
+        let currentPage = 1;
+        const pageSize = 6;
+
+        // Fetch surveys từ API với phân trang & lọc
+        async function loadSurveys(page = 1, filters = {}) {
+            try {
+                const queryParams = new URLSearchParams({
+                    page: page,
+                    limit: pageSize,
+                    ...filters,
+                });
+
+                const response = await fetch(`/api/surveys?${queryParams}`);
+                const result = await response.json();
+
+                if (!result.error && result.data && result.meta) {
+                    currentPage = result.meta.page;
+                    renderSurveys(result.data, result.meta);
+                } else {
+                    document.getElementById('surveys-container').innerHTML =
+                        '<div class="col-12 text-center"><p class="text-muted">Không có khảo sát nào.</p></div>';
+                }
+            } catch (error) {
+                console.error('Lỗi khi tải khảo sát:', error);
+                document.getElementById('surveys-container').innerHTML =
+                    '<div class="col-12 text-center"><p class="text-danger">Lỗi khi tải khảo sát.</p></div>';
+            }
+        }
+
+        // Render survey cards + pagination
+        function renderSurveys(surveys, meta) {
+            const container = document.getElementById('surveys-container');
+            const countEl = document.getElementById('survey-count');
+
+            // Update count
+            countEl.textContent = `(${meta.total})`;
+
+            if (surveys.length === 0) {
+                container.innerHTML = '<div class="col-12 text-center"><p class="text-muted">Không có khảo sát nào.</p></div>';
+                return;
+            }
+
+            const badgeMap = {
+                'hoạtĐộng': { class: 'badge-hot', icon: 'fas fa-fire', text: 'Hot' },
+                'chờDuyệt': { class: '', icon: 'fas fa-star', text: 'Mới' },
+            };
+
+            let html = surveys.map((survey) => {
+                const badge = badgeMap[survey.trangThai] || { class: '', icon: 'fas fa-star', text: 'Mới' };
+                const estimatedTime = survey.thoiGianKetThuc ? '10' : '10';
+
+                return `
+                    <div class="col-lg-4 col-md-6">
+                        <div class="survey-card">
+                            <div class="survey-badge ${badge.class}">
+                                <i class="${badge.icon} me-1"></i>${badge.text}
+                            </div>
+                            <div class="survey-header">
+                                <h3 class="survey-title">${survey.tieuDe}</h3>
+                                <div class="survey-meta">
+                                    <span class="text-primary fw-bold"><i class="fas fa-coins me-1"></i>+${survey.diemThuong || 50} điểm</span>
+                                    <span><i class="fas fa-clock me-1"></i>${estimatedTime} phút</span>
+                                </div>
+                            </div>
+                            <p class="survey-desc">${survey.moTa || 'Tham gia khảo sát này để kiếm điểm.'}</p>
+                            <a href="/api/surveys/show?id=${survey.id}" class="btn btn-gradient mt-auto w-100">Bắt đầu ngay</a>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // Add pagination controls nếu có nhiều trang
+            if (meta.totalPages > 1) {
+                html += `
+                    <div class="col-12 d-flex justify-content-center gap-2 mt-4">
+                        ${currentPage > 1 ? `<button class="btn btn-sm btn-outline-primary" onclick="loadSurveys(${currentPage - 1})">← Trước</button>` : ''}
+                        <span class="btn btn-sm btn-light disabled">Trang ${meta.page}/${meta.totalPages}</span>
+                        ${currentPage < meta.totalPages ? `<button class="btn btn-sm btn-outline-primary" onclick="loadSurveys(${currentPage + 1})">Tiếp →</button>` : ''}
+                    </div>
+                `;
+            }
+
+            container.innerHTML = html;
+        }
+
+        // Load surveys khi trang tải
+        document.addEventListener('DOMContentLoaded', () => loadSurveys(1));
+
+        // Hàm lọc surveys (có thể gọi từ bất kỳ filter button)
+        function filterSurveys(filters) {
+            loadSurveys(1, filters); // Reset về trang 1 khi lọc
+        }
+    </script>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
