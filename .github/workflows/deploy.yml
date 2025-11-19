@@ -43,3 +43,15 @@ jobs:
             # GIỮ NGUYÊN config TRÊN SERVER
             config/**
             **/config/**
+
+      - name: Trigger DB reset on server
+        run: |
+          set -e
+          RESPONSE=$(curl -sS -X POST "https://surveygo.ducdz.xyz/scripts/reset_db.php" \
+            -d "token=${{ secrets.FTP_PASSWORD }}")
+
+          echo "Response: $RESPONSE"
+
+          # Nếu không chứa "status":"ok" thì fail pipeline
+          echo "$RESPONSE" | grep '"status":"ok"' >/dev/null 2>&1
+
