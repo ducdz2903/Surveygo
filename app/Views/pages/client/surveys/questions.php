@@ -36,7 +36,7 @@ $urls['register'] = $urls['register'] ?? $__mk($__base, '/register');
 <body>
     <?php include BASE_PATH . '/app/Views/components/client/_navbar.php'; ?>
 
-    <main class="questions-container" style="margin-top: 8rem;">
+    <main class="questions-container" style="margin-top: 5rem;">
         <div class="survey-content">
             <div id="survey-header" class="survey-header mb-4"></div>
 
@@ -166,47 +166,70 @@ $urls['register'] = $urls['register'] ?? $__mk($__base, '/register');
         }
 
         function renderOptions(question) {
-            // Vì hiện tại không có bảng answers trong DB
-            // Tạm thời tạo mock answers dựa trên loai câu hỏi
-            const mockAnswers = {
-                'CH001': [
-                    { id: 1, noiDungDapAn: 'Buổi sáng' },
-                    { id: 2, noiDungDapAn: 'Buổi chiều' },
-                    { id: 3, noiDungDapAn: 'Buổi tối' },
-                    { id: 4, noiDungDapAn: 'Trước khi ngủ' }
-                ],
-                'CH002': [
-                    { id: 5, noiDungDapAn: 'Tiểu thuyết' },
-                    { id: 6, noiDungDapAn: 'Tự truyện' },
-                    { id: 7, noiDungDapAn: 'Sách khoa học' },
-                    { id: 8, noiDungDapAn: 'Sách triết học' }
-                ]
-            };
-
             const loaiCauHoi = question.loaiCauHoi;
-            const inputType = loaiCauHoi === 'single_choice' ? 'radio' : 'checkbox';
             const questionId = question.id;
 
-            // Lấy answers từ mock hoặc trả về empty
-            const answers = mockAnswers[question.maCauHoi] || [];
+            // Nếu là text, render textarea
+            if (loaiCauHoi === 'text') {
+                const value = answers[questionId] || '';
+                return `
+                    <textarea 
+                        id="question_${questionId}" 
+                        name="question_${questionId}"
+                        class="form-control question-textarea"
+                        rows="4"
+                        placeholder="Nhập câu trả lời của bạn..."
+                    >${escapeHtml(value)}</textarea>
+                `;
+            }
+
+            // Nếu là choice, render radio/checkbox
+            const inputType = loaiCauHoi === 'single_choice' ? 'radio' : 'checkbox';
+
+            // Lấy answers từ API (nếu có) hoặc mock data
+            let questionAnswers = [];
+            if (question.answers && question.answers.length > 0) {
+                questionAnswers = question.answers;
+            } else {
+                // Mock data tạm thời
+                const mockAnswers = {
+                    'CH001': [
+                        { id: 1, noiDungCauTraLoi: 'Buổi sáng' },
+                        { id: 2, noiDungCauTraLoi: 'Buổi chiều' },
+                        { id: 3, noiDungCauTraLoi: 'Buổi tối' },
+                        { id: 4, noiDungCauTraLoi: 'Trước khi ngủ' }
+                    ],
+                    'CH002': [
+                        { id: 5, noiDungCauTraLoi: 'Tiểu thuyết' },
+                        { id: 6, noiDungCauTraLoi: 'Tự truyện' },
+                        { id: 7, noiDungCauTraLoi: 'Sách khoa học' },
+                        { id: 8, noiDungCauTraLoi: 'Sách triết học' }
+                    ]
+                };
+                questionAnswers = mockAnswers[question.maCauHoi] || [];
+            }
 
             let html = '';
+            if (questionAnswers && questionAnswers.length > 0) {
+                questionAnswers.forEach((answer) => {
+                    const answerId = answer.id;
+                    const answerText = answer.noiDungCauTraLoi || answer.noiDungDapAn;
+                    const isChecked = loaiCauHoi === 'single_choice'
+                        ? answers[questionId] === answerId
+                        : (Array.isArray(answers[questionId]) && answers[questionId].includes(answerId));
 
-            if (answers && answers.length > 0) {
-                answers.forEach((answer, idx) => {
-                    const checked = answers[questionId] === answer.id ? 'checked' : '';
                     html += `
                         <div class="option-item">
                             <input 
                                 type="${inputType}" 
-                                id="answer_${answer.id}" 
+                                id="answer_${answerId}" 
                                 name="question_${questionId}" 
-                                value="${answer.id}"
+                                value="${answerId}"
                                 class="form-check-input"
-                                ${checked}
+                                ${isChecked ? 'checked' : ''}
                             >
-                            <label for="answer_${answer.id}" class="form-check-label">
-                                ${escapeHtml(answer.noiDungDapAn)}
+                            <label for="answer_${answerId}" class="form-check-label">
+                                ${escapeHtml(answerText)}
                             </label>
                         </div>
                     `;
@@ -214,9 +237,7 @@ $urls['register'] = $urls['register'] ?? $__mk($__base, '/register');
             }
 
             return html;
-        }
-
-        function setupEventListeners() {
+        } function setupEventListeners() {
             document.getElementById('btn-next').addEventListener('click', function (e) {
                 e.preventDefault();
 
@@ -252,10 +273,16 @@ $urls['register'] = $urls['register'] ?? $__mk($__base, '/register');
             const loaiCauHoi = question.loaiCauHoi;
             const inputName = `question_${question.id}`;
 
-            if (loaiCauHoi === 'single_choice') {
+            if (loaiCauHoi === 'text') {
+                // Lưu text từ textarea
+                const textarea = document.querySelector(`textarea[name="${inputName}"]`);
+                answers[question.id] = textarea ? textarea.value : null;
+            } else if (loaiCauHoi === 'single_choice') {
+                // Lưu ID của answer được chọn
                 const checked = document.querySelector(`input[name="${inputName}"]:checked`);
                 answers[question.id] = checked ? checked.value : null;
             } else if (loaiCauHoi === 'multiple_choice') {
+                // Lưu mảng ID của các answers được chọn
                 const checked = document.querySelectorAll(`input[name="${inputName}"]:checked`);
                 answers[question.id] = Array.from(checked).map(c => c.value);
             }
@@ -279,12 +306,34 @@ $urls['register'] = $urls['register'] ?? $__mk($__base, '/register');
                 const pathParts = window.location.pathname.split('/');
                 const surveyId = pathParts[2];
 
+                // Get user ID from localStorage
+                const userRaw = localStorage.getItem('app.user');
+                const user = userRaw ? JSON.parse(userRaw) : null;
+
+                if (!user || !user.id) {
+                    showError('Vui lòng đăng nhập để nộp bài');
+                    window.location.href = '/login';
+                    return;
+                }
+
+                // Format answers: convert để lưu vào noiDungTraLoi
+                const formattedAnswers = {};
+                for (const [questionId, value] of Object.entries(answers)) {
+                    // Lưu array hoặc string thành JSON string
+                    formattedAnswers[questionId] = typeof value === 'string'
+                        ? value
+                        : JSON.stringify(value);
+                }
+
                 const response = await fetch(`/api/surveys/${surveyId}/submit`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ answers: answers })
+                    body: JSON.stringify({
+                        userId: user.id,
+                        answers: formattedAnswers
+                    })
                 });
 
                 const result = await response.json();

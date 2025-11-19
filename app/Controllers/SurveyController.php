@@ -9,6 +9,8 @@ use App\Core\Request;
 use App\Core\Container;
 use App\Models\Survey;
 use App\Models\Question;
+use App\Models\SurveySubmission;
+use App\Models\UserResponse;
 use PDO;
 
 class SurveyController extends Controller
@@ -519,5 +521,107 @@ class SurveyController extends Controller
     {
         $date = \DateTime::createFromFormat('Y-m-d H:i:s', $dateTime);
         return $date && $date->format('Y-m-d H:i:s') === $dateTime;
+    }
+
+    /**
+     * POST /api/surveys/{id}/submit
+     * Nộp bài khảo sát - tạo survey submission + user responses
+     * 
+     * Request body:
+     * {
+     *   "userId": 1,
+     *   "answers": {
+     *     "1": "Buổi sáng",
+     *     "2": "5",
+     *     "3": "[\"7\", \"8\"]"
+     *   }
+     * }
+     */
+    public function submit(Request $request)
+    {
+        // Get survey ID from route parameter
+        $surveyId = (int) $request->getAttribute('id');
+        $userId = (int) $request->input('userId');
+        $answers = $request->input('answers') ?? [];
+
+        // Validate inputs
+        if (!$surveyId || !$userId || !is_array($answers)) {
+            return $this->json([
+                'error' => true,
+                'message' => 'Invalid survey ID, user ID, or answers format.',
+            ], 422);
+        }
+
+        // Check if survey exists
+        $survey = Survey::find($surveyId);
+        if (!$survey) {
+            return $this->json([
+                'error' => true,
+                'message' => 'Survey not found.',
+            ], 404);
+        }
+
+        // Check if user already submitted this survey
+        $existingSubmission = SurveySubmission::findBySurveyAndUser($surveyId, $userId);
+        if ($existingSubmission) {
+            return $this->json([
+                'error' => true,
+                'message' => 'User already submitted this survey.',
+            ], 409);
+        }
+
+        try {
+            // Create survey submission record
+            $submission = SurveySubmission::create([
+                'maKhaoSat' => $surveyId,
+                'maNguoiDung' => $userId,
+                'trangThai' => 'submitted',
+                'diemDat' => 0,
+                'ghiChu' => 'Submitted at ' . date('Y-m-d H:i:s'),
+            ]);
+
+            if (!$submission) {
+                return $this->json([
+                    'error' => true,
+                    'message' => 'Failed to create submission record.',
+                ], 500);
+            }
+
+            // Get all questions for this survey to validate
+            $questions = Question::findBySurvey($surveyId);
+            $questionIds = array_map(fn($q) => $q->getId(), $questions);
+
+            // Create user response for each answered question
+            foreach ($answers as $questionId => $answer) {
+                $questionId = (int) $questionId;
+
+                // Validate question belongs to this survey
+                if (!in_array($questionId, $questionIds)) {
+                    continue; // Skip invalid question IDs
+                }
+
+                // Create user response
+                UserResponse::create([
+                    'maCauHoi' => $questionId,
+                    'maNguoiDung' => $userId,
+                    'maKhaoSat' => $surveyId,
+                    'noiDungTraLoi' => $answer, // Already formatted as JSON string from frontend
+                ]);
+            }
+
+            return $this->json([
+                'error' => false,
+                'message' => 'Survey submitted successfully.',
+                'data' => [
+                    'submissionId' => $submission->getId(),
+                ],
+            ], 201);
+
+        } catch (\Exception $e) {
+            return $this->json([
+                'error' => true,
+                'message' => 'Error submitting survey: ' . $e->getMessage(),
+            ], 500);
+        }
     }
 }

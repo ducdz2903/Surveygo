@@ -57,6 +57,51 @@ CREATE TABLE IF NOT EXISTS questions (
   FOREIGN KEY (maKhaoSat) REFERENCES surveys(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Answers table
+CREATE TABLE IF NOT EXISTS answers (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  maCauHoi INT UNSIGNED NOT NULL,
+  noiDungCauTraLoi TEXT NOT NULL,
+  laDung BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  creator_id INT UNSIGNED NOT NULL,
+  FOREIGN KEY (maCauHoi) REFERENCES questions(id) ON DELETE CASCADE,
+  FOREIGN KEY (creator_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- User Responses table (để lưu câu trả lời của user)
+CREATE TABLE IF NOT EXISTS user_responses (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  maCauHoi INT UNSIGNED NOT NULL,
+  maNguoiDung INT UNSIGNED NOT NULL,
+  maKhaoSat INT UNSIGNED NOT NULL,
+  noiDungTraLoi LONGTEXT,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (maCauHoi) REFERENCES questions(id) ON DELETE CASCADE,
+  FOREIGN KEY (maNguoiDung) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (maKhaoSat) REFERENCES surveys(id) ON DELETE CASCADE,
+  INDEX idx_user_survey (maNguoiDung, maKhaoSat),
+  INDEX idx_question (maCauHoi)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Survey Submissions table (template submit - lưu thông tin submission của user)
+CREATE TABLE IF NOT EXISTS survey_submissions (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  maKhaoSat INT UNSIGNED NOT NULL,
+  maNguoiDung INT UNSIGNED NOT NULL,
+  trangThai ENUM('draft','submitted','completed') NOT NULL DEFAULT 'submitted',
+  diemDat INT DEFAULT NULL,
+  ghiChu TEXT DEFAULT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (maKhaoSat) REFERENCES surveys(id) ON DELETE CASCADE,
+  FOREIGN KEY (maNguoiDung) REFERENCES users(id) ON DELETE CASCADE,
+  INDEX idx_user_survey (maNguoiDung, maKhaoSat),
+  UNIQUE KEY unique_user_survey (maNguoiDung, maKhaoSat)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- Seed data (password = "password")
 INSERT IGNORE INTO users (id, name, email, password, role, created_at, updated_at) VALUES
   (1, 'Nguyễn Văn A', 'user1@example.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'user', NOW(), NOW()),
@@ -80,3 +125,14 @@ INSERT IGNORE INTO questions (id, maCauHoi, maKhaoSat, loaiCauHoi, noiDungCauHoi
   (2, 'CH002', 1, 'single_choice', 'Bạn thích thể loại sách nào nhất?', TRUE, 2, FALSE, NOW(), NOW()),
   (3, 'CH003', 2, 'text', 'Bạn có thường xuyên kiểm tra sức khỏe không?', FALSE, 1, FALSE, NOW(), NOW()),
   (4, 'CH004', 2, 'multiple_choice', 'Bạn có thói quen tập thể dục hàng ngày không?', TRUE, 2, FALSE, NOW(), NOW());
+
+-- Seed data for answers (for questions 1 and 2)
+INSERT IGNORE INTO answers (id, maCauHoi, noiDungCauTraLoi, laDung, creator_id, created_at, updated_at) VALUES
+  (1, 1, 'Buổi sáng', TRUE, 1, NOW(), NOW()),
+  (2, 1, 'Buổi chiều', FALSE, 1, NOW(), NOW()),
+  (3, 1, 'Buổi tối', FALSE, 1, NOW(), NOW()),
+  (4, 1, 'Trước khi ngủ', FALSE, 1, NOW(), NOW()),
+  (5, 2, 'Tiểu thuyết', FALSE, 1, NOW(), NOW()),
+  (6, 2, 'Tự truyện', TRUE, 1, NOW(), NOW()),
+  (7, 2, 'Sách khoa học', FALSE, 1, NOW(), NOW()),
+  (8, 2, 'Sách triết học', FALSE, 1, NOW(), NOW());

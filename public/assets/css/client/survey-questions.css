@@ -41,7 +41,7 @@
     background: white;
     border-radius: 12px;
     padding: 3rem 2rem;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     display: flex;
     flex-direction: column;
 }
@@ -96,6 +96,28 @@
     color: #1e293b;
     margin-bottom: 1.5rem;
     line-height: 1.6;
+}
+
+.question-textarea {
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1rem;
+    padding: 1rem;
+    resize: vertical;
+    min-height: 120px;
+    transition: all 0.2s ease;
+}
+
+.question-textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(16, 188, 211, 0.1);
+    background-color: #f8fafc;
+}
+
+.question-textarea::placeholder {
+    color: #cbd5e1;
 }
 
 .options-container {

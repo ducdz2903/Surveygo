@@ -57,6 +57,7 @@ $router->put('/api/surveys', [App\Controllers\SurveyController::class, 'update']
 $router->delete('/api/surveys', [App\Controllers\SurveyController::class, 'delete']);
 $router->post('/api/surveys/publish', [App\Controllers\SurveyController::class, 'publish']);
 $router->post('/api/surveys/approve', [App\Controllers\SurveyController::class, 'approve']);
+$router->post('/api/surveys/{id}/submit', [App\Controllers\SurveyController::class, 'submit']); // Submit khảo sát
 
 // Question API routes
 $router->get('/api/questions', [App\Controllers\QuestionController::class, 'index']); // Lấy danh sách tất cả câu hỏi 
