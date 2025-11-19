@@ -23,19 +23,15 @@ if (!is_array($config) || !isset($config['db']) || !is_array($config['db'])) {
 
 $db = $config['db'];
 
-$driver = $db['driver'] ?? 'mysql';
+// Support both MySQL and MariaDB.
+// In PDO, MariaDB cũng dùng driver "mysql".
+$driver = strtolower((string)($db['driver'] ?? 'mysql'));
 $host = $db['host'] ?? '127.0.0.1';
 $port = (int)($db['port'] ?? 3306);
 $dbName = $db['database'] ?? '';
 $user = $db['username'] ?? '';
 $pass = $db['password'] ?? '';
 $charset = $db['charset'] ?? 'utf8mb4';
-
-if ($driver !== 'mysql') {
-    http_response_code(500);
-    echo 'Only mysql driver is supported';
-    exit;
-}
 
 // 2) Load reset token from a separate secret file on the server.
 //    This file is NOT deployed by CI because config/** is excluded.
@@ -63,9 +59,10 @@ if (!is_string($token) || $token !== $expectedToken) {
     echo 'Forbidden';
     exit;
 }
-
-// 4) Connect to MySQL at server level (no database in DSN).
-$dsn = sprintf('mysql:host=%s;port=%d;charset=%s', $host, $port, $charset);
+// 4) Connect to MySQL/MariaDB at server level (no database in DSN).
+// Cho dù config để 'mysql' hay 'mariadb' thì PDO vẫn dùng driver 'mysql'.
+$pdoDriver = 'mysql';
+$dsn = sprintf('%s:host=%s;port=%d;charset=%s', $pdoDriver, $host, $port, $charset);
 $options = [
     PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
 ];
@@ -145,4 +142,3 @@ try {
         'message' => $e->getMessage(),
     ]);
 }
-
