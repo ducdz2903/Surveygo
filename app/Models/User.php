@@ -13,6 +13,7 @@ class User
     private string $name;
     private string $email;
     private string $password;
+    private string $role;
     private string $createdAt;
     private string $updatedAt;
 
@@ -22,11 +23,12 @@ class User
         $this->name = $attributes['name'];
         $this->email = $attributes['email'];
         $this->password = $attributes['password'];
+        $this->role = $attributes['role'];
         $this->createdAt = $attributes['created_at'];
         $this->updatedAt = $attributes['updated_at'];
     }
 
-    public static function create(string $name, string $email, string $hashedPassword): self
+    public static function create(string $name, string $email, string $hashedPassword, string $role): self
     {
         /** @var PDO $db */
         $db = Container::get('db');
@@ -38,6 +40,7 @@ class User
             ':name' => $name,
             ':email' => $email,
             ':password' => $hashedPassword,
+            ':role' => $role,
             ':created_at' => $now,
             ':updated_at' => $now,
         ]);
@@ -105,6 +108,7 @@ class User
             'id' => $this->id,
             'name' => $this->name,
             'email' => $this->email,
+            'role' => $this->role,
             'created_at' => $this->createdAt,
             'updated_at' => $this->updatedAt,
         ];

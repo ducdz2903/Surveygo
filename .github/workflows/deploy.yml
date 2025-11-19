@@ -16,6 +16,32 @@ jobs:
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Call DB reset API if sql/mysql/init.sql changed
+        env:
+          WEB_RESET_URL: ${{ secrets.WEB_RESET_URL }}
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+        run: |
+          set -e
+          echo "Checking for changes in sql/mysql/init.sql..."
+          # Ensure we have the range available for diff
+          git fetch --no-tags --prune --depth=2
+          # Use github event refs to compute changed files between before and after
+          if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q '^sql/mysql/init.sql$'; then
+            echo "Detected change in sql/mysql/init.sql — calling reset API"
+            status=$(curl -s -o /dev/null -w "%{http_code}" -X POST \
+              -H "X-Database-Name: $FTP_SERVER" \
+              -H "Content-Type: application/json" \
+              "$WEB_RESET_URL")
+            echo "Reset API HTTP status: $status"
+            if [ "$status" -ge 400 ]; then
+              echo "Warning: reset API returned error status $status"
+            fi
+          else
+            echo "No changes to sql/mysql/init.sql"
+          fi
 
       - name: FTP Deploy
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4

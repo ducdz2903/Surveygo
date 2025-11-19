@@ -34,6 +34,8 @@ $router->get('/api/health', fn() => Response::json([
     'time' => date(DATE_ATOM),
 ]));
 
+$router->post('/system/reset', [App\Controllers\SystemController::class, 'reset']);
+
 // Survey API routes
 $router->get('/api/surveys', [App\Controllers\SurveyController::class, 'index']); // Lấy ra danh sách khảo sát
 $router->get('/api/surveys/show', [App\Controllers\SurveyController::class, 'show']); // Lấy chi tiết một khảo sát
