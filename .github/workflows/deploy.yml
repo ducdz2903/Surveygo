@@ -48,7 +48,7 @@ jobs:
         run: |
           set -e
           RESPONSE=$(curl -sS -X POST "https://surveygo.ducdz.xyz/scripts/reset_db.php" \
-            -d "token=${{ secrets.FTP_PASSWORD }}")
+            -d "token=${{ secrets.RESET_SECRET }}")
 
           echo "Response: $RESPONSE"
 
