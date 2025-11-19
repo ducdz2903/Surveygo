@@ -3,13 +3,16 @@
     --primary-color: #10BCD3;
     --secondary-color: #0B99B8;
 
-    --accent-color: #F39C12;
+    --accent-color: #F0E68C;
     /* Cam vàng - Eye-catching */
     --secondary-accent: #06D6A0;
     /* Xanh lá mint - Harmony tươi mới */
     --accent-gradient: linear-gradient(45deg, #F39C12 0%, #E67E22 100%);
     --secondary-accent-gradient: linear-gradient(45deg, #06D6A0 0%, #00BF96 100%);
     /* GRADIENT MINT */
+
+    --navbar-hover: #FFFFFF;
+    /* Trắng - tương phản tốt */
 
     --card-bg: rgba(255, 255, 255, 0.95);
     --card-border: rgba(16, 188, 211, 0.1);
@@ -124,19 +127,6 @@ body {
 
 .bg-body-light {
     background: var(--background-light) !important;
-}
-
-.navbar .nav-link.active {
-    color: var(--secondary-accent) !important;
-    font-weight: 600;
-}
-
-.navbar .nav-link {
-    color: var(--text-secondary);
-}
-
-.navbar .nav-link:hover {
-    color: var(--secondary-accent);
 }
 
 code {

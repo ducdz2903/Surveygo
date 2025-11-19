@@ -58,19 +58,23 @@ body {
 }
 
 .nav-link {
-    color: rgba(255, 255, 255, 0.9) !important;
+    color: rgba(255, 255, 255, 0.85) !important;
     font-weight: 500;
     margin: 0 0.5rem;
-    transition: color 0.3s;
+    transition: color 0.3s ease, text-shadow 0.3s ease;
     font-size: 0.95rem;
+    position: relative;
 }
 
 .nav-link:hover {
-    color: var(--success-color) !important;
+    color: var(--navbar-hover) !important;
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
 }
 
 .nav-link.active {
     color: var(--accent-color) !important;
+    font-weight: 600;
+    text-shadow: 0 0 12px rgba(255, 229, 0, 0.4);
 }
 
 /* User Dropdown */
