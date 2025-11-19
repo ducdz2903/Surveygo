@@ -1,0 +1,168 @@
+/* Auth Section */
+.auth-section {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 120px 0 60px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Auth Card */
+.auth-card {
+    background: white;
+    border-radius: 25px;
+    padding: 2rem;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+    position: relative;
+    z-index: 1;
+}
+
+/* Auth Icon */
+.auth-icon {
+    width: 60px;
+    height: 60px;
+    background: var(--primary-gradient);
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.8rem;
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+}
+
+.auth-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 0.5rem;
+}
+
+.auth-subtitle {
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 0;
+}
+
+/* Form Styles */
+.form-label {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 0.4rem;
+    font-size: 0.85rem;
+}
+
+.form-label i {
+    color: var(--primary-color);
+}
+
+.form-control {
+    padding: 0.6rem 0.85rem;
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    transition: all 0.3s;
+}
+
+.form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.15);
+}
+
+/* Password Wrapper */
+.password-wrapper {
+    position: relative;
+}
+
+.password-wrapper .form-control {
+    padding-right: 3rem;
+}
+
+.password-toggle {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #999;
+    cursor: pointer;
+    transition: color 0.3s;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.password-toggle:hover {
+    color: var(--primary-color);
+}
+
+/* Form Check */
+.form-check-input {
+    width: 1.1rem;
+    height: 1.1rem;
+    border: 2px solid #e9ecef;
+    cursor: pointer;
+}
+
+.form-check-input:checked {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.form-check-label {
+    cursor: pointer;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+/* Radio Buttons */
+input[type="radio"] {
+    width: 1.1rem;
+    height: 1.1rem;
+    cursor: pointer;
+    accent-color: var(--primary-color);
+}
+
+/* Links */
+.signup-link,
+.terms-link {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.3s;
+}
+
+.signup-link:hover,
+.terms-link:hover {
+    color: var(--secondary-color);
+}
+
+/* Divider */
+.divider {
+    position: relative;
+    text-align: center;
+    margin: 1.5rem 0;
+}
+
+.divider::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: #e9ecef;
+}
+
+.divider span {
+    position: relative;
+    background: white;
+    padding: 0 1rem;
+    color: #999;
+    font-size: 0.9rem;
+}

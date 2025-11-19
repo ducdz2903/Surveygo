@@ -1,0 +1,286 @@
+:root {
+    --primary-gradient: linear-gradient(135deg, #10BCD3 0%, #0B99B8 100%);
+    --primary-color: #10BCD3;
+    --secondary-color: #0B99B8;
+
+    --accent-color: #F39C12;
+    /* Cam vàng - Eye-catching */
+    --secondary-accent: #06D6A0;
+    /* Xanh lá mint - Harmony tươi mới */
+    --accent-gradient: linear-gradient(45deg, #F39C12 0%, #E67E22 100%);
+    --secondary-accent-gradient: linear-gradient(45deg, #06D6A0 0%, #00BF96 100%);
+    /* GRADIENT MINT */
+
+    --card-bg: rgba(255, 255, 255, 0.95);
+    --card-border: rgba(16, 188, 211, 0.1);
+    --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+
+    --token-bg: rgba(31, 42, 68, 0.03);
+    --token-border: rgba(31, 42, 68, 0.1);
+
+    /* Biến accent cũ (màu xanh) - Giữ lại nếu vẫn đang dùng ở đâu đó */
+    --accent: #5DADE2;
+    --accent-soft: rgba(93, 173, 226, 0.06);
+
+    /* === Bảng màu trung tính (Xám Lạnh) === */
+    --text-primary: #1e293b;
+    /* Xanh đen (Văn bản chính) */
+    --text-secondary: #64748b;
+    /* Xám (Văn bản phụ) */
+    --border-color: #e2e8f0;
+    /* Viền */
+    --background-light: #f8fafc;
+    /* Nền nhạt */
+
+    /* === Màu ngữ nghĩa === */
+    --success-color: #06D6A0;
+    /* Xanh lá mint */
+    --error-color: #E74C3C;
+    /* Đỏ */
+    --warning-color: #F39C12;
+    /* Cam vàng */
+
+    --primary-color-soft: rgba(16, 188, 211, 0.1);
+    --success-color-soft: rgba(6, 214, 160, 0.1);
+    --accent-color-soft: rgba(243, 156, 18, 0.1);
+    --error-color-soft: rgba(231, 76, 60, 0.1);
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    color: var(--text-primary);
+    background-color: #fff;
+}
+
+.text-gradient {
+    /* Điều chỉnh gradient để bao gồm màu hồng */
+    background: linear-gradient(120deg, var(--primary-color) 0%, var(--secondary-accent) 50%, var(--accent-color) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.glass-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 18px;
+    box-shadow: var(--card-shadow);
+    padding: 2rem;
+}
+
+.feature-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    box-shadow: var(--card-shadow);
+}
+
+.feature-card .card-body {
+    padding: 2rem;
+}
+
+.page-content {
+    margin-top: 1rem;
+}
+
+.page .card {
+    border-radius: 18px;
+    border: 1px solid var(--card-border);
+    box-shadow: var(--card-shadow);
+}
+
+.token-field {
+    min-height: 130px;
+    font-family: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', 'Courier New', monospace;
+    font-size: 0.9rem;
+    background: var(--token-bg);
+    border: 1px solid var(--token-border);
+    color: var(--text-primary);
+}
+
+.token-output {
+    min-height: 160px;
+    background: var(--token-bg);
+    border: 1px solid var(--token-border);
+    border-radius: 16px;
+    padding: 1.25rem;
+    font-family: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', 'Courier New', monospace;
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    overflow-x: auto;
+}
+
+.form-feedback {
+    font-size: 0.95rem;
+}
+
+.form-feedback.success {
+    color: var(--success-color);
+}
+
+.form-feedback.error {
+    color: var(--error-color);
+}
+
+.bg-body-light {
+    background: var(--background-light) !important;
+}
+
+.navbar .nav-link.active {
+    color: var(--secondary-accent) !important;
+    font-weight: 600;
+}
+
+.navbar .nav-link {
+    color: var(--text-secondary);
+}
+
+.navbar .nav-link:hover {
+    color: var(--secondary-accent);
+}
+
+code {
+    padding: 2px 6px;
+    border-radius: 6px;
+    background: rgba(15, 23, 55, 0.07);
+    color: var(--text-primary);
+    font-size: 0.9em;
+}
+
+@media (max-width: 767px) {
+    .glass-card {
+        padding: 1.5rem;
+    }
+
+    .feature-card .card-body {
+        padding: 1.5rem;
+    }
+}
+
+
+.btn{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* nút primary */
+.btn-primary-gradient {
+    background: var(--primary-gradient);
+    color: white;
+    padding: 0.65rem 1.5rem;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: transform 0.3s, box-shadow 0.3s;
+    border: none;
+}
+
+.btn-primary-gradient:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+    color: white;
+}
+
+.btn-outline-primary {
+    background: transparent;
+    color: var(--primary-color);
+    border: 2px solid var(--primary-color);
+    padding: 0.45rem 1.2rem;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.3s;
+    text-align: center;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.btn-outline-primary:hover {
+    background: var(--primary-gradient);
+    color: white;
+    border-color: transparent;
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.5);
+}
+
+/* nút accent */
+.btn-accent {
+    background: var(--accent-gradient);
+    color: white;
+    padding: 0.65rem 1.5rem;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: transform 0.3s, box-shadow 0.3s;
+    border: none;
+}
+
+.btn-accent:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(255, 179, 71, 0.4);
+    color: white;
+}
+
+.btn-outline-accent {
+    background: transparent;
+    color: var(--accent-color);
+    border: 2px solid var(--accent-color);
+    padding: 0.45rem 1.2rem;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.3s;
+    text-align: center;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.btn-outline-accent:hover {
+    background: var(--accent-gradient);
+    color: white;
+    border-color: transparent;
+    box-shadow: 0 5px 15px rgba(255, 179, 71, 0.5);
+}
+
+
+/* nút secondary accent */
+.btn-secondary-accent {
+    background: var(--secondary-accent-gradient);
+    color: white;
+    padding: 0.65rem 1.5rem;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: transform 0.3s, box-shadow 0.3s;
+    border: none;
+}
+
+.btn-secondary-accent:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(236, 72, 153, 0.4);
+    color: white;
+}
+
+.btn-outline-secondary-accent {
+    background: transparent;
+    color: var(--secondary-accent);
+    border: 2px solid var(--secondary-accent);
+    padding: 0.45rem 1.2rem;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.3s;
+    text-align: center;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.btn-outline-secondary-accent:hover {
+    background: var(--secondary-accent-gradient);
+    color: white;
+    border-color: transparent;
+    box-shadow: 0 5px 15px rgba(236, 72, 153, 0.5);
+}

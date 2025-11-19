@@ -1,0 +1,319 @@
+.page--home {
+    margin-top: 5rem;
+}
+
+.welcome-section {
+    padding: 3rem 0 2rem;
+    margin-top: 2rem;
+}
+
+.welcome-title {
+    font-size: 2.5rem;
+    color: #333;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.welcome-text {
+    font-size: 1.1rem;
+    color: #666;
+}
+
+.welcome-text strong {
+    color: #10BCD3;
+}
+
+.points-card {
+    background: var(--primary-gradient);
+    padding: 1.5rem 2rem;
+    border-radius: 15px;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: 0 10px 30px rgba(16, 188, 211, 0.3);
+}
+
+.points-icon {
+    width: 50px;
+    height: 50px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+
+.points-label {
+    opacity: 0.8;
+}
+
+.points-value {
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+/* ========== SURVEYS SECTION ========== */
+.surveys-section {
+    padding: 3rem 0;
+    background: white;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.section-title {
+    font-size: 2rem;
+    color: #333;
+    font-weight: 700;
+    margin: 0;
+}
+
+.view-all {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.3s;
+}
+
+.view-all:hover {
+    color: var(--secondary-color);
+}
+
+.survey-card {
+    background: white;
+    border: 2px solid #e9ecef;
+    border-radius: 15px;
+    padding: 1.5rem;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    transition: all 0.3s;
+}
+
+.survey-card:hover {
+    border-color: var(--primary-color);
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.15);
+    transform: translateY(-5px);
+}
+
+.survey-badge {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: var(--secondary-accent-gradient);
+    color: white;
+    padding: 0.3rem 0.8rem;
+    border-radius: 15px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.survey-badge.badge-hot {
+    background: var(--accent-gradient);
+}
+
+.survey-header {
+    margin-bottom: 1rem;
+}
+
+.survey-title {
+    font-size: 1.2rem;
+    color: #333;
+    font-weight: 600;
+    margin-bottom: 0.8rem;
+}
+
+.survey-meta {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.85rem;
+    color: #666;
+}
+
+.survey-desc {
+    font-size: 0.8rem;
+    opacity: 0.8;
+}
+
+.activity-section {
+    padding: 3rem 0;
+}
+
+.activity-list {
+    background: white;
+    border-radius: 15px;
+    padding: 1.5rem;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+}
+
+.activity-item {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1.5rem;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.activity-item:last-child {
+    border-bottom: none;
+}
+
+.activity-item:hover {
+    background: #f8f9fa;
+    border-radius: 15px;
+}
+
+.activity-icon {
+    width: 45px;
+    height: 45px;
+    background: rgba(16, 188, 211, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #10BCD3;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+.activity-icon-success {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+}
+
+.activity-icon-warning {
+    background: rgba(245, 158, 11, 0.1);
+    color: #f59e0b;
+}
+
+.activity-content {
+    flex-grow: 1;
+}
+
+.activity-content h4 {
+    font-size: 1rem;
+    color: #333;
+    font-weight: 600;
+    margin-bottom: 0.3rem;
+}
+
+.activity-content p {
+    font-size: 0.8rem;
+    opacity: 0.8;
+    margin: 0;
+}
+
+.activity-time {
+    font-size: 0.85rem;
+    color: #999;
+    flex-shrink: 0;
+}
+
+/* ========== BUTTONS ========== */
+.btn-gradient {
+    background: var(--primary-gradient);
+    color: white;
+    padding: 0.65rem 1.5rem;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.btn-gradient:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(16, 188, 211, 0.4);
+    color: white;
+}
+
+
+.welcome-section {
+    padding: 3rem 0 2.5rem;
+}
+
+.action-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.25rem;
+    background: #fff;
+    border: 2px solid var(--border-color);
+    border-radius: 15px;
+    text-decoration: none;
+    transition: all 0.3s;
+    height: 100%;
+}
+
+.action-card:hover {
+    border-color: var(--primary-color);
+    box-shadow: 0 10px 30px rgba(16, 188, 211, 0.15);
+    transform: translateY(-5px);
+}
+
+.action-icon {
+    background: var(--icon-bg, #f0f0f0);
+    color: var(--icon-color, #333);
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.action-content {
+    flex-grow: 1;
+}
+
+.action-content h5 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+}
+
+.action-content p {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 0;
+}
+
+.action-arrow {
+    color: var(--border-color);
+    font-size: 0.9rem;
+    transition: color 0.3s;
+}
+
+.action-card:hover .action-arrow {
+    color: var(--primary-color);
+}
+
+.chart-card {
+    background: #fff;
+    border: 2px solid var(--border-color);
+    border-radius: 15px;
+    padding: 1.5rem;
+    height: 100%;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.03);
+}
+
+.chart-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 1.5rem;
+}
+
+
+.surveys-section {
+    background: white;
+}

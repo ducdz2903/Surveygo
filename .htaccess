@@ -1,0 +1,9 @@
+RewriteEngine On
+
+# Nếu file hoặc folder tồn tại thì không rewrite
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Còn lại thì đẩy vào /public/index.php
+RewriteRule ^ public/index.php [L]

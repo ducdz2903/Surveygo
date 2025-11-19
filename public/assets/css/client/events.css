@@ -1,0 +1,310 @@
+/* Tận dụng biến từ app.css */
+:root {
+    --hub-background: var(--background-light, #f8fafc);
+    --hub-card-bg: white;
+    --hub-card-border: var(--card-border, #e2e8f0);
+    --hub-card-shadow: var(--card-shadow, 0 4px 20px rgba(0, 0, 0, 0.08));
+    --hub-text-primary: var(--text-primary, #1e293b);
+    --hub-text-secondary: var(--text-secondary, #64748b);
+}
+
+body.page-mission-hub {
+    background-color: var(--hub-background);
+}
+
+.page-content {
+    padding: 2.5rem 0;
+    margin-top: 1rem;
+}
+
+/* 3. Card Nhiệm vụ hàng ngày (Giữ nguyên) */
+.daily-mission-card {
+    display: flex;
+    align-items: center;
+    background: var(--primary-gradient);
+    color: white;
+    padding: 2rem;
+    border-radius: 16px;
+    margin-top: 2rem;
+    transition: all 0.3s ease;
+}
+
+.daily-mission-card:hover {
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+    transform: translateY(-5px);
+}
+
+.mission-icon {
+    font-size: 2.5rem;
+    margin-right: 1.5rem;
+    line-height: 1;
+}
+
+.mission-content {
+    flex-grow: 1;
+}
+
+.mission-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.mission-desc {
+    font-size: 1rem;
+    margin: 0;
+    opacity: 0.9;
+}
+
+.mission-action .btn {
+    min-width: 200px;
+    font-weight: 700;
+}
+
+/* Trạng thái đã điểm danh (Giữ nguyên) */
+.daily-mission-card.checked-in {
+    background: linear-gradient(135deg, #bdc3c7 0%, #2c3e50 100%);
+    box-shadow: none;
+}
+
+.daily-mission-card.checked-in:hover {
+    transform: none;
+}
+
+.daily-mission-card.checked-in .mission-icon {
+    color: #10b981;
+}
+
+.daily-mission-card.checked-in .btn {
+    background-color: #f0f0f0;
+    color: #777;
+    cursor: not-allowed;
+}
+
+
+/* 4. Nội dung chính (2 cột) */
+.section-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--hub-text-primary);
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid var(--hub-card-border);
+}
+
+/* === THAY ĐỔI: TẠO VÙNG (ZONING) === */
+
+/* 4.0. Biến các cột thành "Vùng" (Zone) */
+.feed-column,
+.sidebar-column {
+    background: var(--hub-card-bg, white);
+    border: 1px solid var(--hub-card-border, #e2e8f0);
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: var(--hub-card-shadow, 0 4px 20px rgba(0, 0, 0, 0.08));
+}
+
+.sidebar-column {
+    position: sticky;
+    top: 2rem;
+}
+
+/* 4.1. Cột Feed (Trái) - Đơn giản hóa card bên trong */
+.event-card-feed {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    border-radius: 0;
+    /* padding: 0; -> Đã có padding ở .event-card-content */
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--hub-card-border, #e2e8f0);
+    display: flex;
+}
+
+.event-card-feed:last-of-type {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.event-card-feed:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+/* Các style này giữ nguyên để bố cục card con */
+.event-card-img {
+    width: 200px;
+    flex-shrink: 0;
+    background-size: cover;
+    background-position: center;
+    border-radius: 8px;
+}
+
+.event-card-content {
+    padding: 0 0 0 1.5rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.event-date {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+}
+
+.event-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--hub-text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.event-desc {
+    font-size: 0.95rem;
+    color: var(--hub-text-secondary);
+    margin-bottom: 1rem;
+    flex-grow: 1;
+}
+
+.event-join-btn {
+    align-self: flex-start;
+}
+
+/* Danh sách người thắng - Đơn giản hóa item */
+.winner-list .winner-item {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    border-radius: 0;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--hub-card-border, #e2e8f0);
+    margin-bottom: 0;
+    display: flex;
+    align-items: center;
+    transition: all 0.2s ease;
+}
+
+.winner-list .winner-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.winner-list .winner-item:hover {
+    background-color: transparent;
+    border-color: transparent;
+}
+
+/* Style cho winner-item con (giữ nguyên) */
+.winner-icon {
+    font-size: 1.5rem;
+    color: var(--accent-color);
+    margin-right: 1rem;
+}
+
+.winner-info {
+    flex-grow: 1;
+}
+
+.winner-title {
+    display: block;
+    font-weight: 600;
+    color: var(--hub-text-primary);
+}
+
+.winner-date {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--hub-text-secondary);
+}
+
+
+/* 4.2. Cột Sidebar (Phải) - Đơn giản hóa card bên trong */
+.sidebar-card {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    border-radius: 0;
+    padding: 1.5rem 0;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid var(--hub-card-border, #e2e8f0);
+    text-align: center;
+}
+
+.sidebar-card:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+/* Style cho sidebar-card con (giữ nguyên) */
+.sidebar-card .card-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+}
+
+.sidebar-card .card-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--hub-text-primary);
+}
+
+.sidebar-card .card-desc {
+    font-size: 0.95rem;
+    color: var(--hub-text-secondary);
+    margin-bottom: 1.5rem;
+}
+
+/* --- Responsive --- */
+@media (max-width: 991px) {
+    .event-card-img {
+        width: 150px;
+    }
+}
+
+@media (max-width: 767px) {
+    .page-content {
+        padding: 1.5rem 0;
+    }
+
+    .daily-mission-card {
+        flex-direction: column;
+        text-align: center;
+        padding: 1.5rem;
+    }
+
+    .mission-icon {
+        margin-right: 0;
+        margin-bottom: 1rem;
+    }
+
+    .mission-action {
+        margin-top: 1.5rem;
+    }
+
+    /* THAY ĐỔI: Cập nhật responsive cho card feed */
+    .event-card-feed {
+        flex-direction: column;
+    }
+
+    .event-card-img {
+        width: 100%;
+        height: 180px;
+    }
+
+    .event-card-content {
+        padding: 1.5rem 0 0 0;
+    }
+
+    .winner-item {
+        flex-direction: column;
+        text-align: center;
+        gap: 0.75rem;
+    }
+
+    .winner-info {
+        flex-grow: 0;
+    }
+}

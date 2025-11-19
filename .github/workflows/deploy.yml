@@ -1,0 +1,45 @@
+name: Deploy Surveyon via FTP
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-surveyon
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: FTP Deploy
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          port: ${{ secrets.FTP_PORT }}
+          protocol: ftp
+
+          local-dir: ./
+          server-dir: ${{ secrets.FTP_REMOTE_PATH }}/
+
+          dangerous-clean-slate: false
+
+          exclude: |
+            **/.git*
+            **/.github/**
+            **/node_modules/**
+            **/vendor/**
+            **/tests/**
+            **/README.md
+            **/.env
+
+            # GIỮ NGUYÊN config TRÊN SERVER
+            config/**
+            **/config/**

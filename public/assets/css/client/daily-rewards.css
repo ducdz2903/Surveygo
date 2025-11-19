@@ -1,0 +1,268 @@
+/* ====== CHUNG ====== */
+.page--daily-rewards {
+  background: linear-gradient(135deg, #f5f7fa 0%, #f0f0f8 100%);
+  min-height: 100vh;
+}
+
+.page-content {
+  padding: 2rem 0;
+  min-height: calc(100vh - 80px - 100px);
+  margin-top: 3rem;
+}
+
+.daily-reward-section {
+  padding: 2rem 0;
+  text-align: center;
+}
+
+/* ====== HEADER ====== */
+.reward-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.reward-title {
+  font-size: 2.8rem;
+  font-weight: 700;
+  background: var(--primary-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 0.5rem;
+}
+
+.reward-subtitle {
+  font-size: 1.15rem;
+  color: #555;
+}
+
+/* ====== BOX CHÍNH ====== */
+.reward-box {
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(2, 6, 23, 0.07);
+  padding: 2.5rem 2rem;
+  margin-top: 20px;
+}
+
+/* ====== LƯỚI PHẦN THƯỞNG (ĐÃ CẬP NHẬT) ====== */
+.reward-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 0.75rem;
+  margin-bottom: 2.5rem;
+}
+
+/* Tablet: 5 cột */
+@media (max-width: 1024px) {
+  .reward-grid {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+
+/* Mobile lớn: 4 cột */
+@media (max-width: 768px) {
+  .reward-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Mobile nhỏ: 3 cột */
+@media (max-width: 576px) {
+  .reward-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* ====== THẺ PHẦN THƯỞNG (ĐÃ CẬP NHẬT) ====== */
+.reward-card {
+  position: relative;
+  background: #f8f9fc;
+  border-radius: 12px;
+  padding: 1rem 0.5rem;
+  text-align: center;
+  border: 2px solid #e9ecef;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 110px;
+
+  opacity: 0.7;
+  filter: grayscale(80%);
+}
+
+.reward-card .icon {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+  color: #aebecd;
+  transition: all 0.3s ease;
+}
+
+.reward-card .day {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #555;
+  margin-bottom: 0.25rem;
+}
+
+.reward-card .points {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #777;
+}
+
+/* ====== 1. THẺ ĐẶC BIỆT (MILESTONE) ====== */
+.reward-card.milestone {
+  background: linear-gradient(135deg, #fffbe6 0%, #fff6cf 100%);
+  border-color: #fde68a;
+  filter: grayscale(30%);
+  opacity: 0.9;
+}
+
+.reward-card.milestone .icon {
+  color: #f7b731;
+  transform: scale(1.1);
+}
+
+/* ====== 2. THẺ "HÔM NAY" (TODAY) ====== */
+.reward-card.today {
+  opacity: 1;
+  filter: none;
+  transform: scale(1.05);
+  border: 2px solid var(--primary-color, #667eea);
+  box-shadow: 0 0 20px rgba(102, 126, 234, 0.4);
+  background: #fff;
+  animation: pulse-border 1.5s infinite;
+}
+
+.reward-card.today .icon {
+  color: var(--primary-color, #667eea);
+  transform: scale(1.1);
+}
+
+.reward-card.today.milestone {
+  background: linear-gradient(135deg, #fffbe6 0%, #fff6cf 100%);
+  border-color: #f7b731;
+  box-shadow: 0 0 25px rgba(247, 183, 49, 0.6);
+  animation: pulse-gold 1.5s infinite;
+}
+
+.reward-card.today.milestone .icon {
+  color: #f7b731;
+}
+
+/* ====== 3. THẺ "ĐÃ NHẬN" (CLAIMED) ====== */
+.reward-card.claimed {
+  opacity: 1;
+  filter: none;
+  background: var(--primary-gradient, linear-gradient(135deg, #667eea 0%, #764ba2 100%));
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+}
+
+.reward-card.claimed .icon {
+  color: white;
+  font-size: 1.6rem;
+}
+
+.reward-card.claimed .day,
+.reward-card.claimed .points {
+  color: white;
+}
+
+
+/* ====== NÚT BẤM & TRẠNG THÁI ====== */
+.claim-container {
+  text-align: center;
+  margin-top: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-gradient {
+  background: linear-gradient(135deg, #10BCD3 0%, #0B99B8 100%);
+  color: #fff;
+  padding: 0.75rem 2.5rem;
+  border-radius: 50px;
+  font-weight: 700;
+  font-size: 1.1rem;
+  border: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 8px 20px rgba(16, 188, 211, 0.3);
+}
+
+.btn-gradient:hover:not(:disabled) {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 32px rgba(16, 188, 211, 0.4);
+}
+
+.btn-gradient:disabled {
+  background: #adb5bd;
+  box-shadow: none;
+  opacity: 0.7;
+}
+
+.claim-status {
+  min-height: 50px;
+}
+
+/* ====== HỘP GHI CHÚ ====== */
+.note-box {
+  text-align: left;
+  background: #fff;
+  border-radius: 12px;
+  padding: 1.5rem 1.75rem;
+  margin-top: 25px;
+  border: 1px solid #e9ecef;
+  box-shadow: 0 6px 30px rgba(2, 6, 23, 0.04);
+}
+
+.note-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--primary-color, #667eea);
+  margin-bottom: 1rem;
+}
+
+.note-list {
+  padding-left: 20px;
+  margin-bottom: 0;
+  color: #444;
+}
+
+.note-list li {
+  margin-bottom: 0.5rem;
+}
+
+/* ====== ANIMATIONS ====== */
+@keyframes pulse-border {
+  0% {
+    box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.5);
+  }
+
+  70% {
+    box-shadow: 0 0 0 10px rgba(102, 126, 234, 0);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(102, 126, 234, 0);
+  }
+}
+
+@keyframes pulse-border {
+  0% {
+    box-shadow: 0 0 0 0 rgba(16, 188, 211, 0.5);
+  }
+
+  70% {
+    box-shadow: 0 0 0 10px rgba(16, 188, 211, 0);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(16, 188, 211, 0);
+  }
+}
