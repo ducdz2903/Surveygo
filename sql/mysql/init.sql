@@ -51,6 +51,7 @@ CREATE TABLE IF NOT EXISTS questions (
   noiDungCauHoi TEXT NOT NULL,
   batBuocTraLoi BOOLEAN NOT NULL DEFAULT FALSE,
   thuTu INT DEFAULT 0,
+  maNguoiTao INT UNSIGNED NOT NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   quick_poll BOOLEAN NOT NULL DEFAULT FALSE,
@@ -75,8 +76,8 @@ INSERT IGNORE INTO surveys (
   (2, 'KS002', 'Khảo sát về sức khỏe cộng đồng', 'Khảo sát nhằm đánh giá tình trạng sức khỏe cộng đồng.', 'Sức khỏe', 2, 'draft', 15, 2, NULL, 'pending', '2024-02-01 00:00:00', '2024-02-28 23:59:59', NOW(), NOW());
 
 -- Seed data for questions (fields match schema)
-INSERT IGNORE INTO questions (id, maCauHoi, maKhaoSat, loaiCauHoi, noiDungCauHoi, batBuocTraLoi, thuTu, quick_poll, created_at, updated_at) VALUES
-  (1, 'CH001', 1, 'multiple_choice', 'Bạn thường đọc sách vào thời gian nào trong ngày?', TRUE, 1, FALSE, NOW(), NOW()),
-  (2, 'CH002', 1, 'single_choice', 'Bạn thích thể loại sách nào nhất?', TRUE, 2, FALSE, NOW(), NOW()),
-  (3, 'CH003', 2, 'text', 'Bạn có thường xuyên kiểm tra sức khỏe không?', FALSE, 1, FALSE, NOW(), NOW()),
-  (4, 'CH004', 2, 'multiple_choice', 'Bạn có thói quen tập thể dục hàng ngày không?', TRUE, 2, FALSE, NOW(), NOW());
+INSERT IGNORE INTO questions (id, maCauHoi, maKhaoSat, loaiCauHoi, noiDungCauHoi, batBuocTraLoi, thuTu, maNguoiTao, quick_poll, created_at, updated_at) VALUES
+  (1, 'CH001', 1, 'multiple_choice', 'Bạn thường đọc sách vào thời gian nào trong ngày?', TRUE, 1, 1, FALSE, NOW(), NOW()),
+  (2, 'CH002', 1, 'single_choice', 'Bạn thích thể loại sách nào nhất?', TRUE, 2, 2, FALSE, NOW(), NOW()),
+  (3, 'CH003', 2, 'text', 'Bạn có thường xuyên kiểm tra sức khỏe không?', FALSE, 1, 1, FALSE, NOW(), NOW()),
+  (4, 'CH004', 2, 'multiple_choice', 'Bạn có thói quen tập thể dục hàng ngày không?', TRUE, 2, 2, FALSE, NOW(), NOW());
