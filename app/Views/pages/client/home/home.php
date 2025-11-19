@@ -250,7 +250,7 @@ $url = static fn($urls_array, $key, $default) => $urls_array[$key] ?? $default;
                                 </div>
                             </div>
                             <p class="survey-desc">${survey.moTa || 'Tham gia khảo sát này để kiếm điểm.'}</p>
-                            <a href="/api/surveys/show?id=${survey.id}" class="btn btn-gradient mt-auto w-100">Bắt đầu ngay</a>
+                            <a href="/surveys/guide?id=${survey.id}" class="btn btn-gradient mt-auto w-100">Bắt đầu ngay</a>
                         </div>
                     </div>
                 `;

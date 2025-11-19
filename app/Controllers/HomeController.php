@@ -70,6 +70,16 @@ class HomeController extends Controller
         return $this->view('pages/client/surveys/quick-poll', $this->pageData($request));
     }
 
+    public function surveyGuide(Request $request)
+    {
+        return $this->view('pages/client/surveys/guide', $this->pageData($request));
+    }
+
+    public function surveyQuestions(Request $request)
+    {
+        return $this->view('pages/client/surveys/questions', $this->pageData($request));
+    }
+
     private function pageData(Request $request): array
     {
         $config = Container::get('config');

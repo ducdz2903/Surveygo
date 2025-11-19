@@ -148,7 +148,7 @@ $urls['register'] = $urls['register'] ?? $__mk($__base, '/register');
                                 </div>
                             </div>
                             <p class="survey-desc">${survey.moTa || 'Tham gia khảo sát này để kiếm điểm.'}</p>
-                            <a href="/api/surveys/show?id=${survey.id}" class="btn btn-gradient mt-auto w-100">
+                            <a href="/surveys/guide?id=${survey.id}" class="btn btn-gradient mt-auto w-100">
                                 <i class="fas fa-play me-1"></i>Bắt đầu
                             </a>
                         </div>

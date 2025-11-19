@@ -20,6 +20,8 @@ $router->post('/api/login', [App\Controllers\AuthController::class, 'login']);
 $router->get('/', [HomeController::class, 'home']);
 $router->get('/home', [HomeController::class, 'homeAfterLogin']);
 $router->get('/surveys', [HomeController::class, 'surveys']);
+$router->get('/surveys/guide', [HomeController::class, 'surveyGuide']);
+$router->get('/surveys/{id}/questions', [HomeController::class, 'surveyQuestions']);
 $router->get('/quick-poll', [HomeController::class, 'quickPoll']);
 $router->get('/daily-rewards', [HomeController::class, 'dailyRewards']);
 $router->get('/events', [HomeController::class, 'events']);

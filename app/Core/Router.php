@@ -57,7 +57,13 @@ class Router
         $method = $request->method();
         $path = $request->uri();
 
+        // First try exact match
         $route = $this->routes[$method][$path] ?? null;
+
+        if (!$route) {
+            // Try pattern matching for dynamic routes
+            $route = $this->matchDynamicRoute($method, $path);
+        }
 
         if (!$route) {
             return Response::json([
@@ -67,16 +73,51 @@ class Router
         }
 
         $handler = $route['handler'];
-        $callable = $this->resolveHandler($handler);
+        $callable = $this->resolveHandler($handler, $route['params'] ?? []);
         return $callable($request);
     }
 
-    private function resolveHandler($handler): callable
+    private function matchDynamicRoute(string $method, string $path): ?array
+    {
+        $routes = $this->routes[$method] ?? [];
+
+        foreach ($routes as $pattern => $route) {
+            // Convert pattern like /surveys/{id}/questions to regex
+            $regexPattern = preg_replace(
+                '/\{([a-zA-Z_][a-zA-Z0-9_]*)\}/',
+                '(?P<$1>[^/]+)',
+                $pattern
+            );
+            $regexPattern = '#^' . $regexPattern . '$#';
+
+            if (preg_match($regexPattern, $path, $matches)) {
+                // Filter out numeric keys from matches (keep only named groups)
+                $params = [];
+                foreach ($matches as $key => $value) {
+                    if (!is_numeric($key)) {
+                        $params[$key] = $value;
+                    }
+                }
+                return [
+                    'handler' => $route['handler'],
+                    'params' => $params,
+                ];
+            }
+        }
+
+        return null;
+    }
+
+    private function resolveHandler($handler, array $params = []): callable
     {
         if (is_array($handler) && count($handler) === 2) {
             [$class, $method] = $handler;
             $instance = $this->resolveController($class);
-            return function (Request $request) use ($instance, $method) {
+            return function (Request $request) use ($instance, $method, $params) {
+                // Inject params into request attributes
+                foreach ($params as $key => $value) {
+                    $request->setAttribute($key, $value);
+                }
                 return $instance->$method($request);
             };
         }
