@@ -139,20 +139,22 @@ $urls['register'] = $urls['register'] ?? $__mk($__base, '/register');
             `;
         }
 
-        function renderQuestion(index) {
+        async function renderQuestion(index) {
             currentQuestion = index;
             const question = surveyData.questions[index];
 
             if (!question) return;
 
             const container = document.getElementById('questions-container');
+            const optionsHTML = await renderOptions(question);
+
             container.innerHTML = `
                 <div class="question-card">
                     <div class="question-number">Câu hỏi ${index + 1}</div>
                     <div class="question-text">${escapeHtml(question.noiDungCauHoi)}</div>
                     
                     <div id="options-container" class="options-container mt-4">
-                        ${renderOptions(question)}
+                        ${optionsHTML}
                     </div>
                 </div>
             `;
@@ -165,7 +167,7 @@ $urls['register'] = $urls['register'] ?? $__mk($__base, '/register');
             updateButtonStates();
         }
 
-        function renderOptions(question) {
+        async function renderOptions(question) {
             const loaiCauHoi = question.loaiCauHoi;
             const questionId = question.id;
 
@@ -183,30 +185,24 @@ $urls['register'] = $urls['register'] ?? $__mk($__base, '/register');
                 `;
             }
 
-            // Nếu là choice, render radio/checkbox
-            const inputType = loaiCauHoi === 'single_choice' ? 'radio' : 'checkbox';
+            // Nếu là choice, render radio (chỉ cho phép chọn 1 đáp án)
+            const inputType = 'radio';
 
-            // Lấy answers từ API (nếu có) hoặc mock data
+            // Lấy answers từ API
             let questionAnswers = [];
             if (question.answers && question.answers.length > 0) {
                 questionAnswers = question.answers;
             } else {
-                // Mock data tạm thời
-                const mockAnswers = {
-                    'CH001': [
-                        { id: 1, noiDungCauTraLoi: 'Buổi sáng' },
-                        { id: 2, noiDungCauTraLoi: 'Buổi chiều' },
-                        { id: 3, noiDungCauTraLoi: 'Buổi tối' },
-                        { id: 4, noiDungCauTraLoi: 'Trước khi ngủ' }
-                    ],
-                    'CH002': [
-                        { id: 5, noiDungCauTraLoi: 'Tiểu thuyết' },
-                        { id: 6, noiDungCauTraLoi: 'Tự truyện' },
-                        { id: 7, noiDungCauTraLoi: 'Sách khoa học' },
-                        { id: 8, noiDungCauTraLoi: 'Sách triết học' }
-                    ]
-                };
-                questionAnswers = mockAnswers[question.maCauHoi] || [];
+                // Gọi API để lấy answers
+                try {
+                    const answersResponse = await fetch(`/api/questions/${question.id}/answers`);
+                    const answersResult = await answersResponse.json();
+                    if (!answersResult.error && answersResult.data) {
+                        questionAnswers = answersResult.data;
+                    }
+                } catch (error) {
+                    console.error('Lỗi tải answers:', error);
+                }
             }
 
             let html = '';
@@ -214,9 +210,7 @@ $urls['register'] = $urls['register'] ?? $__mk($__base, '/register');
                 questionAnswers.forEach((answer) => {
                     const answerId = answer.id;
                     const answerText = answer.noiDungCauTraLoi || answer.noiDungDapAn;
-                    const isChecked = loaiCauHoi === 'single_choice'
-                        ? answers[questionId] === answerId
-                        : (Array.isArray(answers[questionId]) && answers[questionId].includes(answerId));
+                    const isChecked = answers[questionId] === answerId;
 
                     html += `
                         <div class="option-item">
@@ -237,8 +231,10 @@ $urls['register'] = $urls['register'] ?? $__mk($__base, '/register');
             }
 
             return html;
-        } function setupEventListeners() {
-            document.getElementById('btn-next').addEventListener('click', function (e) {
+        }
+
+        function setupEventListeners() {
+            document.getElementById('btn-next').addEventListener('click', async function (e) {
                 e.preventDefault();
 
                 // Save current answer
@@ -246,11 +242,11 @@ $urls['register'] = $urls['register'] ?? $__mk($__base, '/register');
 
                 // Move to next
                 if (currentQuestion < surveyData.questions.length - 1) {
-                    renderQuestion(currentQuestion + 1);
+                    await renderQuestion(currentQuestion + 1);
                 }
             });
 
-            document.getElementById('btn-prev').addEventListener('click', function (e) {
+            document.getElementById('btn-prev').addEventListener('click', async function (e) {
                 e.preventDefault();
 
                 // Save current answer
@@ -258,7 +254,7 @@ $urls['register'] = $urls['register'] ?? $__mk($__base, '/register');
 
                 // Move to previous
                 if (currentQuestion > 0) {
-                    renderQuestion(currentQuestion - 1);
+                    await renderQuestion(currentQuestion - 1);
                 }
             });
 
@@ -277,14 +273,10 @@ $urls['register'] = $urls['register'] ?? $__mk($__base, '/register');
                 // Lưu text từ textarea
                 const textarea = document.querySelector(`textarea[name="${inputName}"]`);
                 answers[question.id] = textarea ? textarea.value : null;
-            } else if (loaiCauHoi === 'single_choice') {
-                // Lưu ID của answer được chọn
+            } else {
+                // Tất cả choice (single_choice, multiple_choice) đều là radio nên lưu single value
                 const checked = document.querySelector(`input[name="${inputName}"]:checked`);
                 answers[question.id] = checked ? checked.value : null;
-            } else if (loaiCauHoi === 'multiple_choice') {
-                // Lưu mảng ID của các answers được chọn
-                const checked = document.querySelectorAll(`input[name="${inputName}"]:checked`);
-                answers[question.id] = Array.from(checked).map(c => c.value);
             }
         }
 

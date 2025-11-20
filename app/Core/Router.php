@@ -85,7 +85,7 @@ class Router
             // Convert pattern like /surveys/{id}/questions to regex
             $regexPattern = preg_replace(
                 '/\{([a-zA-Z_][a-zA-Z0-9_]*)\}/',
-                '(?P<$1>[^/]+)',
+                '(?P<$1>[0-9]+)',
                 $pattern
             );
             $regexPattern = '#^' . $regexPattern . '$#';

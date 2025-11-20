@@ -186,6 +186,28 @@ class Question
     }
 
     /**
+     * Lấy danh sách đáp án cho câu hỏi này
+     */
+    public function getAnswers(): array
+    {
+        /** @var PDO $db */
+        $db = Container::get('db');
+
+        $statement = $db->prepare('SELECT * FROM answers WHERE maCauHoi = :questionId ORDER BY id ASC');
+        $statement->execute([':questionId' => $this->id]);
+        $rows = $statement->fetchAll();
+
+        return array_map(fn($row) => [
+            'id' => (int)$row['id'],
+            'maCauHoi' => (int)$row['maCauHoi'],
+            'noiDungCauTraLoi' => $row['noiDungCauTraLoi'],
+            'laDung' => (bool)$row['laDung'],
+            'created_at' => $row['created_at'],
+            'updated_at' => $row['updated_at'],
+        ], $rows);
+    }
+
+    /**
      * Chuyển đổi thành array
      */
     public function toArray(): array

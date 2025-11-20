@@ -79,6 +79,38 @@ class QuestionController extends Controller
     }
 
     /**
+     * Lấy danh sách đáp án của một câu hỏi
+     * GET /api/questions/{id}/answers
+     */
+    public function getAnswersForQuestion(Request $request)
+    {
+        // Lấy {id} từ URL params
+        $id = $request->getAttribute('id') ?? $request->query('id') ?? $request->input('id');
+
+        if (!$id || !is_numeric($id)) {
+            return $this->json([
+                'error' => true,
+                'message' => 'ID câu hỏi không hợp lệ.',
+            ], 422);
+        }
+
+        $question = Question::find((int)$id);
+        if (!$question) {
+            return $this->json([
+                'error' => true,
+                'message' => 'Câu hỏi không tồn tại.',
+            ], 404);
+        }
+
+        $answers = $question->getAnswers();
+
+        return $this->json([
+            'error' => false,
+            'data' => $answers,
+        ]);
+    }
+
+    /**
      * Tạo câu hỏi mới
      * POST /api/questions
      * Body: { maKhaoSat, loaiCauHoi, noiDungCauHoi, batBuocTraLoi?, thuTu?, maCauHoi? }

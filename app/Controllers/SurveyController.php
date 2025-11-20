@@ -92,12 +92,12 @@ class SurveyController extends Controller
 
         $questions = Question::findBySurvey($survey->getId());
 
+        $surveyData = $survey->toArray();
+        $surveyData['questions'] = array_map(fn($q) => $q->toArray(), $questions);
+
         return $this->json([
             'error' => false,
-            'data' => [
-                ...($survey->toArray()),
-                'questions' => array_map(fn($q) => $q->toArray(), $questions),
-            ],
+            'data' => $surveyData,
         ]);
     }
 
