@@ -45,6 +45,7 @@ $urls['register'] = $urls['register'] ?? $__mk($__base, '/register');
                 <p>Đang tải thông tin khảo sát...</p>
             </div>
         </div>
+        <div id="guide-alert-container" style="display: none;"></div>
     </main>
 
     <?php include BASE_PATH . '/app/Views/components/client/_footer.php'; ?>
@@ -156,11 +157,71 @@ $urls['register'] = $urls['register'] ?? $__mk($__base, '/register');
             return String(text).replace(/[&<>"']/g, m => map[m]);
         }
 
-        function startSurvey(surveyId) {
-            // Chuyển hướng tới trang câu hỏi khảo sát
-            window.location.href = `/surveys/${surveyId}/questions`;
+        function showAlert(message, type = 'info', title = '') {
+            const container = document.getElementById('guide-alert-container');
+
+            const iconMap = {
+                'success': 'fas fa-check-circle',
+                'danger': 'fas fa-exclamation-circle',
+                'warning': 'fas fa-exclamation-triangle',
+                'info': 'fas fa-info-circle'
+            };
+
+            const titleMap = {
+                'success': 'Thành công',
+                'danger': 'Lỗi',
+                'warning': 'Cảnh báo',
+                'info': 'Thông báo'
+            };
+
+            const alertHTML = `
+                <div class="guide-alert alert-${type}">
+                    <i class="${iconMap[type]}"></i>
+                    <div class="guide-alert-message">
+                        ${title ? `<div class="guide-alert-title">${title}</div>` : ''}
+                        <p class="guide-alert-text">${escapeHtml(message)}</p>
+                    </div>
+                </div>
+            `;
+
+            container.innerHTML = alertHTML;
+            container.style.display = 'block';
+            container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        async function startSurvey(surveyId) {
+            // Get user from localStorage
+            const userRaw = localStorage.getItem('app.user');
+            const user = userRaw ? JSON.parse(userRaw) : null;
+
+            if (!user || !user.id) {
+                showAlert('Vui lòng đăng nhập để bắt đầu khảo sát', 'warning');
+                setTimeout(() => {
+                    window.location.href = '/login';
+                }, 1500);
+                return;
+            }
+
+            try {
+                // Check if user already submitted this survey
+                const response = await fetch(`/api/surveys/${surveyId}/check-submission?userId=${user.id}`);
+                const result = await response.json();
+
+                if (result.data && result.data.hasSubmitted) {
+                    showAlert('Bạn đã thực hiện khảo sát này rồi. Mỗi người chỉ được thực hiện một khảo sát một lần.', 'warning', 'Không thể tiếp tục');
+                    return;
+                }
+
+                // If no submission found, proceed to survey directly
+                window.location.href = `/surveys/${surveyId}/questions`;
+
+            } catch (error) {
+                console.error('Lỗi:', error);
+                showAlert('Có lỗi xảy ra. Vui lòng thử lại.', 'danger', 'Lỗi');
+            }
         }
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>

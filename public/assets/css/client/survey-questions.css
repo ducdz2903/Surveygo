@@ -238,3 +238,73 @@
         width: 100%;
     }
 }
+
+/* thanh thông báo */
+
+.guide-alert {
+    padding: 1.25rem 1.5rem;
+    margin-top: 2rem;
+    margin-bottom: 1.5rem;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.alert-warning {
+    background-color: #fff3cd !important;
+    border-color: #ffeaa7 !important;
+    color: #856404 !important;
+}
+
+.alert-danger {
+    background-color: #f8d7da !important;
+    border-color: #f5c6cb !important;
+    color: #721c24 !important;
+}
+
+.alert-success {
+    background-color: #d4edda !important;
+    border-color: #c3e6cb !important;
+    color: #155724 !important;
+}
+
+.alert-info {
+    background-color: #d1ecf1 !important;
+    border-color: #bee5eb !important;
+    color: #0c5460 !important;
+}
+
+.guide-alert i {
+    font-size: 1.25rem;
+    flex-shrink: 0;
+    color: inherit;
+}
+
+.guide-alert-message {
+    flex: 1;
+}
+
+.guide-alert-title {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.guide-alert-text {
+    font-size: 0.95rem;
+    margin: 0;
+}

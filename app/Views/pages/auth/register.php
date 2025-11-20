@@ -190,7 +190,7 @@ $urls = $urls ?? [];
             }
         });
     </script>
-    <script><?php @include __DIR__ . '/../register/script.js'; ?></script>
+    <script><?php @include __DIR__ . '/script.js'; ?></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 

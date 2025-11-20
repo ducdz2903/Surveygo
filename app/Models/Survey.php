@@ -14,8 +14,7 @@ class Survey
     private string $tieuDe;
     private ?string $moTa;
     private ?string $loaiKhaoSat;
-    private ?string $thoiGianBatDau;
-    private ?string $thoiGianKetThuc;
+    private ?int $thoiLuongDuTinh;
     private int $maNguoiTao;
     private string $trangThai;
     private int $diemThuong;
@@ -32,8 +31,7 @@ class Survey
         $this->tieuDe = $attributes['tieuDe'] ?? '';
         $this->moTa = $attributes['moTa'] ?? null;
         $this->loaiKhaoSat = $attributes['loaiKhaoSat'] ?? null;
-        $this->thoiGianBatDau = $attributes['thoiGianBatDau'] ?? null;
-        $this->thoiGianKetThuc = $attributes['thoiGianKetThuc'] ?? null;
+        $this->thoiLuongDuTinh = $attributes['thoiLuongDuTinh'] ? (int) $attributes['thoiLuongDuTinh'] : null;
         $this->maNguoiTao = (int) ($attributes['maNguoiTao'] ?? 0);
         $this->trangThai = $attributes['trangThai'] ?? 'draft';
         $this->diemThuong = (int) ($attributes['diemThuong'] ?? 0);
@@ -197,8 +195,8 @@ class Survey
 
         try {
             $statement = $db->prepare(
-                'INSERT INTO surveys (maKhaoSat, tieuDe, moTa, loaiKhaoSat, thoiGianBatDau, thoiGianKetThuc, maNguoiTao, trangThai, diemThuong, danhMuc, soLuongCauHoi, soNguoiThamGia, maSuKien, trangThaiKiemDuyet, created_at, updated_at)
-                VALUES (:ma, :tieu, :mo, :loai, :start, :end, :user, :status, :diem, :danh, :soluong, :songuoi, :sukien, :kiemduyet, :created, :updated)'
+                'INSERT INTO surveys (maKhaoSat, tieuDe, moTa, loaiKhaoSat, thoiLuongDuTinh, maNguoiTao, trangThai, diemThuong, danhMuc, soLuongCauHoi, soNguoiThamGia, maSuKien, trangThaiKiemDuyet, created_at, updated_at)
+                VALUES (:ma, :tieu, :mo, :loai, :thoiluo, :user, :status, :diem, :danh, :soluong, :songuoi, :sukien, :kiemduyet, :created, :updated)'
             );
 
             $statement->execute([
@@ -206,8 +204,7 @@ class Survey
                 ':tieu' => $data['tieuDe'],
                 ':mo' => $data['moTa'] ?? null,
                 ':loai' => $data['loaiKhaoSat'] ?? null,
-                ':start' => $data['thoiGianBatDau'] ?? null,
-                ':end' => $data['thoiGianKetThuc'] ?? null,
+                ':thoiluo' => $data['thoiLuongDuTinh'] ?? null,
                 ':user' => $data['maNguoiTao'],
                 ':status' => $data['trangThai'] ?? 'draft',
                 ':diem' => (int) ($data['diemThuong'] ?? 0),
@@ -240,8 +237,7 @@ class Survey
         $tieuDe = $data['tieuDe'] ?? $this->tieuDe;
         $moTa = $data['moTa'] ?? $this->moTa;
         $loaiKhaoSat = $data['loaiKhaoSat'] ?? $this->loaiKhaoSat;
-        $thoiGianBatDau = $data['thoiGianBatDau'] ?? $this->thoiGianBatDau;
-        $thoiGianKetThuc = $data['thoiGianKetThuc'] ?? $this->thoiGianKetThuc;
+        $thoiLuongDuTinh = $data['thoiLuongDuTinh'] ?? $this->thoiLuongDuTinh;
         $trangThai = $data['trangThai'] ?? $this->trangThai;
         $diemThuong = $data['diemThuong'] ?? $this->diemThuong;
         $danhMuc = $data['danhMuc'] ?? $this->danhMuc;
@@ -249,7 +245,7 @@ class Survey
         $trangThaiKiemDuyet = $data['trangThaiKiemDuyet'] ?? $this->trangThaiKiemDuyet;
 
         $statement = $db->prepare(
-            'UPDATE surveys SET tieuDe = :tieu, moTa = :mo, loaiKhaoSat = :loai, thoiGianBatDau = :start, thoiGianKetThuc = :end,
+            'UPDATE surveys SET tieuDe = :tieu, moTa = :mo, loaiKhaoSat = :loai, thoiLuongDuTinh = :thoiluo,
              trangThai = :status, diemThuong = :diem, danhMuc = :danh, maSuKien = :sukien, trangThaiKiemDuyet = :kiemduyet, updated_at = :updated WHERE id = :id'
         );
 
@@ -257,8 +253,7 @@ class Survey
             ':tieu' => $tieuDe,
             ':mo' => $moTa,
             ':loai' => $loaiKhaoSat,
-            ':start' => $thoiGianBatDau,
-            ':end' => $thoiGianKetThuc,
+            ':thoiluo' => $thoiLuongDuTinh,
             ':status' => $trangThai,
             ':diem' => (int) $diemThuong,
             ':danh' => $danhMuc,
@@ -326,8 +321,7 @@ class Survey
             'tieuDe' => $this->tieuDe,
             'moTa' => $this->moTa,
             'loaiKhaoSat' => $this->loaiKhaoSat,
-            'thoiGianBatDau' => $this->thoiGianBatDau,
-            'thoiGianKetThuc' => $this->thoiGianKetThuc,
+            'thoiLuongDuTinh' => $this->thoiLuongDuTinh,
             'maNguoiTao' => $this->maNguoiTao,
             'trangThai' => $this->trangThai,
             'diemThuong' => $this->diemThuong,

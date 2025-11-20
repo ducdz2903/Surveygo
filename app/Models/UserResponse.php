@@ -132,7 +132,7 @@ class UserResponse
             $id = (int) $db->lastInsertId();
             return self::find($id);
         } catch (\Exception $e) {
-            return null;
+            throw new \Exception('Failed to create user response: ' . $e->getMessage());
         }
     }
 

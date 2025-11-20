@@ -56,6 +56,8 @@ $urls['register'] = $urls['register'] ?? $__mk($__base, '/register');
                 </div>
             </form>
 
+            <div id="guide-alert-container" style="display: none;"></div>
+
             <div class="survey-progress">
                 <div class="progress-bar-container">
                     <div class="progress-bar" id="progress-bar" style="width: 0%"></div>
@@ -185,8 +187,8 @@ $urls['register'] = $urls['register'] ?? $__mk($__base, '/register');
                 `;
             }
 
-            // Nếu là choice, render radio (chỉ cho phép chọn 1 đáp án)
-            const inputType = 'radio';
+            // Nếu là choice, render radio/checkbox
+            const inputType = loaiCauHoi === 'single_choice' ? 'radio' : 'checkbox';
 
             // Lấy answers từ API
             let questionAnswers = [];
@@ -201,7 +203,7 @@ $urls['register'] = $urls['register'] ?? $__mk($__base, '/register');
                         questionAnswers = answersResult.data;
                     }
                 } catch (error) {
-                    console.error('Lỗi tải answers:', error);
+                    console.error('Lỗi khi lấy đáp án:', error);
                 }
             }
 
@@ -210,7 +212,9 @@ $urls['register'] = $urls['register'] ?? $__mk($__base, '/register');
                 questionAnswers.forEach((answer) => {
                     const answerId = answer.id;
                     const answerText = answer.noiDungCauTraLoi || answer.noiDungDapAn;
-                    const isChecked = answers[questionId] === answerId;
+                    const isChecked = loaiCauHoi === 'single_choice'
+                        ? answers[questionId] === answerId
+                        : (Array.isArray(answers[questionId]) && answers[questionId].includes(answerId));
 
                     html += `
                         <div class="option-item">
@@ -231,10 +235,8 @@ $urls['register'] = $urls['register'] ?? $__mk($__base, '/register');
             }
 
             return html;
-        }
-
-        function setupEventListeners() {
-            document.getElementById('btn-next').addEventListener('click', async function (e) {
+        } function setupEventListeners() {
+            document.getElementById('btn-next').addEventListener('click', function (e) {
                 e.preventDefault();
 
                 // Save current answer
@@ -242,11 +244,11 @@ $urls['register'] = $urls['register'] ?? $__mk($__base, '/register');
 
                 // Move to next
                 if (currentQuestion < surveyData.questions.length - 1) {
-                    await renderQuestion(currentQuestion + 1);
+                    renderQuestion(currentQuestion + 1);
                 }
             });
 
-            document.getElementById('btn-prev').addEventListener('click', async function (e) {
+            document.getElementById('btn-prev').addEventListener('click', function (e) {
                 e.preventDefault();
 
                 // Save current answer
@@ -254,7 +256,7 @@ $urls['register'] = $urls['register'] ?? $__mk($__base, '/register');
 
                 // Move to previous
                 if (currentQuestion > 0) {
-                    await renderQuestion(currentQuestion - 1);
+                    renderQuestion(currentQuestion - 1);
                 }
             });
 
@@ -273,10 +275,14 @@ $urls['register'] = $urls['register'] ?? $__mk($__base, '/register');
                 // Lưu text từ textarea
                 const textarea = document.querySelector(`textarea[name="${inputName}"]`);
                 answers[question.id] = textarea ? textarea.value : null;
-            } else {
-                // Tất cả choice (single_choice, multiple_choice) đều là radio nên lưu single value
+            } else if (loaiCauHoi === 'single_choice') {
+                // Lưu ID của answer được chọn
                 const checked = document.querySelector(`input[name="${inputName}"]:checked`);
                 answers[question.id] = checked ? checked.value : null;
+            } else if (loaiCauHoi === 'multiple_choice') {
+                // Lưu mảng ID của các answers được chọn
+                const checked = document.querySelectorAll(`input[name="${inputName}"]:checked`);
+                answers[question.id] = Array.from(checked).map(c => c.value);
             }
         }
 
@@ -287,6 +293,38 @@ $urls['register'] = $urls['register'] ?? $__mk($__base, '/register');
             document.getElementById('btn-prev').disabled = isFirst;
             document.getElementById('btn-next').classList.toggle('d-none', isLast);
             document.getElementById('btn-submit').classList.toggle('d-none', !isLast);
+        }
+
+        function showAlert(message, type = 'info', title = '') {
+            const container = document.getElementById('guide-alert-container');
+
+            const iconMap = {
+                'success': 'fas fa-check-circle',
+                'danger': 'fas fa-exclamation-circle',
+                'warning': 'fas fa-exclamation-triangle',
+                'info': 'fas fa-info-circle'
+            };
+
+            const titleMap = {
+                'success': 'Thành công',
+                'danger': 'Lỗi',
+                'warning': 'Cảnh báo',
+                'info': 'Thông báo'
+            };
+
+            const alertHTML = `
+                <div class="guide-alert alert-${type}">
+                    <i class="${iconMap[type]}"></i>
+                    <div class="guide-alert-message">
+                        ${title ? `<div class="guide-alert-title">${title}</div>` : ''}
+                        <p class="guide-alert-text">${escapeHtml(message)}</p>
+                    </div>
+                </div>
+            `;
+
+            container.innerHTML = alertHTML;
+            container.style.display = 'block';
+            container.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
         async function submitSurvey() {
@@ -335,10 +373,10 @@ $urls['register'] = $urls['register'] ?? $__mk($__base, '/register');
                     return;
                 }
 
-                // Show success message
-                alert('Nộp bài thành công!');
-                window.location.href = '/surveys';
-
+                showAlert('Đang nộp bài ...', 'success', 'Thành công');
+                setTimeout(() => {
+                    window.location.href = '/surveys';
+                }, 2000);
             } catch (error) {
                 console.error('Lỗi:', error);
                 showError('Có lỗi xảy ra khi nộp bài');

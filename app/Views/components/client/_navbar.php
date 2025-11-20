@@ -100,7 +100,6 @@ $url = static function (array $urls, string $key, string $fallbackPath = '/') us
             try {
                 var raw = localStorage.getItem('app.user');
                 user = raw ? JSON.parse(raw) : null;
-                console.log('User data:', user);
             } catch (e) { }
 
             var userDropdown = document.getElementById('nav-user');

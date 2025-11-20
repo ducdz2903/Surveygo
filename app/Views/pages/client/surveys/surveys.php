@@ -144,7 +144,7 @@ $urls['register'] = $urls['register'] ?? $__mk($__base, '/register');
                                 <h5 class="survey-title">${survey.tieuDe}</h5>
                                 <div class="survey-meta">
                                     <span class="text-primary fw-bold"><i class="fas fa-coins me-1"></i>+${survey.diemThuong || 50} điểm</span>
-                                    <span><i class="fas fa-clock me-1"></i>~10 phút</span>
+                                    <span><i class="fas fa-clock me-1"></i>~${survey.thoiLuongDuTinh || 10} phút</span>
                                 </div>
                             </div>
                             <p class="survey-desc">${survey.moTa || 'Tham gia khảo sát này để kiếm điểm.'}</p>

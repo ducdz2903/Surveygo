@@ -234,7 +234,6 @@ $url = static fn($urls_array, $key, $default) => $urls_array[$key] ?? $default;
 
             let html = surveys.map((survey) => {
                 const badge = badgeMap[survey.trangThai] || { class: '', icon: 'fas fa-star', text: 'Mới' };
-                const estimatedTime = survey.thoiGianKetThuc ? '10' : '10';
 
                 return `
                     <div class="col-lg-4 col-md-6">
@@ -246,7 +245,7 @@ $url = static fn($urls_array, $key, $default) => $urls_array[$key] ?? $default;
                                 <h3 class="survey-title">${survey.tieuDe}</h3>
                                 <div class="survey-meta">
                                     <span class="text-primary fw-bold"><i class="fas fa-coins me-1"></i>+${survey.diemThuong || 50} điểm</span>
-                                    <span><i class="fas fa-clock me-1"></i>${estimatedTime} phút</span>
+                                    <span><i class="fas fa-clock me-1"></i>~${survey.thoiLuongDuTinh || 10} phút</span>
                                 </div>
                             </div>
                             <p class="survey-desc">${survey.moTa || 'Tham gia khảo sát này để kiếm điểm.'}</p>

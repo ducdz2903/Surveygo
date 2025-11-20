@@ -149,3 +149,70 @@
     border-radius: 4px;
     margin-bottom: 1rem;
 }
+
+.guide-alert {
+    padding: 1.25rem 1.5rem;
+    margin-top: 2rem;
+    margin-bottom: 1.5rem;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.guide-alert.alert-warning {
+    background-color: #fff3cd;
+    border-color: #ffeaa7;
+    color: #856404;
+}
+
+.guide-alert.alert-danger {
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+    color: #721c24;
+}
+
+.guide-alert.alert-success {
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+    color: #155724;
+}
+
+.guide-alert.alert-info {
+    background-color: #d1ecf1;
+    border-color: #bee5eb;
+    color: #0c5460;
+}
+
+.guide-alert i {
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.guide-alert-message {
+    flex: 1;
+}
+
+.guide-alert-title {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.guide-alert-text {
+    font-size: 0.95rem;
+    margin: 0;
+}

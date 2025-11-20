@@ -145,8 +145,14 @@ class SurveySubmission
 
             $id = (int) $db->lastInsertId();
             return self::find($id);
+        } catch (\PDOException $e) {
+            // Check for UNIQUE constraint violation (duplicate submission)
+            if (strpos($e->getMessage(), 'Duplicate') !== false || $e->getCode() === '23000') {
+                throw new \Exception('User has already submitted this survey');
+            }
+            throw new \Exception('Database error: ' . $e->getMessage());
         } catch (\Exception $e) {
-            return null;
+            throw new \Exception('Failed to create survey submission: ' . $e->getMessage());
         }
     }
 

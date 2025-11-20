@@ -9,6 +9,7 @@ use App\Core\Request;
 use App\Core\Container;
 use App\Models\Survey;
 use App\Models\Question;
+use App\Models\User;
 use App\Models\SurveySubmission;
 use App\Models\UserResponse;
 use PDO;
@@ -561,6 +562,15 @@ class SurveyController extends Controller
             ], 404);
         }
 
+        // Check if user exists
+        $user = User::findById($userId);
+        if (!$user) {
+            return $this->json([
+                'error' => true,
+                'message' => 'User not found.',
+            ], 404);
+        }
+
         // Check if user already submitted this survey
         $existingSubmission = SurveySubmission::findBySurveyAndUser($surveyId, $userId);
         if ($existingSubmission) {
@@ -623,5 +633,42 @@ class SurveyController extends Controller
                 'message' => 'Error submitting survey: ' . $e->getMessage(),
             ], 500);
         }
+    }
+
+    /**
+     * GET /api/surveys/{id}/check-submission
+     * Kiểm tra xem user đã submit khảo sát này chưa
+     */
+    public function checkSubmission(Request $request)
+    {
+        $surveyId = (int) $request->getAttribute('id');
+        $userId = (int) $request->query('userId');
+
+        if (!$surveyId || !$userId) {
+            return $this->json([
+                'error' => true,
+                'message' => 'Survey ID and User ID are required.',
+            ], 422);
+        }
+
+        // Check if survey exists
+        $survey = Survey::find($surveyId);
+        if (!$survey) {
+            return $this->json([
+                'error' => true,
+                'message' => 'Survey not found.',
+            ], 404);
+        }
+
+        // Check if user already submitted this survey
+        $submission = SurveySubmission::findBySurveyAndUser($surveyId, $userId);
+
+        return $this->json([
+            'error' => false,
+            'data' => [
+                'hasSubmitted' => (bool) $submission,
+                'submission' => $submission ? $submission->toArray() : null,
+            ],
+        ]);
     }
 }
