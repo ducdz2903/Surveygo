@@ -17,6 +17,43 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v4
 
+      - name: Detect sql/mysql/init.sql changes
+        id: sql_change
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          BEFORE: ${{ github.event.before }}
+          SHA: ${{ github.sha }}
+        run: |
+          set -e
+          echo "Checking for changes in sql/mysql/init.sql..."
+          git fetch --no-tags --prune --depth=2 --quiet || true
+
+          changed=false
+
+          # 1) Push diff (fast)
+          if [ -n "$BEFORE" ] && git diff --name-only "$BEFORE" "$SHA" | grep -q '^sql/mysql/init.sql$'; then
+            echo "Detected via git diff"
+            changed=true
+          else
+            echo "Not found in git diff, trying PR-based detection..."
+            # 2) PR-based: find PRs associated with the commit, then check PR files
+            prs=$(curl -s -H "Authorization: token $GITHUB_TOKEN" -H "Accept: application/vnd.github.groot-preview+json" \
+              "https://api.github.com/repos/$REPO/commits/$SHA/pulls" | jq -r '.[].number' || true)
+            for pr in $prs; do
+              echo "Checking PR #$pr files..."
+              files_json=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
+                "https://api.github.com/repos/$REPO/pulls/$pr/files?per_page=100")
+              if echo "$files_json" | jq -r '.[].filename' | grep -xq 'sql/mysql/init.sql'; then
+                echo "Detected in PR #$pr"
+                changed=true
+                break
+              fi
+            done
+          fi
+
+          echo "changed=$changed" >> "$GITHUB_OUTPUT"
+
       - name: FTP Deploy
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
@@ -40,6 +77,26 @@ jobs:
             **/README.md
             **/.env
 
-            # GIỮ NGUYÊN config TRÊN SERVER
+            # Giữ NGUYÊN config TRÊN SERVER
             config/**
             **/config/**
+
+      - name: Trigger DB reset on server
+        if: steps.sql_change.outputs.changed == 'true'
+        env:
+          WEB_RESET_URL: ${{ secrets.WEB_RESET_URL }}
+        run: |
+          set -e
+          if [ -z "$WEB_RESET_URL" ]; then
+            echo "WEB_RESET_URL is not set"
+            exit 1
+          fi
+
+          RESPONSE=$(curl -sS -X POST "$WEB_RESET_URL" \
+            -d "token=${{ secrets.RESET_SECRET }}")
+
+          echo "Response: $RESPONSE"
+
+          # Nếu không chứa "status":"ok" thì fail pipeline
+          echo "$RESPONSE" | grep '"status":"ok"' >/dev/null 2>&1
+
