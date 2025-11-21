@@ -26,10 +26,10 @@ class SurveyController extends Controller
      * - search: string (tìm kiếm trong tiêu đề và mô tả)
      * - trangThai: string (lọc theo trạng thái: hoạtĐộng, draft, published, etc.)
      * - danhMuc: int (lọc theo danh mục ID)
-     * - quickPoll: bool (nếu true, chỉ lấy surveys có 1 câu hỏi)
+     * - isQuickPoll: bool
      * 
      * Ví dụ: GET /api/surveys?page=1&limit=6&search=sức khỏe&trangThai=hoạtĐộng
-     *        GET /api/surveys?page=1&limit=6&quickPoll=true
+     *        GET /api/surveys?page=1&limit=6&isQuickPoll=true
      */
     public function index(Request $request)
     {
@@ -50,8 +50,10 @@ class SurveyController extends Controller
             $filters['danhMuc'] = $danhMuc;
         }
 
-        if ($request->query('quickPoll')) {
-            $filters['quickPoll'] = true;
+        $qpParam = $request->query('isQuickPoll');
+
+        if ($qpParam !== null && $qpParam !== '') {
+            $filters['isQuickPoll'] = (int) filter_var($qpParam, FILTER_VALIDATE_BOOLEAN);
         }
 
         $result = Survey::paginate($page, $limit, $filters);
