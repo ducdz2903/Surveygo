@@ -13,6 +13,9 @@ class User
     private string $name;
     private string $email;
     private string $password;
+    private ?string $phone;
+    private ?string $gender;
+    private ?string $avatar;
     private string $createdAt;
     private string $updatedAt;
 
@@ -22,6 +25,9 @@ class User
         $this->name = $attributes['name'];
         $this->email = $attributes['email'];
         $this->password = $attributes['password'];
+        $this->phone = $attributes['phone'] ?? null;
+        $this->gender = $attributes['gender'] ?? null;
+        $this->avatar = $attributes['avatar'] ?? null;
         $this->createdAt = $attributes['created_at'];
         $this->updatedAt = $attributes['updated_at'];
     }
@@ -99,12 +105,29 @@ class User
         return $this->name;
     }
 
+    public function getPhone(): ?string
+    {
+        return $this->phone;
+    }
+
+    public function getGender(): ?string
+    {
+        return $this->gender;
+    }
+    public function getAvatar(): ?string
+    {
+        return $this->avatar;
+    }
+
     public function toArray(): array
     {
         return [
             'id' => $this->id,
             'name' => $this->name,
             'email' => $this->email,
+            'phone' => $this->phone,
+            'gender' => $this->gender,
+            'avatar' => $this->avatar,
             'created_at' => $this->createdAt,
             'updated_at' => $this->updatedAt,
         ];

@@ -40,10 +40,7 @@ class Request
         $basePath = str_replace('\\', '/', $scriptName);
         $basePath = rtrim(dirname($basePath), '/');
 
-        $appBase = $basePath;
-        if ($appBase !== '' && (function_exists('str_ends_with') ? str_ends_with($appBase, '/public') : substr($appBase, -7) === '/public')) {
-            $appBase = substr($appBase, 0, -strlen('/public'));
-        }
+        $appBase = dirname($basePath);
         $appBase = rtrim($appBase, '/');
 
         // Normalize to a path relative to the app base so routes like "/" work under "/Surveyon"
