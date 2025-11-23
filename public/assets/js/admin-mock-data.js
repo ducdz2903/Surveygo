@@ -179,7 +179,8 @@ const AdminMockData = {
 
     // Generate large datasets
     surveys: generateSurveys(50),
-    users: generateUsers(30),
+    // Increase mock users so admin UI can demo pagination
+    users: generateUsers(120),
     events: generateEvents(15),
 
     // Reports Data

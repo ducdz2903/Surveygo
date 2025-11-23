@@ -15,11 +15,21 @@ class AuthController extends Controller
         $name = trim((string)$request->input('name'));
         $email = strtolower(trim((string)$request->input('email')));
         $password = (string)$request->input('password');
+        $role = trim((string)$request->input('role'));
 
         if (!$name || !$email || !$password) {
             return $this->json([
                 'error' => true,
                 'message' => 'Missing required fields.',
+            ], 422);
+        }
+
+        if (!$role) {
+            $role = 'user';
+        } elseif (!in_array($role, ['admin', 'moderator', 'user'], true)) {
+            return $this->json([
+                'error' => true,
+                'message' => 'Invalid role specified.',
             ], 422);
         }
 
@@ -46,7 +56,7 @@ class AuthController extends Controller
 
         $hashed = password_hash($password, PASSWORD_BCRYPT);
 
-        $user = User::create($name, $email, $hashed);
+        $user = User::create($name, $email, $hashed, $role);
 
         return $this->json([
             'error' => false,

@@ -4,6 +4,7 @@ $appName = $appName ?? 'Admin - Quản lý Users';
 ?>
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -12,6 +13,7 @@ $appName = $appName ?? 'Admin - Quản lý Users';
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="/public/assets/css/admin.css" rel="stylesheet">
 </head>
+
 <body>
     <?php include BASE_PATH . '/app/Views/components/admin/_sidebar.php'; ?>
 
@@ -96,6 +98,7 @@ $appName = $appName ?? 'Admin - Quản lý Users';
                             <tbody id="users-table-body"></tbody>
                         </table>
                     </div>
+                    <div class="d-flex justify-content-center mt-3" id="users-pagination"></div>
                 </div>
             </div>
         </div>
@@ -105,10 +108,78 @@ $appName = $appName ?? 'Admin - Quản lý Users';
     <script src="/public/assets/js/admin-mock-data.js"></script>
     <script>
         let filteredUsers = [...AdminMockData.users];
+        let currentPage = 1;
+        const pageSizeSelect = 10; // default page size
+
+        function getPaginated(users, page, pageSize) {
+            const start = (page - 1) * pageSize;
+            return users.slice(start, start + pageSize);
+        }
+
+        function renderPagination(total, page, pageSize) {
+            const container = document.getElementById('users-pagination');
+            if (!container) return;
+            const totalPages = Math.ceil(total / pageSize) || 1;
+            if (totalPages <= 1) {
+                container.innerHTML = '';
+                return;
+            }
+
+            let html = '<ul class="pagination justify-content-center">';
+
+            // Previous
+            if (page > 1) {
+                html += `<li class="page-item"><button class="page-link" onclick="changePage(${page - 1})">← Trước</button></li>`;
+            }
+
+            const startPage = Math.max(1, page - 2);
+            const endPage = Math.min(totalPages, page + 2);
+
+            if (startPage > 1) {
+                html += `<li class="page-item"><button class="page-link" onclick="changePage(1)">1</button></li>`;
+                if (startPage > 2) html += '<li class="page-item disabled"><span class="page-link">...</span></li>';
+            }
+
+            for (let i = startPage; i <= endPage; i++) {
+                if (i === page) {
+                    html += `<li class="page-item active"><span class="page-link">${i}</span></li>`;
+                } else {
+                    html += `<li class="page-item"><button class="page-link" onclick="changePage(${i})">${i}</button></li>`;
+                }
+            }
+
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) html += '<li class="page-item disabled"><span class="page-link">...</span></li>';
+                html += `<li class="page-item"><button class="page-link" onclick="changePage(${totalPages})">${totalPages}</button></li>`;
+            }
+
+            // Next
+            if (page < totalPages) {
+                html += `<li class="page-item"><button class="page-link" onclick="changePage(${page + 1})">Tiếp →</button></li>`;
+            }
+
+            html += '</ul>';
+            container.innerHTML = html;
+        }
+
+        function changePage(page) {
+            currentPage = page;
+            loadUsers();
+            // scroll to table top
+            const table = document.querySelector('.table-responsive');
+            if (table) table.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // expose changePage globally for inline onclick handlers
+        window.changePage = changePage;
 
         function loadUsers() {
             const tbody = document.getElementById('users-table-body');
-            tbody.innerHTML = filteredUsers.map(user => `
+            const pageSize = pageSizeSelect;
+            const totalPages = Math.ceil(filteredUsers.length / pageSize) || 1;
+            if (currentPage > totalPages) currentPage = totalPages;
+            const paged = getPaginated(filteredUsers, currentPage, pageSize);
+            tbody.innerHTML = paged.map(user => `
                 <tr class="slide-in">
                     <td>
                         <div class="d-flex align-items-center gap-2">
@@ -151,6 +222,7 @@ $appName = $appName ?? 'Admin - Quản lý Users';
                 </tr>
             `).join('');
             document.getElementById('total-users').textContent = filteredUsers.length;
+            renderPagination(filteredUsers.length, currentPage, pageSize);
         }
 
         function applyFilters() {
@@ -164,6 +236,7 @@ $appName = $appName ?? 'Admin - Quản lý Users';
                 if (search && !user.name.toLowerCase().includes(search) && !user.email.toLowerCase().includes(search)) return false;
                 return true;
             });
+            currentPage = 1; // reset to first page when filters change
             loadUsers();
         }
 
@@ -184,4 +257,5 @@ $appName = $appName ?? 'Admin - Quản lý Users';
         loadUsers();
     </script>
 </body>
+
 </html>
