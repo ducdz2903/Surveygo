@@ -53,6 +53,14 @@ $appName = $appName ?? 'Admin - Quản lý Events';
                 <div class="card-body">
                     <div class="row g-3">
                         <div class="col-md-4">
+                            <label class="form-label fw-bold">Tìm theo tiêu đề</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                <input type="text" id="filter-search" class="form-control"
+                                    placeholder="Tìm theo tiêu đề...">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
                             <label class="form-label fw-bold">Loại</label>
                             <select class="form-select" id="filter-type">
                                 <option value="">Tất cả</option>
@@ -213,7 +221,8 @@ $appName = $appName ?? 'Admin - Quản lý Events';
 
         function applyFilters() {
             const type = document.getElementById('filter-type').value;
-            const search = document.getElementById('search-input').value.trim().toLowerCase();
+            const searchRaw = (document.getElementById('filter-search')?.value || document.getElementById('search-input')?.value || '').trim();
+            const search = searchRaw.toLowerCase();
 
             filteredEvents = AdminMockData.events.filter(ev => {
                 if (type && ev.status !== type) return false;
@@ -228,10 +237,23 @@ $appName = $appName ?? 'Admin - Quản lý Events';
             loadEvents();
         }
 
+        // debounce helper
+        function debounce(fn, wait = 300) {
+            let timer = null;
+            return function (...args) {
+                clearTimeout(timer);
+                timer = setTimeout(() => fn.apply(this, args), wait);
+            };
+        }
+
+        const debouncedApplyFilters = debounce(() => applyFilters(), 300);
+
         document.getElementById('filter-type').addEventListener('change', applyFilters);
-        document.getElementById('search-input').addEventListener('input', applyFilters);
+        document.getElementById('filter-search')?.addEventListener('input', debouncedApplyFilters);
+        document.getElementById('search-input').addEventListener('input', debouncedApplyFilters);
         document.getElementById('reset-filters').addEventListener('click', () => {
             document.getElementById('filter-type').value = '';
+            if (document.getElementById('filter-search')) document.getElementById('filter-search').value = '';
             document.getElementById('search-input').value = '';
             applyFilters();
         });

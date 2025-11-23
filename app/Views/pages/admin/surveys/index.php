@@ -62,20 +62,20 @@ $appName = $appName ?? 'Admin - Quản lý Khảo sát';
                 <div class="card-body">
                     <div class="row g-3">
                         <div class="col-md-3">
+                            <label class="form-label fw-bold">Tìm theo tiêu đề</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                <input type="text" id="filter-search" class="form-control"
+                                    placeholder="Tìm theo tiêu đề...">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
                             <label class="form-label fw-bold">Trạng thái</label>
                             <select class="form-select" id="filter-status">
                                 <option value="">Tất cả</option>
                                 <option value="approved">Đã duyệt</option>
                                 <option value="pending">Chờ duyệt</option>
                                 <option value="draft">Nháp</option>
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label fw-bold">Loại</label>
-                            <select class="form-select" id="filter-type">
-                                <option value="">Tất cả</option>
-                                <option value="regular">Khảo sát thường</option>
-                                <option value="quickpoll">Quick Poll</option>
                             </select>
                         </div>
                         <div class="col-md-3">
@@ -203,9 +203,9 @@ $appName = $appName ?? 'Admin - Quản lý Khảo sát';
         // Map filters và gọi api
         async function loadSurveys(page = 1) {
             const status = document.getElementById('filter-status').value;
-            const type = document.getElementById('filter-type').value;
             const category = document.getElementById('filter-category').value;
-            const search = document.getElementById('search-input').value.trim();
+            // prefer the filter-search in the filters card when present, fallback to header search-input
+            const search = (document.getElementById('filter-search')?.value || document.getElementById('search-input')?.value || '').trim();
 
             const params = new URLSearchParams();
             params.set('page', page);
@@ -214,10 +214,6 @@ $appName = $appName ?? 'Admin - Quản lý Khảo sát';
             if (search) params.set('search', search);
             if (status) params.set('trangThai', status);
             if (category) params.set('danhMuc', category);
-            if (type) {
-                if (type === 'quickpoll') params.set('isQuickPoll', '1');
-                if (type === 'regular') params.set('isQuickPoll', '0');
-            }
 
             const tbody = document.getElementById('surveys-table-body');
             tbody.innerHTML = '<tr><td colspan="8" class="text-center py-5"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Đang tải...</span></div></td></tr>';
@@ -328,14 +324,25 @@ $appName = $appName ?? 'Admin - Quản lý Khảo sát';
             container.innerHTML = html;
         }
 
-        // trigger lọc 
+        // Debounce helper to avoid firing requests too often
+        function debounce(fn, wait = 300) {
+            let timer = null;
+            return function (...args) {
+                clearTimeout(timer);
+                timer = setTimeout(() => fn.apply(this, args), wait);
+            };
+        }
+
+        const debouncedLoadSurveys = debounce(() => loadSurveys(1), 300);
+
+        // add sự kiện 
         document.getElementById('filter-status').addEventListener('change', () => loadSurveys(1));
-        document.getElementById('filter-type').addEventListener('change', () => loadSurveys(1));
         document.getElementById('filter-category').addEventListener('change', () => loadSurveys(1));
-        document.getElementById('search-input').addEventListener('input', () => {loadSurveys(1);});
+        document.getElementById('filter-search')?.addEventListener('input', debouncedLoadSurveys);
+        document.getElementById('search-input')?.addEventListener('input', debouncedLoadSurveys);
         document.getElementById('reset-filters').addEventListener('click', () => {
             document.getElementById('filter-status').value = '';
-            document.getElementById('filter-type').value = '';
+            if (document.getElementById('filter-search')) document.getElementById('filter-search').value = '';
             document.getElementById('filter-category').value = '';
             document.getElementById('search-input').value = '';
             loadSurveys(1);

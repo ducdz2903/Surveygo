@@ -52,7 +52,15 @@ $appName = $appName ?? 'Admin - Quản lý Users';
             <div class="card mb-4 fade-in">
                 <div class="card-body">
                     <div class="row g-3">
-                        <div class="col-md-4">
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold">Tìm theo tên / email</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                <input type="text" id="filter-search" class="form-control"
+                                    placeholder="Tìm theo tên hoặc email...">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
                             <label class="form-label fw-bold">Vai trò</label>
                             <select class="form-select" id="filter-role">
                                 <option value="">Tất cả</option>
@@ -61,7 +69,7 @@ $appName = $appName ?? 'Admin - Quản lý Users';
                                 <option value="user">Người dùng</option>
                             </select>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <label class="form-label fw-bold">Trạng thái</label>
                             <select class="form-select" id="filter-status">
                                 <option value="">Tất cả</option>
@@ -69,7 +77,7 @@ $appName = $appName ?? 'Admin - Quản lý Users';
                                 <option value="inactive">Không hoạt động</option>
                             </select>
                         </div>
-                        <div class="col-md-4 d-flex align-items-end">
+                        <div class="col-md-3 d-flex align-items-end">
                             <button class="btn btn-outline-secondary w-100" id="reset-filters">
                                 <i class="fas fa-redo me-2"></i>Đặt lại
                             </button>
@@ -228,7 +236,8 @@ $appName = $appName ?? 'Admin - Quản lý Users';
         function applyFilters() {
             const role = document.getElementById('filter-role').value;
             const status = document.getElementById('filter-status').value;
-            const search = document.getElementById('search-input').value.toLowerCase();
+            const searchRaw = (document.getElementById('filter-search')?.value || document.getElementById('search-input')?.value || '').trim();
+            const search = searchRaw.toLowerCase();
 
             filteredUsers = AdminMockData.users.filter(user => {
                 if (role && user.role !== role) return false;
@@ -240,12 +249,25 @@ $appName = $appName ?? 'Admin - Quản lý Users';
             loadUsers();
         }
 
+        // debounce helper for search inputs
+        function debounce(fn, wait = 300) {
+            let timer = null;
+            return function (...args) {
+                clearTimeout(timer);
+                timer = setTimeout(() => fn.apply(this, args), wait);
+            };
+        }
+
+        const debouncedApplyFilters = debounce(() => applyFilters(), 300);
+
         document.getElementById('filter-role').addEventListener('change', applyFilters);
         document.getElementById('filter-status').addEventListener('change', applyFilters);
-        document.getElementById('search-input').addEventListener('input', applyFilters);
+        document.getElementById('filter-search')?.addEventListener('input', debouncedApplyFilters);
+        document.getElementById('search-input').addEventListener('input', debouncedApplyFilters);
         document.getElementById('reset-filters').addEventListener('click', () => {
             document.getElementById('filter-role').value = '';
             document.getElementById('filter-status').value = '';
+            if (document.getElementById('filter-search')) document.getElementById('filter-search').value = '';
             document.getElementById('search-input').value = '';
             applyFilters();
         });
