@@ -113,7 +113,7 @@ $appName = $appName ?? 'Admin - Quản lý Users';
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="/public/assets/js/admin-mock-data.js"></script>
+    <script src="/public/assets/js/admin-helpers.js"></script>
     <script>
         // Server-driven users list via /api/users
         let currentPage = 1;
@@ -246,17 +246,8 @@ $appName = $appName ?? 'Admin - Quản lý Users';
         }
 
         function applyFilters() {
-            const role = document.getElementById('filter-role').value;
-            const status = document.getElementById('filter-status').value;
-            const searchRaw = (document.getElementById('filter-search')?.value || document.getElementById('search-input')?.value || '').trim();
-            const search = searchRaw.toLowerCase();
-
-            filteredUsers = AdminMockData.users.filter(user => {
-                if (role && user.role !== role) return false;
-                if (status && user.status !== status) return false;
-                if (search && !user.name.toLowerCase().includes(search) && !user.email.toLowerCase().includes(search)) return false;
-                return true;
-            });
+            // Server-side filters: reset to first page and re-fetch.
+            // Note: only `search` and `role` are sent to the API currently; `status` UI is kept for future support.
             currentPage = 1; // reset to first page when filters change
             loadUsers();
         }

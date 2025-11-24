@@ -113,7 +113,7 @@ $appName = $appName ?? 'Admin - Quản lý Events';
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="/public/assets/js/admin-mock-data.js"></script>
+    <script src="/public/assets/js/admin-helpers.js"></script>
     <script>
         // events admin: server-driven pagination + search via /api/events
         let eventsCurrentPage = 1;

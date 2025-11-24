@@ -1,5 +1,3 @@
-// ==================== MOCK DATA GENERATOR ====================
-
 // Function to generate more mock data
 function generateSurveys(count) {
     const surveys = [];
@@ -101,8 +99,6 @@ function generateEvents(count) {
     }
     return events;
 }
-
-// ==================== MOCK DATA FOR ADMIN DASHBOARD ====================
 
 const AdminMockData = {
     // Statistics

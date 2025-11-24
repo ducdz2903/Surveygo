@@ -330,7 +330,7 @@ $appName = $appName ?? 'Admin Dashboard';
         `).join('');
 
         // User menu logout
-        document.getElementById('admin-user-menu')?.addEventListener('click', function() {
+        document.getElementById('admin-user-menu')?.addEventListener('click', function () {
             if (confirm('Bạn có chắc muốn đăng xuất?')) {
                 localStorage.removeItem('app.user');
                 window.location.href = '/login';

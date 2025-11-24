@@ -4,6 +4,7 @@ $appName = $appName ?? 'Admin - Báo cáo';
 ?>
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -12,6 +13,7 @@ $appName = $appName ?? 'Admin - Báo cáo';
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="/public/assets/css/admin.css" rel="stylesheet">
 </head>
+
 <body>
     <?php include BASE_PATH . '/app/Views/components/admin/_sidebar.php'; ?>
 
@@ -200,4 +202,5 @@ $appName = $appName ?? 'Admin - Báo cáo';
         });
     </script>
 </body>
+
 </html>
