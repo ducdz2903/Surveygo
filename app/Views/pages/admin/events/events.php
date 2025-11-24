@@ -115,21 +115,9 @@ $appName = $appName ?? 'Admin - Quản lý Events';
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/public/assets/js/admin-mock-data.js"></script>
     <script>
-        // events admin: client-side filtering + pagination (uses AdminMockData.events)
-        let filteredEvents = [...AdminMockData.events];
+        // events admin: server-driven pagination + search via /api/events
         let eventsCurrentPage = 1;
         const itemsPerPage = 10;
-
-        function getPaginated(items, page, pageSize) {
-            const total = items.length;
-            const totalPages = Math.max(1, Math.ceil(total / pageSize));
-            page = Math.min(Math.max(1, page), totalPages);
-            const start = (page - 1) * pageSize;
-            return {
-                data: items.slice(start, start + pageSize),
-                meta: { total, page, pageSize, totalPages, startIndex: start }
-            };
-        }
 
         function renderEventsTable(events) {
             const tbody = document.getElementById('events-table-body');
@@ -220,19 +208,7 @@ $appName = $appName ?? 'Admin - Quản lý Events';
         window.changePage = changePage;
 
         function applyFilters() {
-            const type = document.getElementById('filter-type').value;
-            const searchRaw = (document.getElementById('filter-search')?.value || document.getElementById('search-input')?.value || '').trim();
-            const search = searchRaw.toLowerCase();
-
-            filteredEvents = AdminMockData.events.filter(ev => {
-                if (type && ev.status !== type) return false;
-                if (search) {
-                    const hay = (ev.title + ' ' + ev.location + ' ' + ev.creator).toLowerCase();
-                    if (!hay.includes(search)) return false;
-                }
-                return true;
-            });
-
+            // For server-side filtering we just reset to page 1 and call loadEvents()
             eventsCurrentPage = 1;
             loadEvents();
         }
@@ -274,15 +250,46 @@ $appName = $appName ?? 'Admin - Quản lý Events';
             return (first + last).toUpperCase();
         }
 
-        function loadEvents() {
-            const pag = getPaginated(filteredEvents, eventsCurrentPage, itemsPerPage);
-            renderEventsTable(pag.data);
-            renderPagination(pag.meta.total, pag.meta.page, pag.meta.pageSize);
-            document.getElementById('total-events').textContent = pag.meta.total;
+        async function loadEvents() {
+            const tbody = document.getElementById('events-table-body');
+            tbody.innerHTML = `<tr><td colspan="6" class="text-center py-5"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Đang tải...</span></div></td></tr>`;
+
+            const params = new URLSearchParams();
+            params.set('page', eventsCurrentPage);
+            params.set('limit', itemsPerPage);
+
+            const searchVal = (document.getElementById('filter-search')?.value || document.getElementById('search-input')?.value || '').trim();
+            if (searchVal) params.set('search', searchVal);
+
+            const type = document.getElementById('filter-type')?.value || '';
+            if (type) {
+                // send both possible param names in case backend expects one of them
+                params.set('trangThai', type);
+                params.set('status', type);
+            }
+
+            try {
+                const res = await fetch('/api/events?' + params.toString(), { headers: { 'Accept': 'application/json' } });
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const json = await res.json();
+
+                const data = Array.isArray(json.data) ? json.data : (json.data || []);
+                const meta = json.meta || { total: data.length, page: eventsCurrentPage, limit: itemsPerPage, totalPages: 1 };
+
+                renderEventsTable(data);
+                renderPagination(meta.total || 0, meta.page || eventsCurrentPage, meta.limit || itemsPerPage);
+                document.getElementById('total-events').textContent = meta.total || 0;
+            } catch (err) {
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-danger">Lỗi khi tải dữ liệu: ${err.message}</td></tr>`;
+                document.getElementById('events-pagination').innerHTML = '';
+                document.getElementById('total-events').textContent = '0';
+                // eslint-disable-next-line no-console
+                console.error('loadEvents error', err);
+            }
         }
 
         // initial
-        applyFilters();
+        loadEvents();
     </script>
 </body>
 

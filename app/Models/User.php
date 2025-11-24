@@ -19,7 +19,7 @@ class User
 
     public function __construct(array $attributes)
     {
-        $this->id = (int)($attributes['id'] ?? 0);
+        $this->id = (int) ($attributes['id'] ?? 0);
         $this->name = $attributes['name'];
         $this->email = $attributes['email'];
         $this->password = $attributes['password'];
@@ -45,7 +45,7 @@ class User
             ':updated_at' => $now,
         ]);
 
-        $id = (int)$db->lastInsertId();
+        $id = (int) $db->lastInsertId();
 
         return self::findById($id);
     }
@@ -111,6 +111,59 @@ class User
             'role' => $this->role,
             'created_at' => $this->createdAt,
             'updated_at' => $this->updatedAt,
+        ];
+    }
+
+
+    // hàm phân trang người dùng
+    public static function paginate(int $page = 1, int $limit = 10, array $filters = []): array
+    {
+        /** @var \PDO $db */
+        $db = Container::get('db');
+
+        $page = max(1, (int) $page);
+        $limit = max(1, min(100, (int) $limit));
+        $offset = ($page - 1) * $limit;
+
+        $where = [];
+        $params = [];
+
+        if (!empty($filters['search'])) {
+            $where[] = '(name LIKE :search OR email LIKE :search)';
+            $params[':search'] = '%' . $filters['search'] . '%';
+        }
+
+        if (!empty($filters['role'])) {
+            $where[] = 'role = :role';
+            $params[':role'] = $filters['role'];
+        }
+
+        $whereSql = $where ? 'WHERE ' . implode(' AND ', $where) : '';
+
+        $countSql = "SELECT COUNT(*) as total FROM users {$whereSql}";
+        $countStmt = $db->prepare($countSql);
+        $countStmt->execute($params);
+        $total = (int) $countStmt->fetch()['total'];
+
+        $sql = "SELECT * FROM users {$whereSql} ORDER BY created_at DESC LIMIT :offset, :limit";
+        $stmt = $db->prepare($sql);
+        foreach ($params as $k => $v) {
+            $stmt->bindValue($k, $v);
+        }
+        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->execute();
+        $rows = $stmt->fetchAll();
+
+        $users = array_map(fn($r) => new self($r), $rows);
+        $totalPages = (int) ceil($total / $limit);
+
+        return [
+            'users' => $users,
+            'total' => $total,
+            'page' => $page,
+            'limit' => $limit,
+            'totalPages' => $totalPages,
         ];
     }
 }

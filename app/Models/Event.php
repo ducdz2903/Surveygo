@@ -223,4 +223,13 @@ class Event
     {
         return $this->maNguoiTao;
     }
+    public function getCreatedAt(): string
+    {
+        return $this->createdAt;
+    }
+
+    public function getUpdatedAt(): string
+    {
+        return $this->updatedAt;
+    }
 }

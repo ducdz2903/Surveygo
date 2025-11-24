@@ -17,32 +17,32 @@ class AdminController extends Controller
 
     public function surveys(Request $request)
     {
-        return $this->view('pages/admin/surveys/index', $this->pageData($request));
+        return $this->view('pages/admin/surveys/surveys', $this->pageData($request));
     }
 
     public function users(Request $request)
     {
-        return $this->view('pages/admin/users/index', $this->pageData($request));
+        return $this->view('pages/admin/users/users', $this->pageData($request));
     }
 
     public function questions(Request $request)
     {
-        return $this->view('pages/admin/questions/index', $this->pageData($request));
+        return $this->view('pages/admin/questions/questions', $this->pageData($request));
     }
 
     public function reports(Request $request)
     {
-        return $this->view('pages/admin/reports/index', $this->pageData($request));
+        return $this->view('pages/admin/reports/reports', $this->pageData($request));
     }
 
     public function events(Request $request)
     {
-        return $this->view('pages/admin/events/index', $this->pageData($request));
+        return $this->view('pages/admin/events/events', $this->pageData($request));
     }
 
     public function settings(Request $request)
     {
-        return $this->view('pages/admin/settings/index', $this->pageData($request));
+        return $this->view('pages/admin/settings/settings', $this->pageData($request));
     }
 
     private function pageData(Request $request): array

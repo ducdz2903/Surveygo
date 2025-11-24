@@ -16,21 +16,8 @@ use PDO;
 
 class SurveyController extends Controller
 {
-    /**
-     * GET /api/surveys
-     * Lấy danh sách khảo sát với phân trang và lọc
-     * 
-     * Query params:
-     * - page: int (default: 1)
-     * - limit: int (default: 10, max: 100)
-     * - search: string (tìm kiếm trong tiêu đề và mô tả)
-     * - trangThai: string (lọc theo trạng thái: hoạtĐộng, draft, published, etc.)
-     * - danhMuc: int (lọc theo danh mục ID)
-     * - isQuickPoll: bool
-     * 
-     * Ví dụ: GET /api/surveys?page=1&limit=6&search=sức khỏe&trangThai=hoạtĐộng
-     *        GET /api/surveys?page=1&limit=6&isQuickPoll=true
-     */
+
+    // api phân trang
     public function index(Request $request)
     {
         $page = (int) ($request->query('page') ?? 1);

@@ -12,10 +12,8 @@ use PDO;
 
 class QuestionController extends Controller
 {
-    /**
-     * Lấy tất cả câu hỏi
-     * GET /api/questions
-     */
+
+    // api lấy all
     public function index(Request $request)
     {
         $questions = Question::all();
@@ -26,10 +24,8 @@ class QuestionController extends Controller
         ]);
     }
 
-    /**
-     * Lấy tất cả câu hỏi của một khảo sát
-     * GET /api/questions?maKhaoSat=:id
-     */
+
+    // Lấy tất cả câu hỏi của một khảo sát
     public function getBySurvey(Request $request)
     {
         $surveyId = $request->query('maKhaoSat') ?? $request->input('maKhaoSat') ?? $request->query('surveyId') ?? $request->input('surveyId');
@@ -49,10 +45,7 @@ class QuestionController extends Controller
         ]);
     }
 
-    /**
-     * Lấy chi tiết 1 câu hỏi
-     * GET /api/questions?id=:id
-     */
+    // api detail
     public function show(Request $request)
     {
         $id = $request->query('id') ?? $request->input('id');
@@ -78,10 +71,7 @@ class QuestionController extends Controller
         ]);
     }
 
-    /**
-     * Lấy danh sách đáp án của một câu hỏi
-     * GET /api/questions/{id}/answers
-     */
+    // api lấy danh sách đáp án
     public function getAnswersForQuestion(Request $request)
     {
         // Lấy {id} từ URL params

@@ -115,14 +115,9 @@ $appName = $appName ?? 'Admin - Quản lý Users';
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/public/assets/js/admin-mock-data.js"></script>
     <script>
-        let filteredUsers = [...AdminMockData.users];
+        // Server-driven users list via /api/users
         let currentPage = 1;
-        const pageSizeSelect = 10; // default page size
-
-        function getPaginated(users, page, pageSize) {
-            const start = (page - 1) * pageSize;
-            return users.slice(start, start + pageSize);
-        }
+        const itemsPerPage = 10;
 
         function renderPagination(total, page, pageSize) {
             const container = document.getElementById('users-pagination');
@@ -181,56 +176,73 @@ $appName = $appName ?? 'Admin - Quản lý Users';
         // expose changePage globally for inline onclick handlers
         window.changePage = changePage;
 
-        function loadUsers() {
+        async function loadUsers() {
             const tbody = document.getElementById('users-table-body');
-            const pageSize = pageSizeSelect;
-            const totalPages = Math.ceil(filteredUsers.length / pageSize) || 1;
-            if (currentPage > totalPages) currentPage = totalPages;
-            const paged = getPaginated(filteredUsers, currentPage, pageSize);
-            tbody.innerHTML = paged.map(user => `
-                <tr class="slide-in">
-                    <td>
-                        <div class="d-flex align-items-center gap-2">
-                            <div class="user-avatar" style="width: 40px; height: 40px; background: ${AdminHelpers.getAvatarColor(user.name)}">
-                                ${user.avatar}
+            tbody.innerHTML = `<tr><td colspan="8" class="text-center py-5"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Đang tải...</span></div></td></tr>`;
+
+            const params = new URLSearchParams();
+            params.set('page', currentPage);
+            params.set('limit', itemsPerPage);
+
+            const searchVal = (document.getElementById('filter-search')?.value || document.getElementById('search-input')?.value || '').trim();
+            if (searchVal) params.set('search', searchVal);
+
+            const role = document.getElementById('filter-role')?.value || '';
+            if (role) params.set('role', role);
+
+            try {
+                const res = await fetch('/api/users?' + params.toString(), { headers: { 'Accept': 'application/json' } });
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const json = await res.json();
+
+                const data = Array.isArray(json.data) ? json.data : (json.data || []);
+                const meta = json.meta || { total: data.length, page: currentPage, limit: itemsPerPage, totalPages: 1 };
+
+                tbody.innerHTML = data.map(user => `
+                    <tr class="slide-in">
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="user-avatar" style="width: 40px; height: 40px; background: ${AdminHelpers.getAvatarColor(user.name)};display:inline-flex;align-items:center;justify-content:center;color:#fff;font-weight:600;border-radius:6px;">
+                                    ${(user.name || '').split(/\s+/).map(p => p[0] || '').slice(0, 2).join('').toUpperCase()}
+                                </div>
+                                <div>
+                                    <div class="fw-bold">${user.name}</div>
+                                    <small class="text-muted">${user.joinedAt ? new Date(user.joinedAt).toLocaleDateString() : ''}</small>
+                                </div>
                             </div>
-                            <div>
-                                <div class="fw-bold">${user.name}</div>
-                                <small class="text-muted">${user.lastActive}</small>
+                        </td>
+                        <td>${user.email}</td>
+                        <td>
+                            <span class="badge ${AdminHelpers.getRoleBadge(user.role)}">
+                                ${AdminHelpers.getRoleText(user.role)}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge ${AdminHelpers.getStatusBadge(user.status || 'active')}">
+                                ${AdminHelpers.getStatusText(user.status || 'active')}
+                            </span>
+                        </td>
+                        <td class="text-center">${user.surveys}</td>
+                        <td class="text-center"><strong class="text-primary">${user.responses}</strong></td>
+                        <td>${user.joinedAt ? new Date(user.joinedAt).toLocaleString() : ''}</td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <button class="btn btn-icon btn-outline-primary" title="Xem profile"><i class="fas fa-eye"></i></button>
+                                <button class="btn btn-icon btn-outline-success" title="Chỉnh sửa"><i class="fas fa-edit"></i></button>
+                                <button class="btn btn-icon btn-outline-danger" title="Vô hiệu hóa"><i class="fas fa-ban"></i></button>
                             </div>
-                        </div>
-                    </td>
-                    <td>${user.email}</td>
-                    <td>
-                        <span class="badge ${AdminHelpers.getRoleBadge(user.role)}">
-                            ${AdminHelpers.getRoleText(user.role)}
-                        </span>
-                    </td>
-                    <td>
-                        <span class="badge ${AdminHelpers.getStatusBadge(user.status)}">
-                            ${AdminHelpers.getStatusText(user.status)}
-                        </span>
-                    </td>
-                    <td class="text-center">${user.surveys}</td>
-                    <td class="text-center"><strong class="text-primary">${user.responses}</strong></td>
-                    <td>${AdminHelpers.formatDate(user.joinedAt)}</td>
-                    <td>
-                        <div class="btn-group btn-group-sm">
-                            <button class="btn btn-icon btn-outline-primary" title="Xem profile">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                            <button class="btn btn-icon btn-outline-success" title="Chỉnh sửa">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="btn btn-icon btn-outline-danger" title="Vô hiệu hóa">
-                                <i class="fas fa-ban"></i>
-                            </button>
-                        </div>
-                    </td>
-                </tr>
-            `).join('');
-            document.getElementById('total-users').textContent = filteredUsers.length;
-            renderPagination(filteredUsers.length, currentPage, pageSize);
+                        </td>
+                    </tr>
+                `).join('');
+
+                document.getElementById('total-users').textContent = meta.total || 0;
+                renderPagination(meta.total || 0, meta.page || currentPage, meta.limit || itemsPerPage);
+            } catch (err) {
+                tbody.innerHTML = `<tr><td colspan="8" class="text-center py-4 text-danger">Lỗi khi tải dữ liệu: ${err.message}</td></tr>`;
+                document.getElementById('users-pagination').innerHTML = '';
+                document.getElementById('total-users').textContent = '0';
+                console.error('loadUsers error', err);
+            }
         }
 
         function applyFilters() {
