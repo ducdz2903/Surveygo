@@ -66,9 +66,15 @@ $router->get('/api/questions', [App\Controllers\QuestionController::class, 'inde
 $router->get('/api/questions/by-survey', [App\Controllers\QuestionController::class, 'getBySurvey']); // Lấy câu hỏi theo khảo sát
 $router->get('/api/questions/show', [App\Controllers\QuestionController::class, 'show']); // Lấy chi tiết một câu hỏi
 
+// Events API
+$router->get('/api/events', [App\Controllers\EventController::class, 'index']); // Lấy danh sách sự kiện (phân trang + tìm kiếm)
+
 $router->post('/api/questions', [App\Controllers\QuestionController::class, 'create']); // Tạo câu hỏi mới
 $router->put('/api/questions', [App\Controllers\QuestionController::class, 'update']); // Cập nhật câu hỏi
 $router->delete('/api/questions', [App\Controllers\QuestionController::class, 'delete']); // Xóa câu hỏi
+
+// Users API
+$router->get('/api/users', [App\Controllers\UserController::class, 'index']); // Lấy danh sách users (phân trang + tìm kiếm)
 
 
 $request = Request::capture();

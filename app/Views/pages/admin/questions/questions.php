@@ -16,41 +16,7 @@ $appName = $appName ?? 'Admin - Quản lý Câu hỏi';
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-
-    <style>
-        .admin-sidebar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 250px;
-            height: 100vh;
-            background: #2c3e50;
-            color: white;
-            overflow-y: auto;
-            z-index: 1000;
-        }
-
-        .admin-header {
-            position: fixed;
-            top: 0;
-            left: 250px;
-            right: 0;
-            height: 60px;
-            background: white;
-            border-bottom: 1px solid #ddd;
-            z-index: 999;
-            display: flex;
-            align-items: center;
-            padding: 0 2rem;
-        }
-
-        .admin-content {
-            margin-left: 250px;
-            margin-top: 60px;
-            padding: 2rem;
-            min-height: calc(100vh - 60px);
-        }
-    </style>
+    <link href="/public/assets/css/admin.css" rel="stylesheet">
 </head>
 
 <body>
@@ -58,11 +24,11 @@ $appName = $appName ?? 'Admin - Quản lý Câu hỏi';
 
     <header class="admin-header">
         <div class="d-flex justify-content-between align-items-center w-100">
-            <h5 class="mb-0">Quản lý Câu hỏi</h5>
-            <div>
-                <button class="btn btn-link" id="admin-logout">
-                    <i class="fas fa-sign-out-alt me-1"></i>Đăng xuất
-                </button>
+            <h5 class="mb-0"><i class="fas fa-question-circle me-2"></i>Quản lý Câu hỏi</h5>
+            <div class="header-actions">
+                <div class="user-menu" id="admin-user-menu">
+                    <div class="user-avatar">AD</div>
+                </div>
             </div>
         </div>
     </header>
@@ -92,7 +58,9 @@ $appName = $appName ?? 'Admin - Quản lý Câu hỏi';
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td colspan="6" class="text-center text-muted">Đang tải dữ liệu...</td>
+                                    <td colspan="6" class="text-center text-muted py-5">
+                                        Chức năng đang được phát triển...
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>
@@ -104,9 +72,11 @@ $appName = $appName ?? 'Admin - Quản lý Câu hỏi';
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        document.getElementById('admin-logout')?.addEventListener('click', function () {
-            localStorage.removeItem('app.user');
-            window.location.href = '/login';
+        document.getElementById('admin-user-menu')?.addEventListener('click', function () {
+            if (confirm('Bạn có chắc muốn đăng xuất?')) {
+                localStorage.removeItem('app.user');
+                window.location.href = '/login';
+            }
         });
     </script>
 </body>

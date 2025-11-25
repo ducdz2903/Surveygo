@@ -16,21 +16,8 @@ use PDO;
 
 class SurveyController extends Controller
 {
-    /**
-     * GET /api/surveys
-     * Lấy danh sách khảo sát với phân trang và lọc
-     * 
-     * Query params:
-     * - page: int (default: 1)
-     * - limit: int (default: 10, max: 100)
-     * - search: string (tìm kiếm trong tiêu đề và mô tả)
-     * - trangThai: string (lọc theo trạng thái: hoạtĐộng, draft, published, etc.)
-     * - danhMuc: int (lọc theo danh mục ID)
-     * - quickPoll: bool (nếu true, chỉ lấy surveys có 1 câu hỏi)
-     * 
-     * Ví dụ: GET /api/surveys?page=1&limit=6&search=sức khỏe&trangThai=hoạtĐộng
-     *        GET /api/surveys?page=1&limit=6&quickPoll=true
-     */
+
+    // api phân trang
     public function index(Request $request)
     {
         $page = (int) ($request->query('page') ?? 1);
@@ -50,8 +37,10 @@ class SurveyController extends Controller
             $filters['danhMuc'] = $danhMuc;
         }
 
-        if ($request->query('quickPoll')) {
-            $filters['quickPoll'] = true;
+        $qpParam = $request->query('isQuickPoll');
+
+        if ($qpParam !== null && $qpParam !== '') {
+            $filters['isQuickPoll'] = (int) filter_var($qpParam, FILTER_VALIDATE_BOOLEAN);
         }
 
         $result = Survey::paginate($page, $limit, $filters);
@@ -186,10 +175,7 @@ class SurveyController extends Controller
         ]);
     }
 
-    /**
-     * DELETE /api/surveys?id=:id
-     * Xóa khảo sát
-     */
+    // xóa
     public function delete(Request $request)
     {
         $id = $request->query('id') ?? $request->input('id');
@@ -222,10 +208,7 @@ class SurveyController extends Controller
         ]);
     }
 
-    /**
-     * POST /api/surveys?id=:id/publish
-     * Công bố khảo sát (chuyển từ draft → published)
-     */
+    // công bố
     public function publish(Request $request)
     {
         $id = $request->query('id') ?? $request->input('id');
@@ -271,11 +254,7 @@ class SurveyController extends Controller
         ]);
     }
 
-    /**
-     * POST /api/surveys?id=:id/approve
-     * Phê duyệt khảo sát (trangThaiKiemDuyet: pending → approved)
-     * Chỉ admin/mod mới được gọi
-     */
+    // phê duyệt
     public function approve(Request $request)
     {
         $id = $request->query('id') ?? $request->input('id');
@@ -320,11 +299,7 @@ class SurveyController extends Controller
         ]);
     }
 
-    /**
-     * POST /api/questions
-     * Thêm câu hỏi vào khảo sát
-     * Body: { maKhaoSat, loaiCauHoi, noiDungCauHoi, batBuocTraLoi?, thuTu?, maCauHoi? }
-     */
+    // thêm mới
     public function addQuestion(Request $request)
     {
         $data = $request->input();
@@ -354,10 +329,7 @@ class SurveyController extends Controller
         ], 201);
     }
 
-    /**
-     * PUT /api/questions?id=:id
-     * Cập nhật câu hỏi
-     */
+    // cập nhật
     public function updateQuestion(Request $request)
     {
         $id = $request->query('id') ?? $request->input('id');
@@ -404,10 +376,7 @@ class SurveyController extends Controller
         ]);
     }
 
-    /**
-     * DELETE /api/questions?id=:id
-     * Xóa câu hỏi
-     */
+    // xóa
     public function deleteQuestion(Request $request)
     {
         $id = $request->query('id') ?? $request->input('id');
@@ -524,20 +493,7 @@ class SurveyController extends Controller
         return $date && $date->format('Y-m-d H:i:s') === $dateTime;
     }
 
-    /**
-     * POST /api/surveys/{id}/submit
-     * Nộp bài khảo sát - tạo survey submission + user responses
-     * 
-     * Request body:
-     * {
-     *   "userId": 1,
-     *   "answers": {
-     *     "1": "Buổi sáng",
-     *     "2": "5",
-     *     "3": "[\"7\", \"8\"]"
-     *   }
-     * }
-     */
+    // nộp khảo sát
     public function submit(Request $request)
     {
         // Get survey ID from route parameter
