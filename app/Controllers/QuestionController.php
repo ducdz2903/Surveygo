@@ -100,11 +100,7 @@ class QuestionController extends Controller
         ]);
     }
 
-    /**
-     * Tạo câu hỏi mới
-     * POST /api/questions
-     * Body: { maKhaoSat, loaiCauHoi, noiDungCauHoi, batBuocTraLoi?, thuTu?, maCauHoi? }
-     */
+    // tạo mới 
     public function create(Request $request)
     {
         $data = $request->input();
@@ -133,10 +129,7 @@ class QuestionController extends Controller
         ], 201);
     }
 
-    /**
-     * Cập nhật câu hỏi
-     * PUT /api/questions?id=:id
-     */
+    // cập nhật
     public function update(Request $request)
     {
         $id = $request->query('id') ?? $request->input('id');
@@ -183,10 +176,7 @@ class QuestionController extends Controller
         ]);
     }
 
-    /**
-     * Xoá câu hỏi
-     * DELETE /api/questions?id=:id
-     */
+    // xoá
     public function delete(Request $request)
     {
         $id = $request->query('id') ?? $request->input('id');

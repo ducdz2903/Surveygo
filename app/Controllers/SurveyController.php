@@ -175,10 +175,7 @@ class SurveyController extends Controller
         ]);
     }
 
-    /**
-     * DELETE /api/surveys?id=:id
-     * Xóa khảo sát
-     */
+    // xóa
     public function delete(Request $request)
     {
         $id = $request->query('id') ?? $request->input('id');
@@ -211,10 +208,7 @@ class SurveyController extends Controller
         ]);
     }
 
-    /**
-     * POST /api/surveys?id=:id/publish
-     * Công bố khảo sát (chuyển từ draft → published)
-     */
+    // công bố
     public function publish(Request $request)
     {
         $id = $request->query('id') ?? $request->input('id');
@@ -260,11 +254,7 @@ class SurveyController extends Controller
         ]);
     }
 
-    /**
-     * POST /api/surveys?id=:id/approve
-     * Phê duyệt khảo sát (trangThaiKiemDuyet: pending → approved)
-     * Chỉ admin/mod mới được gọi
-     */
+    // phê duyệt
     public function approve(Request $request)
     {
         $id = $request->query('id') ?? $request->input('id');
@@ -309,11 +299,7 @@ class SurveyController extends Controller
         ]);
     }
 
-    /**
-     * POST /api/questions
-     * Thêm câu hỏi vào khảo sát
-     * Body: { maKhaoSat, loaiCauHoi, noiDungCauHoi, batBuocTraLoi?, thuTu?, maCauHoi? }
-     */
+    // thêm mới
     public function addQuestion(Request $request)
     {
         $data = $request->input();
@@ -343,10 +329,7 @@ class SurveyController extends Controller
         ], 201);
     }
 
-    /**
-     * PUT /api/questions?id=:id
-     * Cập nhật câu hỏi
-     */
+    // cập nhật
     public function updateQuestion(Request $request)
     {
         $id = $request->query('id') ?? $request->input('id');
@@ -393,10 +376,7 @@ class SurveyController extends Controller
         ]);
     }
 
-    /**
-     * DELETE /api/questions?id=:id
-     * Xóa câu hỏi
-     */
+    // xóa
     public function deleteQuestion(Request $request)
     {
         $id = $request->query('id') ?? $request->input('id');
@@ -513,20 +493,7 @@ class SurveyController extends Controller
         return $date && $date->format('Y-m-d H:i:s') === $dateTime;
     }
 
-    /**
-     * POST /api/surveys/{id}/submit
-     * Nộp bài khảo sát - tạo survey submission + user responses
-     * 
-     * Request body:
-     * {
-     *   "userId": 1,
-     *   "answers": {
-     *     "1": "Buổi sáng",
-     *     "2": "5",
-     *     "3": "[\"7\", \"8\"]"
-     *   }
-     * }
-     */
+    // nộp khảo sát
     public function submit(Request $request)
     {
         // Get survey ID from route parameter
