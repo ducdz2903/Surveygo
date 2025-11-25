@@ -100,6 +100,34 @@ CREATE TABLE IF NOT EXISTS survey_submissions (
   UNIQUE KEY unique_user_survey (maNguoiDung, maKhaoSat)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS contact_messages (
+  id int UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  ma varchar(20) NOT NULL UNIQUE,
+  hoTen VARCHAR(255) NOT NULL,
+  email VARCHAR(255) NOT NULL,
+  soDienThoai VARCHAR(20) DEFAULT NULL,
+  chuDe VARCHAR(255) NOT NULL,
+  tinNhan TEXT NOT NULL,
+  idNguoiDung INT UNSIGNED DEFAULT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  response TEXT DEFAULT NULL,
+  FOREIGN KEY (idNguoiDung) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS feedbacks (
+  id int UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  ma varchar(20) NOT NULL UNIQUE,
+  idKhaoSat INT UNSIGNED NOT NULL,
+  idNguoiDung INT UNSIGNED NOT NULL,
+  danhGia int UNSIGNED NOT NULL,
+  binhLuan TEXT DEFAULT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (idKhaoSat) REFERENCES surveys(id) ON DELETE CASCADE,
+  FOREIGN KEY (idNguoiDung) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 INSERT IGNORE INTO users (id, name, email, password, role, created_at, updated_at) VALUES
   (1, 'Nguyễn Văn A', 'user1@example.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'user', NOW(), NOW()),
   (2, 'Trần Thị B', 'user2@example.com', '$2y$10$92IXUNpkjO0rOO5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'user', NOW(), NOW()),
@@ -231,3 +259,20 @@ INSERT IGNORE INTO answers (id, maCauHoi, noiDungCauTraLoi, laDung, creator_id, 
   (70, 21, 'Pizza', FALSE, 1, NOW(), NOW()),
   (71, 21, 'Gà rán', FALSE, 1, NOW(), NOW()),
   (72, 21, 'Cơm văn phòng healthy', TRUE, 1, NOW(), NOW());
+
+
+-- dữ liệu cho bảng contact mesages
+INSERT IGNORE INTO contact_messages (id,ma, hoTen, email, soDienThoai, chuDe, tinNhan, idNguoiDung, created_at, updated_at, response) VALUES
+  (1, 'CM001' ,'Lê Văn D', 'levand@example.com', '0909123456', 'Hỗ trợ khảo sát', 'Tôi không thể gửi kết quả khảo sát, báo lỗi khi submit.', 1, NOW(), NOW(), NULL),
+  (2, 'CM002','Ngô Thị E', 'ngothe@example.com', NULL, 'Yêu cầu hợp tác', 'Công ty chúng tôi muốn hợp tác tổ chức sự kiện cùng bạn.', NULL, NOW(), NOW(), 'Cám ơn, đã nhận yêu cầu. Chúng tôi sẽ liên hệ.'),
+  (3, 'CM003','Hoàng Văn F', 'hoangvf@example.com', '0912345678', 'Báo lỗi', 'Gặp lỗi khi xem kết quả khảo sát KS003.', 2, NOW(), NOW(), NULL),
+  (4, 'CM004','Trương Thị G', 'truongtg@example.com', '0987654321', 'Góp ý giao diện', 'Giao diện dark mode vẫn còn một số chỗ chưa tối.', 3, NOW(), NOW(), 'Cảm ơn góp ý, chúng tôi sẽ xem xét.'),
+  (5, 'CM005', 'Khách Ẩn Danh', 'anonymous@example.com', NULL, 'Góp ý chung', 'Mong có thêm tính năng xuất báo cáo PDF.', NULL, NOW(), NOW(), NULL);
+
+-- dữ liệu cho bảng feedbacks
+INSERT IGNORE INTO feedbacks (id,ma, idKhaoSat, idNguoiDung, danhGia, binhLuan, created_at, updated_at) VALUES
+  (1, 'FB001', 1, 1, 5, 'Khảo sát hữu ích, câu hỏi rõ ràng.', NOW(), NOW()),
+  (2,'FB002', 2, 2, 4, 'Nội dung tốt nhưng thời gian khảo sát hơi dài.', NOW(), NOW()),
+  (3,'FB002', 3, 1, 5, 'Rất phù hợp với mục tiêu nghiên cứu.', NOW(), NOW()),
+  (4, 'FB002',13, 2, 3, 'Quick poll hơi nhiều lựa chọn không cần thiết.', NOW(), NOW()),
+  (5,'FB002', 7, NULL, 4, 'Khảo sát nhanh, dễ trả lời.', NOW(), NOW());
