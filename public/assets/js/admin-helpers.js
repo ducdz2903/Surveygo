@@ -1,4 +1,3 @@
-// Lightweight helpers extracted from admin-mock-data.js
 class AdminHelpers {
     static formatDate(dateString) {
         if (!dateString) return '';
@@ -70,13 +69,11 @@ class AdminHelpers {
         return colors[index];
     }
 }
-
-// Expose as a global for legacy pages which include this script with a normal <script> tag
+// export class
 if (typeof window !== 'undefined') {
     window.AdminHelpers = AdminHelpers;
 }
 
-// Also support CommonJS environments
 if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
     module.exports = AdminHelpers;
 }
