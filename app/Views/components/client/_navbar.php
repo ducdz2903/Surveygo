@@ -115,6 +115,28 @@ $url = static function (array $urls, string $key, string $fallbackPath = '/') us
                 if (navUsername) navUsername.textContent = user.name || user.email || 'Tài khoản';
                 // Khi đăng nhập, logo đi tới /home
                 if (navBrand) navBrand.href = window.location.origin + '/home';
+                // hiển thị item quản lý nếu là admin 
+                try {
+                    var dropdownMenu = userDropdown ? userDropdown.querySelector('.dropdown-menu') : null;
+                    if (dropdownMenu) {
+                        var existingAdmin = document.getElementById('nav-admin-item');
+                        if (user.role === 'admin') {
+                            if (!existingAdmin) {
+                                var li = document.createElement('li');
+                                li.id = 'nav-admin-item';
+                                li.innerHTML = `<a class="dropdown-item" href="<?= $url($urls, 'admin', '/admin') ?>">Trang quản lý</a>`;
+                                var divider = dropdownMenu.querySelector('li hr.dropdown-divider');
+                                if (divider && divider.parentElement) {
+                                    dropdownMenu.insertBefore(li, divider.parentElement);
+                                } else {
+                                    dropdownMenu.appendChild(li);
+                                }
+                            }
+                        } else {
+                            if (existingAdmin) existingAdmin.remove();
+                        }
+                    }
+                } catch (e) { /* ignore DOM errors */ }
             } else {
                 // User not logged in
                 if (userDropdown) userDropdown.style.display = 'none';

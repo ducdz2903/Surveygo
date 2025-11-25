@@ -55,9 +55,9 @@ $urls['register'] = $urls['register'] ?? $__mk($__base, '/register');
                 </div>
                 <div class="col-md-3">
                     <select class="form-select" id="status-filter">
-                        <option value="">Tất c</option>
+                        <option value="">Tất cả</option>
                         <option value="hoạtĐộng">Hot 🔥</option>
-                        <option value="chờDuyệt">Mới ⭐</option>
+                        <option value="pending">Mới ⭐</option>
                     </select>
                 </div>
                 <div class="col-md-3">
@@ -86,7 +86,7 @@ $urls['register'] = $urls['register'] ?? $__mk($__base, '/register');
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         const baseUrl = window.location.origin;
-        const pageSize = 12;
+        const pageSize = 6;
         let currentPage = 1;
 
         // Load quick polls
@@ -94,7 +94,7 @@ $urls['register'] = $urls['register'] ?? $__mk($__base, '/register');
             const params = new URLSearchParams({
                 page: page,
                 limit: pageSize,
-                quickPoll: true,
+                isQuickPoll: true,
             });
 
             if (filters.search) {
@@ -126,38 +126,43 @@ $urls['register'] = $urls['register'] ?? $__mk($__base, '/register');
             }
         }
 
-        // Render quick polls grid
+        // Render quick polls grid (same style as surveys)
         function renderQuickPolls(surveys) {
             const container = document.getElementById('polls-container');
 
             if (!surveys || surveys.length === 0) {
                 container.innerHTML =
-                    '<div class="col-12"><div class="alert alert-info text-center">Không tìm thấy quick poll nào.</div></div>';
+                    '<div class="col-12 text-center py-5"><p class="text-muted fs-5">Không tìm thấy quick poll nào.</p></div>';
                 return;
             }
 
+            const badgeMap = {
+                'hoạtĐộng': { class: 'badge-hot', icon: 'fas fa-fire', text: 'Hot' },
+                'pending': { class: '', icon: 'fas fa-star', text: 'Mới' },
+                'chờDuyệt': { class: '', icon: 'fas fa-star', text: 'Mới' },
+            };
+
             container.innerHTML = surveys.map(survey => {
-                const badge = survey.trangThai === 'hoạtĐộng' ? '🔥 Hot' : '⭐ Mới';
-                const timeEstimate = survey.thoiGianUocTinh ? `~${survey.thoiGianUocTinh} phút` : '~1 phút';
+                const badge = badgeMap[survey.trangThai] || { class: '', icon: 'fas fa-star', text: 'Mới' };
+                const timeEstimate = survey.thoiLuongDuTinh || 1;
 
                 return `
                     <div class="col-lg-4 col-md-6">
-                        <div class="card h-100 border-0 shadow-sm hover-shadow survey-card">
-                            <div class="card-body d-flex flex-column">
-                                <div class="d-flex justify-content-between align-items-start mb-3">
-                                    <span class="badge bg-success">${badge}</span>
-                                    <small class="text-muted"><i class="far fa-clock"></i> ${timeEstimate}</small>
-                                </div>
-                                <h5 class="card-title fw-bold mb-2 flex-grow-1">${survey.tieuDe}</h5>
-                                <p class="card-text text-muted small mb-3 flex-grow-1">${survey.moTa || 'Không có mô tả'}</p>
-                                <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <span class="badge bg-warning text-dark">${survey.diemThuong || 0} điểm</span>
-                                    ${survey.danhMuc ? `<small class="text-muted">${survey.danhMuc}</small>` : ''}
-                                </div>
-                                <button class="btn btn-primary w-100" onclick="startPoll(${survey.id})">
-                                    Trả lời ngay <i class="fas fa-arrow-right ms-2"></i>
-                                </button>
+                        <div class="survey-card">
+                            <div class="survey-badge ${badge.class}">
+                                <i class="${badge.icon} me-1"></i>${badge.text}
                             </div>
+                            <div class="survey-header">
+                                <h5 class="survey-title">${survey.tieuDe}</h5>
+                                <div class="survey-meta">
+                                    <span class="text-primary fw-bold"><i class="fas fa-coins me-1"></i>+${survey.diemThuong || 5} điểm</span>
+                                    <span><i class="fas fa-clock me-1"></i>~${timeEstimate} phút</span>
+                                </div>
+                            </div>
+                            <p class="survey-desc">${survey.moTa || 'Trả lời nhanh 1 câu hỏi để kiếm điểm!'}</p>
+                            <button class="btn btn-gradient mt-auto w-100" onclick="startPoll(${survey.id})">
+                                <i class="fas fa-play me-1"></i>Bắt đầu
+                            </button>
                         </div>
                     </div>
                 `;
@@ -176,12 +181,18 @@ $urls['register'] = $urls['register'] ?? $__mk($__base, '/register');
             let html = '<ul class="pagination justify-content-center">';
 
             if (meta.page > 1) {
-                html += `<li class="page-item"><a class="page-link" href="#" onclick="loadQuickPolls(${meta.page - 1}, getFilters()); return false;">Trước</a></li>`;
-            } else {
-                html += '<li class="page-item disabled"><span class="page-link">Trước</span></li>';
+                html += `<li class="page-item"><a class="page-link" href="#" onclick="loadQuickPolls(${meta.page - 1}, getFilters()); return false;">← Trước</a></li>`;
             }
 
-            for (let i = 1; i <= meta.totalPages; i++) {
+            const startPage = Math.max(1, meta.page - 2);
+            const endPage = Math.min(meta.totalPages, meta.page + 2);
+
+            if (startPage > 1) {
+                html += `<li class="page-item"><a class="page-link" href="#" onclick="loadQuickPolls(1, getFilters()); return false;">1</a></li>`;
+                if (startPage > 2) html += '<li class="page-item disabled"><span class="page-link">...</span></li>';
+            }
+
+            for (let i = startPage; i <= endPage; i++) {
                 if (i === meta.page) {
                     html += `<li class="page-item active"><span class="page-link">${i}</span></li>`;
                 } else {
@@ -189,10 +200,13 @@ $urls['register'] = $urls['register'] ?? $__mk($__base, '/register');
                 }
             }
 
+            if (endPage < meta.totalPages) {
+                if (endPage < meta.totalPages - 1) html += '<li class="page-item disabled"><span class="page-link">...</span></li>';
+                html += `<li class="page-item"><a class="page-link" href="#" onclick="loadQuickPolls(${meta.totalPages}, getFilters()); return false;">${meta.totalPages}</a></li>`;
+            }
+
             if (meta.page < meta.totalPages) {
-                html += `<li class="page-item"><a class="page-link" href="#" onclick="loadQuickPolls(${meta.page + 1}, getFilters()); return false;">Tiếp</a></li>`;
-            } else {
-                html += '<li class="page-item disabled"><span class="page-link">Tiếp</span></li>';
+                html += `<li class="page-item"><a class="page-link" href="#" onclick="loadQuickPolls(${meta.page + 1}, getFilters()); return false;">Tiếp →</a></li>`;
             }
 
             html += '</ul>';
@@ -207,9 +221,9 @@ $urls['register'] = $urls['register'] ?? $__mk($__base, '/register');
             };
         }
 
-        // Start a poll (placeholder)
+        // Start a poll - redirect to survey guide page
         function startPoll(pollId) {
-            alert(`Bạn đã chọn quick poll #${pollId}`);
+            window.location.href = `/surveys/guide?id=${pollId}`;
         }
 
         // Initialize

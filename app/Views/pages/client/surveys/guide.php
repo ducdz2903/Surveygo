@@ -78,7 +78,8 @@ $urls['register'] = $urls['register'] ?? $__mk($__base, '/register');
                 }
 
                 const survey = result.data;
-                const estimatedTime = survey.soLuongCauHoi ? Math.ceil(survey.soLuongCauHoi / 10) : 5;
+                // Use thoiLuongDuTinh from API, fallback to 5 if not available
+                const estimatedTime = survey.thoiLuongDuTinh || 5;
 
                 const guideHTML = `
                     <div class="guide-header">
@@ -86,7 +87,7 @@ $urls['register'] = $urls['register'] ?? $__mk($__base, '/register');
                             <i class="fas fa-edit"></i>
                         </div>
                         <div>
-                            <h2 class="guide-title">${escapeHtml(survey.tenKhaoSat || 'Khảo sát')}</h2>
+                            <h2 class="guide-title">${escapeHtml(survey.tieuDe || 'Khảo sát')}</h2>
                             <p class="text-muted mb-0">${escapeHtml(survey.moTa || 'Khảo sát')}</p>
                         </div>
                     </div>
@@ -104,7 +105,7 @@ $urls['register'] = $urls['register'] ?? $__mk($__base, '/register');
                         </div>
                         <div class="info-item">
                             <div class="info-label">Điểm thưởng</div>
-                            <div class="info-value">${survey.diem || 0}</div>
+                            <div class="info-value">${survey.diemThuong || 0}</div>
                             <div class="text-muted">điểm</div>
                         </div>
                     </div>

@@ -131,8 +131,6 @@ $url = static fn($urls_array, $key, $default) => $urls_array[$key] ?? $default;
         <div class="container">
             <div class="section-header">
                 <h2 class="section-title">Khảo sát mới dành cho bạn <span id="survey-count">(0)</span></h2>
-                <a href="<?= $url($urls, 'surveys', '/surveys') ?>" class="view-all">Xem tất cả <i
-                        class="fas fa-arrow-right ms-1"></i></a>
             </div>
 
             <div class="row g-4" id="surveys-container"></div>

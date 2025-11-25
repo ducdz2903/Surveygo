@@ -86,7 +86,7 @@ $urls['register'] = $urls['register'] ?? $__mk($__base, '/register');
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         let currentPage = 1;
-        const pageSize = 12;
+        const pageSize = 6;
         let currentFilters = {};
 
         // Load surveys
@@ -95,6 +95,7 @@ $urls['register'] = $urls['register'] ?? $__mk($__base, '/register');
                 const queryParams = new URLSearchParams({
                     page: page,
                     limit: pageSize,
+                    isQuickPoll : false ,
                     ...filters,
                 });
 
