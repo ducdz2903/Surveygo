@@ -16,11 +16,24 @@ class QuestionController extends Controller
     // api lấy all
     public function index(Request $request)
     {
-        $questions = Question::all();
+        // Support pagination and filters
+        $page = (int)($request->query('page') ?? 1);
+        $perPage = (int)($request->query('per_page') ?? 10);
+        $search = $request->query('search') ?? null;
+        $loai = $request->query('loaiCauHoi') ?? $request->query('type') ?? null;
+        $survey = $request->query('maKhaoSat') ?? null;
+
+        $filters = [];
+        if ($search) $filters['search'] = $search;
+        if ($loai) $filters['loaiCauHoi'] = $loai;
+        if ($survey) $filters['maKhaoSat'] = $survey;
+
+        $result = Question::paginate(max(1, $page), max(1, $perPage), $filters);
 
         return $this->json([
             'error' => false,
-            'data' => array_map(fn($q) => $q->toArray(), $questions),
+            'data' => array_map(fn($q) => $q->toArray(), $result['data']),
+            'meta' => $result['meta'],
         ]);
     }
 

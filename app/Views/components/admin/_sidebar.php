@@ -21,7 +21,7 @@ $currentPath = $currentPath ?? ($_SERVER['REQUEST_URI'] ?? '/');
                 <a class="nav-link <?= str_contains($currentPath, '/admin/dashboard') ? 'active' : '' ?>"
                     href="/admin/dashboard">
                     <i class="fas fa-home"></i>
-                    <span>Dashboard</span>
+                    <span>Bảng điều khiển</span>
                 </a>
             </li>
 
@@ -45,7 +45,7 @@ $currentPath = $currentPath ?? ($_SERVER['REQUEST_URI'] ?? '/');
                 <a class="nav-link <?= str_contains($currentPath, '/admin/users') ? 'active' : '' ?>"
                     href="/admin/users">
                     <i class="fas fa-users"></i>
-                    <span>Users</span>
+                    <span>Người dùng</span>
                 </a>
             </li>
 
@@ -61,14 +61,14 @@ $currentPath = $currentPath ?? ($_SERVER['REQUEST_URI'] ?? '/');
                 <a class="nav-link <?= str_contains($currentPath, '/admin/feedbacks') ? 'active' : '' ?>"
                     href="/admin/feedbacks">
                     <i class="fas fa-comments"></i>
-                    <span>Feedbacks</span>
+                    <span>Phản hồi</span>
                 </a>
             </li>
             <li class="nav-item">
                 <a class="nav-link <?= str_contains($currentPath, '/admin/contact-messages') ? 'active' : '' ?>"
                     href="/admin/contact-messages">
                     <i class="fas fa-envelope"></i>
-                    <span>Contact Messages</span>
+                    <span>Liên hệ</span>
                 </a>
             </li>
         </ul>

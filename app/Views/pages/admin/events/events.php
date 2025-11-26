@@ -29,7 +29,7 @@
                     </select>
                 </div>
                 <div class="col-md-4 d-flex align-items-end">
-                    <button class="btn btn-light w-100 border" id="reset-filters">
+                    <button class="btn btn-light w-100 border" id="reset-filters" onclick="resetFilters()">
                         <i class="fas fa-redo me-2"></i>Đặt lại bộ lọc
                     </button>
                 </div>
@@ -229,11 +229,8 @@
             const type = document.getElementById('filter-type')?.value;
             if (type) {
                 params.set('trangThai', type);
-                params.set('status', type); // Gửi cả 2 phòng hờ backend đổi tên
             }
-
             try {
-                // Gọi API thật như yêu cầu
                 const res = await fetch('/api/events?' + params.toString(), {
                     headers: { 'Accept': 'application/json' }
                 });
@@ -258,18 +255,14 @@
             }
         }
 
-        // --- Event Listeners & Global Handlers ---
-
         // Expose function for pagination onclick
         window.changePage = function(page) {
             eventsCurrentPage = page;
             loadEvents();
         }
         
-        // Delete function (Placeholder for now)
         window.deleteEvent = function(id) {
             if(confirm('Bạn có chắc chắn muốn xóa sự kiện này?')) {
-                // Logic API DELETE /api/events/{id}
                 console.log('Delete event', id);
             }
         }
@@ -295,12 +288,17 @@
         
         document.getElementById('filter-search')?.addEventListener('input', debouncedLoad);
         
-        document.getElementById('reset-filters').addEventListener('click', () => {
-            document.getElementById('filter-type').value = '';
-            document.getElementById('filter-search').value = '';
+        // expose loadEvents and reset handler
+        window.loadEvents = loadEvents;
+        window.debouncedLoad = debouncedLoad;
+        window.resetFilters = function() {
+            const ft = document.getElementById('filter-type');
+            const fs = document.getElementById('filter-search');
+            if (ft) ft.value = '';
+            if (fs) fs.value = '';
             eventsCurrentPage = 1;
             loadEvents();
-        });
+        };
 
         // Initial Load
         loadEvents();

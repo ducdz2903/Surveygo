@@ -45,6 +45,68 @@ class Question
         return array_map(fn($row) => new self($row), $rows);
     }
 
+    public static function paginate(int $page = 1, int $perPage = 10, array $filters = []): array
+    {
+        /** @var PDO $db */
+        $db = Container::get('db');
+
+        $offset = max(0, ($page - 1)) * $perPage;
+
+        $wheres = [];
+        $params = [];
+
+        if (!empty($filters['search'])) {
+            $wheres[] = 'noiDungCauHoi LIKE :search';
+            $params[':search'] = '%' . $filters['search'] . '%';
+        }
+
+        if (!empty($filters['loaiCauHoi'])) {
+            $wheres[] = 'loaiCauHoi = :loai';
+            $params[':loai'] = $filters['loaiCauHoi'];
+        }
+
+        if (!empty($filters['maKhaoSat'])) {
+            $wheres[] = 'maKhaoSat = :surveyId';
+            $params[':surveyId'] = (int)$filters['maKhaoSat'];
+        }
+
+        $whereSql = '';
+        if (!empty($wheres)) {
+            $whereSql = 'WHERE ' . implode(' AND ', $wheres);
+        }
+
+        // total count
+        $countSql = "SELECT COUNT(*) as cnt FROM questions $whereSql";
+        $countStmt = $db->prepare($countSql);
+        $countStmt->execute($params);
+        $total = (int)$countStmt->fetchColumn();
+
+        // fetch paginated rows
+        $sql = "SELECT * FROM questions $whereSql ORDER BY thuTu ASC LIMIT :limit OFFSET :offset";
+        $stmt = $db->prepare($sql);
+        foreach ($params as $k => $v) {
+            $stmt->bindValue($k, $v);
+        }
+        $stmt->bindValue(':limit', (int)$perPage, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', (int)$offset, PDO::PARAM_INT);
+        $stmt->execute();
+        $rows = $stmt->fetchAll();
+
+        $data = array_map(fn($row) => new self($row), $rows);
+
+        $totalPages = $perPage > 0 ? (int)ceil($total / $perPage) : 1;
+
+        return [
+            'data' => $data,
+            'meta' => [
+                'total' => $total,
+                'page' => $page,
+                'per_page' => $perPage,
+                'total_pages' => $totalPages,
+            ],
+        ];
+    }
+
     /**
      * Lấy tất cả câu hỏi của một khảo sát (sắp xếp theo thuTu)
      */

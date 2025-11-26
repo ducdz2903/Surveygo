@@ -37,7 +37,7 @@
                     </select>
                 </div>
                 <div class="col-md-3 d-flex align-items-end">
-                    <button class="btn btn-light w-100 border" id="reset-filters">
+                    <button class="btn btn-light w-100 border" id="reset-filters" onclick="resetFilters()">
                         <i class="fas fa-redo me-2"></i>Đặt lại bộ lọc
                     </button>
                 </div>
@@ -277,13 +277,15 @@
         roleFilter.addEventListener('change', () => { currentPage = 1; loadUsers(); });
         statusFilter.addEventListener('change', () => { currentPage = 1; loadUsers(); });
 
-        document.getElementById('reset-filters').addEventListener('click', () => {
+        // expose loadUsers and resetFilters for inline usage
+        window.loadUsers = loadUsers;
+        window.resetFilters = function() {
             searchInput.value = '';
             roleFilter.value = '';
             statusFilter.value = '';
             currentPage = 1;
             loadUsers();
-        });
+        };
 
         // Initial Load
         loadUsers();

@@ -41,7 +41,7 @@
                     </select>
                 </div>
                 <div class="col-md-3 d-flex align-items-end">
-                    <button class="btn btn-light w-100 border" id="reset-filters">
+                    <button class="btn btn-light w-100 border" id="reset-filters" onclick="resetFilters()">
                         <i class="fas fa-redo me-2"></i>Đặt lại bộ lọc
                     </button>
                 </div>
@@ -303,15 +303,21 @@
         document.getElementById('filter-status').addEventListener('change', () => loadSurveys(1));
         document.getElementById('filter-category').addEventListener('change', () => loadSurveys(1));
         document.getElementById('filter-search')?.addEventListener('input', debouncedLoad);
-        
-        document.getElementById('reset-filters').addEventListener('click', () => {
-            document.getElementById('filter-status').value = '';
-            document.getElementById('filter-category').value = '';
-            if(document.getElementById('filter-search')) document.getElementById('filter-search').value = '';
-            loadSurveys(1);
-        });
 
+        // expose functions for inline handlers
         window.loadSurveys = loadSurveys;
+        window.debouncedLoad = debouncedLoad;
+
+        // reset handler (callable via onclick attribute)
+        window.resetFilters = function() {
+            const fs = document.getElementById('filter-status');
+            const fc = document.getElementById('filter-category');
+            const fsrch = document.getElementById('filter-search');
+            if (fs) fs.value = '';
+            if (fc) fc.value = '';
+            if (fsrch) fsrch.value = '';
+            loadSurveys(1);
+        };
         window.createSurvey = function() {
             alert("Tính năng đang phát triển: Gọi API tạo mới tại đây");
         };

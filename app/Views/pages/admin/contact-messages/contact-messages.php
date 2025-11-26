@@ -17,7 +17,7 @@
                     </div>
                 </div>
                 <div class="col-md-4 d-flex align-items-end">
-                    <button class="btn btn-light w-100 border" id="reset-filters">
+                    <button class="btn btn-light w-100 border" id="reset-filters" onclick="resetFilters()">
                         <i class="fas fa-redo me-2"></i>Đặt lại bộ lọc
                     </button>
                 </div>
@@ -171,7 +171,6 @@
                             </div>
                             <div class="d-flex flex-column" style="line-height:1.1;">
                                 <span class="fw-bold small">${it.hoTen || 'Ẩn danh'}</span>
-                                <small class="text-muted">ID: ${it.id}</small>
                             </div>
                         </div>
                     </td>
@@ -264,7 +263,14 @@
             }
         }
 
-        document.getElementById('reset-filters').addEventListener('click', () => { searchInput.value = ''; currentPage = 1; loadContacts(); });
+        // expose loadContacts so inline handlers can call it
+        window.loadContacts = loadContacts;
+
+        // reset handler usable via onclick
+        window.resetFilters = function() { searchInput.value = ''; currentPage = 1; loadContacts(); };
+
+        // keep key handling for Enter but expose a global helper
+        window.onContactSearchKeyUp = function(e) { if (e.key === 'Enter') { currentPage = 1; loadContacts(); } };
         searchInput.addEventListener('keyup', (e) => { if (e.key === 'Enter') { currentPage = 1; loadContacts(); } });
 
         loadContacts();
