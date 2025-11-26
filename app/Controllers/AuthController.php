@@ -105,7 +105,43 @@ class AuthController extends Controller
             'message' => 'Profile endpoint disabled (JWT removed).',
         ], 404);
     }
+    public function change_password(Request $request)
+    {
+        $email = strtolower(trim((string)$request->input('email')));
+        $oldPassword = (string)$request->input('old_password');
+        $newPassword = (string)$request->input('new_password');
 
+        if (!$email || !$oldPassword || !$newPassword) {
+            return $this->json([
+                'error' => true,
+                'message' => 'Email, old password, and new password are required.',
+            ], 422);
+        }
+
+        $user = User::findByEmail($email);
+
+        if (!$user || !$user->verifyPassword($oldPassword)) {
+            return $this->json([
+                'error' => true,
+                'message' => 'Invalid credentials.',
+            ], 401);
+        }
+
+        if (strlen($newPassword) < 6) {
+            return $this->json([
+                'error' => true,
+                'message' => 'New password must be at least 6 characters.',
+            ], 422);
+        }
+
+        $hashed = password_hash($newPassword, PASSWORD_BCRYPT);
+        $user->updatePassword($hashed);
+
+        return $this->json([
+            'error' => false,
+            'message' => 'Password changed successfully.',
+        ]);
+    }
     public function updateProfile(Request $request)
     {
         $id = (int)$request->input('id');

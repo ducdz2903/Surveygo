@@ -190,5 +190,13 @@ class User
             'totalPages' => $totalPages,
         ];
     }
+    public function updatePassword(string $newHashedPassword): void
+    {
+        /** @var \PDO $db */
+        $db = Container::get('db');
+        $now = (new \DateTimeImmutable())->format('Y-m-d H:i:s');
+        $stmt = $db->prepare('UPDATE users SET password = :password, updated_at = :updated_at WHERE id = :id');
+        $stmt->execute([':password' => $newHashedPassword, ':updated_at' => $now, ':id' => $this->id]);
+    }
 }
 
