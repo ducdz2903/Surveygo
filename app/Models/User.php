@@ -12,7 +12,10 @@ class User
     private int $id;
     private string $name;
     private string $email;
+    private ?string $phone;
     private string $password;
+    private ?string $gender;
+    private ?string $avatar;
     private string $role;
     private string $createdAt;
     private string $updatedAt;
@@ -22,7 +25,11 @@ class User
         $this->id = (int) ($attributes['id'] ?? 0);
         $this->name = $attributes['name'];
         $this->email = $attributes['email'];
+        $this->phone = $attributes['phone'];
         $this->password = $attributes['password'];
+        $this->phone = $attributes['phone'] ?? null;
+        $this->gender = $attributes['gender'] ?? null;
+        $this->avatar = $attributes['avatar'] ?? null;
         $this->role = $attributes['role'];
         $this->createdAt = $attributes['created_at'];
         $this->updatedAt = $attributes['updated_at'];
@@ -102,12 +109,29 @@ class User
         return $this->name;
     }
 
+    public function getPhone(): ?string
+    {
+        return $this->phone;
+    }
+
+    public function getGender(): ?string
+    {
+        return $this->gender;
+    }
+    public function getAvatar(): ?string
+    {
+        return $this->avatar;
+    }
+
     public function toArray(): array
     {
         return [
             'id' => $this->id,
             'name' => $this->name,
             'email' => $this->email,
+            'phone' => $this->phone,
+            'gender' => $this->gender,
+            'avatar' => $this->avatar,
             'role' => $this->role,
             'created_at' => $this->createdAt,
             'updated_at' => $this->updatedAt,
@@ -165,6 +189,14 @@ class User
             'limit' => $limit,
             'totalPages' => $totalPages,
         ];
+    }
+    public function updatePassword(string $newHashedPassword): void
+    {
+        /** @var \PDO $db */
+        $db = Container::get('db');
+        $now = (new \DateTimeImmutable())->format('Y-m-d H:i:s');
+        $stmt = $db->prepare('UPDATE users SET password = :password, updated_at = :updated_at WHERE id = :id');
+        $stmt->execute([':password' => $newHashedPassword, ':updated_at' => $now, ':id' => $this->id]);
     }
 }
 

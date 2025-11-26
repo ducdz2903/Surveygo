@@ -86,26 +86,27 @@ $urls = $urls ?? []; // Giả định $urls được truyền vào
                             <div class="info-card">
                                 <div class="card-header-custom">
                                     <h5><i class="fas fa-user-edit me-2"></i>Thông tin cá nhân</h5>
-                                    <button class="btn btn-primary-gradient btn-sm">Cập nhật</button>
+                                    <button id="btn-update-profile" type="button" class="btn btn-primary-gradient btn-sm">Cập nhật</button>
                                 </div>
                                 <div class="card-body">
                                     <form>
                                         <div class="row g-3">
                                             <div class="col-md-6">
                                                 <label class="form-label">Họ tên</label>
-                                                <input type="text" class="form-control" value="Tên Người Dùng">
+                                                <input id="input-name" type="text" class="form-control" value="Tên Người Dùng">
                                             </div>
                                             <div class="col-md-6">
                                                 <label class="form-label">Email</label>
-                                                <input type="email" class="form-control" value="user@email.com">
+                                                <input id="input-email" type="email" class="form-control" value="user@email.com">
                                             </div>
                                             <div class="col-md-6">
                                                 <label class="form-label">Số điện thoại</label>
-                                                <input type="text" class="form-control" placeholder="Chưa cập nhật">
+                                                <input id="input-phone" name="phone" type="text" class="form-control" placeholder="Số điện thoại">
                                             </div>
                                             <div class="col-md-6">
                                                 <label class="form-label">Giới tính</label>
-                                                <select class="form-select">
+                                                <select id="input-gender" class="form-select">
+                                                    <option value="">-- Chọn --</option>
                                                     <option value="male">Nam</option>
                                                     <option value="female">Nữ</option>
                                                     <option value="other">Khác</option>
@@ -121,7 +122,7 @@ $urls = $urls ?? []; // Giả định $urls được truyền vào
                             <div class="info-card">
                                 <div class="card-header-custom">
                                     <h5><i class="fas fa-lock me-2"></i>Bảo mật & Mật khẩu</h5>
-                                    <button class="btn btn-primary-gradient btn-sm">Cập nhật</button>
+                                    <button id="btn-update-password" type="button" class="btn btn-primary-gradient btn-sm">Cập nhật</button>
                                 </div>
                                 <div class="card-body">
                                     <form>
@@ -201,6 +202,7 @@ $urls = $urls ?? []; // Giả định $urls được truyền vào
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        const API_BASE = window.location.origin;
         // Lấy thông tin user từ localStorage khi trang load
         document.addEventListener('DOMContentLoaded', function () {
             try {
@@ -211,14 +213,14 @@ $urls = $urls ?? []; // Giả định $urls được truyền vào
                     // Cập nhật thông tin cá nhân
                     if (user.name) {
                         document.querySelector('.user-fullname').textContent = user.name;
-                        const fullNameInput = document.querySelector('input[value="Tên Người Dùng"]');
-                        if (fullNameInput) {
-                            fullNameInput.value = user.name;
+                        const nameInput = document.getElementById('input-name');
+                        if (nameInput) {
+                            nameInput.value = user.name;
                         }
                     }
 
                     if (user.email) {
-                        const emailInput = document.querySelector('input[type="email"]');
+                        const emailInput = document.getElementById('input-email');
                         if (emailInput) {
                             emailInput.value = user.email;
                         }
@@ -231,6 +233,20 @@ $urls = $urls ?? []; // Giả định $urls được truyền vào
                             const encodedName = encodeURIComponent(user.name);
                             avatarImg.src = `https://ui-avatars.com/api/?name=${encodedName}&background=ec4899&color=fff&size=150`;
                         }
+                    }
+
+                    const phoneInput = document.getElementById('input-phone');
+                    if (user.phone) {
+                        console.log('Cập nhật số điện thoại:', user.phone);
+                        if (phoneInput) {
+                            phoneInput.value = user.phone;
+                        }
+                    }
+
+                    // Set gender select from user data
+                    const genderSelect = document.getElementById('input-gender');
+                    if (genderSelect && user.gender) {
+                        genderSelect.value = user.gender;
                     }
 
                     // Cập nhật member since date
@@ -267,6 +283,148 @@ $urls = $urls ?? []; // Giả định $urls được truyền vào
                 icon.classList.add('fa-eye');
             }
         }
+
+        // Helper: convert file to base64 data URL
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = (err) => reject(err);
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // setup nhận sự kiện nút
+        document.addEventListener('DOMContentLoaded', () => {
+            const avatarInput = document.getElementById('avatar-upload');
+            const avatarImg = document.querySelector('.avatar-img');
+            let selectedAvatarData = null; // base64 string cho ảnh đại diện
+
+            if (avatarInput) {
+                avatarInput.addEventListener('change', async (e) => {
+                    const file = e.target.files[0];
+                    if (!file) return;
+                    try {
+                        const dataUrl = await fileToBase64(file);
+                        selectedAvatarData = dataUrl;
+                        if (avatarImg) avatarImg.src = dataUrl;
+                    } catch (err) {
+                        console.error('Lỗi đọc file avatar:', err);
+                        alert('Không thể đọc file ảnh. Vui lòng thử lại.');
+                    }
+                });
+            }
+
+            const btnUpdateProfile = document.getElementById('btn-update-profile');
+            if (btnUpdateProfile) {
+                btnUpdateProfile.addEventListener('click', async () => {
+                    try {
+                        const stored = localStorage.getItem('app.user');
+                        if (!stored) return alert('Vui lòng đăng nhập trước khi cập nhật.');
+                        const currentUser = JSON.parse(stored);
+
+                        const payload = {
+                            id: currentUser.id,
+                            name: document.getElementById('input-name').value.trim(),
+                            email: document.getElementById('input-email').value.trim(),
+                            phone: (document.getElementById('input-phone') ? document.getElementById('input-phone').value.trim() : ''),
+                            gender: document.getElementById('input-gender').value || '',
+                        };
+
+                        if (selectedAvatarData) {
+                            payload.avatar = selectedAvatarData;
+                        }
+
+                        // Email validation
+                        if (!payload.name) return alert('Vui lòng nhập họ tên.');
+                        if (!payload.email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(payload.email)) return alert('Email không hợp lệ.');
+
+                        const res = await fetch(`${API_BASE}/api/auth/update-profile`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload),
+                        });
+                        let data;
+                        try {
+                            data = await res.json();
+                        } catch (e) {
+                            console.error('Response is not JSON:', e);
+                            return alert('Máy chủ trả về phản hồi không mong muốn. Vui lòng thử lại.');
+                        }
+                        if (!res.ok || data.error) {
+                            return alert(data.message || 'Cập nhật thất bại.');
+                        }
+
+                        // Update local user
+                        const updatedUser = Object.assign({}, currentUser, {
+                            name: payload.name,
+                            email: payload.email,
+                            phone: payload.phone,
+                            gender: payload.gender || null,
+                            avatar: payload.avatar || currentUser.avatar || null,
+                        });
+                        localStorage.setItem('app.user', JSON.stringify(updatedUser));
+
+                        // Update UI
+                        const nameEl = document.querySelector('.user-fullname');
+                        if (nameEl) nameEl.textContent = updatedUser.name;
+
+                        alert('Cập nhật thông tin thành công.');
+                    } catch (err) {
+                        console.error(err);
+                        alert('Đã có lỗi xảy ra khi cập nhật.');
+                    }
+                });
+            }
+
+            const btnUpdatePassword = document.getElementById('btn-update-password');
+            if (btnUpdatePassword) {
+                btnUpdatePassword.addEventListener('click', async () => {
+                    try {
+                        const stored = localStorage.getItem('app.user');
+                        if (!stored) return alert('Vui lòng đăng nhập trước khi đổi mật khẩu.');
+                        const currentUser = JSON.parse(stored);
+
+                        const payload = {
+                            id: currentUser.id,
+                            current_password: document.getElementById('current-password').value,
+                            new_password: document.getElementById('new-password').value,
+                            confirm_password: document.getElementById('confirm-password').value,
+                        };
+
+                        if (!payload.current_password || !payload.new_password || !payload.confirm_password) return alert('Vui lòng điền đầy đủ các trường mật khẩu.');
+                        if (payload.new_password.length < 6) return alert('Mật khẩu mới phải có ít nhất 6 ký tự.');
+                        if (payload.new_password !== payload.confirm_password) return alert('Mật khẩu mới không khớp.');
+
+                        const res = await fetch(`${API_BASE}/api/auth/change-password`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload),
+                        });
+                        let data;
+                        try {
+                            data = await res.json();
+                        } catch (e) {
+                            console.error('Response is not JSON:', e);
+                            return alert('Máy chủ trả về phản hồi không mong muốn. Vui lòng thử lại.');
+                        }
+                        if (!res.ok || data.error) {
+                            return alert(data.message || 'Đổi mật khẩu thất bại.');
+                        }
+
+                        // Clear password text in box
+                        document.getElementById('current-password').value = '';
+                        document.getElementById('new-password').value = '';
+                        document.getElementById('confirm-password').value = '';
+
+                        alert('Đổi mật khẩu thành công.');
+                    } catch (err) {
+                        console.error(err);
+                        alert('Đã có lỗi xảy ra khi đổi mật khẩu.');
+                    }
+                });
+            }
+        });
     </script>
 </body>
 
