@@ -1,7 +1,4 @@
 <?php
-/**
- * Admin Footer Component
- */
 ?>
 <footer class="admin-footer">
     <div class="container-fluid">
