@@ -15,8 +15,10 @@
                 <div class="col-md-3">
                     <label class="form-label fw-bold small text-uppercase text-muted">Tìm kiếm</label>
                     <div class="input-group">
-                        <span class="input-group-text bg-light border-end-0"><i class="fas fa-search text-muted"></i></span>
-                        <input type="text" id="search-input" class="form-control border-start-0 ps-0" placeholder="Nhập nội dung câu hỏi...">
+                        <span class="input-group-text bg-light border-end-0"><i
+                                class="fas fa-search text-muted"></i></span>
+                        <input type="text" id="search-input" class="form-control border-start-0 ps-0"
+                            placeholder="Nhập nội dung câu hỏi...">
                     </div>
                 </div>
                 <div class="col-md-3">
@@ -78,7 +80,7 @@
                 </div>
                 <nav>
                     <ul class="pagination pagination-sm mb-0" id="pagination">
-                        </ul>
+                    </ul>
                 </nav>
             </div>
         </div>
@@ -96,7 +98,8 @@
                 <form id="question-form">
                     <div class="mb-3">
                         <label class="form-label fw-bold">Nội dung câu hỏi <span class="text-danger">*</span></label>
-                        <textarea class="form-control" rows="2" required placeholder="Nhập câu hỏi của bạn..."></textarea>
+                        <textarea class="form-control" rows="2" required
+                            placeholder="Nhập câu hỏi của bạn..."></textarea>
                     </div>
                     <div class="row mb-3">
                         <div class="col-md-6">
@@ -123,159 +126,14 @@
                             <div class="input-group mb-2">
                                 <span class="input-group-text">A</span>
                                 <input type="text" class="form-control" placeholder="Nhập lựa chọn...">
-                                <button type="button" class="btn btn-outline-danger"><i class="fas fa-times"></i></button>
+                                <button type="button" class="btn btn-outline-danger"><i
+                                        class="fas fa-times"></i></button>
                             </div>
                             <div class="input-group mb-2">
                                 <span class="input-group-text">B</span>
                                 <input type="text" class="form-control" placeholder="Nhập lựa chọn...">
-                                <button type="button" class="btn btn-outline-danger"><i class="fas fa-times"></i></button>
-                            </div>
-                        </div>
-                        <button type="button" class="btn btn-sm btn-outline-primary mt-2">
-                            <i class="fas fa-plus me-1"></i>Thêm lựa chọn
-                        </button>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                <button type="button" class="btn btn-primary">Lưu câu hỏi</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="container-fluid">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h4 class="mb-1">Quản lý Câu hỏi</h4>
-            <p class="text-muted mb-0">Ngân hàng câu hỏi và quản lý liên kết khảo sát</p>
-        </div>
-        <button class="btn btn-primary" onclick="openCreateModal()">
-            <i class="fas fa-plus me-2"></i>Tạo câu hỏi mới
-        </button>
-    </div>
-
-    <div class="card mb-4 fade-in">
-        <div class="card-body">
-            <div class="row g-3">
-                <div class="col-md-3">
-                    <label class="form-label fw-bold small text-uppercase text-muted">Tìm kiếm</label>
-                    <div class="input-group">
-                        <span class="input-group-text bg-light border-end-0"><i class="fas fa-search text-muted"></i></span>
-                        <input type="text" id="search-input" class="form-control border-start-0 ps-0" placeholder="Nhập nội dung câu hỏi...">
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label fw-bold small text-uppercase text-muted">Loại</label>
-                    <select class="form-select" id="filter-type">
-                        <option value="">Tất cả loại</option>
-                        <option value="single_choice">Một lựa chọn (Radio)</option>
-                        <option value="multi_choice">Nhiều lựa chọn (Checkbox)</option>
-                        <option value="text">Văn bản (Text)</option>
-                        <option value="rating">Đánh giá (Rating)</option>
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label fw-bold small text-uppercase text-muted">Danh mục</label>
-                    <select class="form-select" id="filter-survey">
-                        <option value="">Tất cả danh mục</option>
-                        <option value="1">Khảo sát thói quen đọc</option>
-                        <option value="2">Đánh giá dịch vụ</option>
-                    </select>
-                </div>
-                <div class="col-md-3 d-flex align-items-end">
-                    <button class="btn btn-light w-100 border" onclick="resetFilters()">
-                        <i class="fas fa-redo"></i>
-                        Đặt lại bộ lọc
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="card fade-in" style="animation-delay: 0.1s">
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="bg-light">
-                        <tr>
-                            <th class="ps-4" style="width: 80px;">#ID</th>
-                            <th style="width: 40%;">Nội dung câu hỏi</th>
-                            <th style="width: 150px;">Loại</th>
-                            <th>Thuộc khảo sát</th>
-                            <th style="width: 150px;">Ngày tạo</th>
-                            <th class="text-end pe-4" style="width: 150px;">Thao tác</th>
-                        </tr>
-                    </thead>
-                    <tbody id="questions-table-body">
-                        <tr>
-                            <td colspan="6" class="text-center py-5">
-                                <div class="spinner-border text-primary" role="status"></div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        <div class="card-footer bg-white border-top-0 py-3">
-            <div class="d-flex justify-content-between align-items-center">
-                <div class="text-muted small">
-                    Hiển thị <span id="showing-count">0</span> / <span id="total-count">0</span> câu hỏi
-                </div>
-                <nav>
-                    <ul class="pagination pagination-sm mb-0" id="pagination">
-                        </ul>
-                </nav>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="modal fade" id="questionModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="modalTitle">Tạo câu hỏi mới</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <form id="question-form">
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Nội dung câu hỏi <span class="text-danger">*</span></label>
-                        <textarea class="form-control" rows="2" required placeholder="Nhập câu hỏi của bạn..."></textarea>
-                    </div>
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold">Loại câu hỏi</label>
-                            <select class="form-select" id="modal-type-select">
-                                <option value="single_choice">Một lựa chọn (Radio)</option>
-                                <option value="multi_choice">Nhiều lựa chọn (Checkbox)</option>
-                                <option value="text">Văn bản (Text)</option>
-                                <option value="rating">Đánh giá (Star/Scale)</option>
-                            </select>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold">Gán vào khảo sát</label>
-                            <select class="form-select">
-                                <option value="">-- Chọn khảo sát --</option>
-                                <option value="1">Khảo sát thói quen đọc</option>
-                                <option value="2">Đánh giá dịch vụ</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div id="options-area" class="mb-3 border rounded p-3 bg-light">
-                        <label class="form-label fw-bold small text-uppercase">Các lựa chọn trả lời</label>
-                        <div id="options-list">
-                            <div class="input-group mb-2">
-                                <span class="input-group-text">A</span>
-                                <input type="text" class="form-control" placeholder="Nhập lựa chọn...">
-                                <button type="button" class="btn btn-outline-danger"><i class="fas fa-times"></i></button>
-                            </div>
-                            <div class="input-group mb-2">
-                                <span class="input-group-text">B</span>
-                                <input type="text" class="form-control" placeholder="Nhập lựa chọn...">
-                                <button type="button" class="btn btn-outline-danger"><i class="fas fa-times"></i></button>
+                                <button type="button" class="btn btn-outline-danger"><i
+                                        class="fas fa-times"></i></button>
                             </div>
                         </div>
                         <button type="button" class="btn btn-sm btn-outline-primary mt-2">
@@ -293,13 +151,11 @@
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // --- Config for API pagination ---
+    document.addEventListener('DOMContentLoaded', function () {
         const API_BASE = '/api/questions';
         let currentPage = 1;
         let perPage = 10;
 
-        // --- 2. HELPERS ---
         const getTypeBadge = (type) => {
             const map = {
                 'single_choice': { class: 'bg-primary', icon: 'fa-dot-circle', text: 'Radio' },
@@ -313,7 +169,7 @@
                     </span>`;
         };
 
-        // --- 3. RENDER FUNCTION ---
+        // hàm tạo giao diện bảng
         function renderTable(rows, meta) {
             const tbody = document.getElementById('questions-table-body');
             const totalEl = document.getElementById('total-count');
@@ -348,13 +204,12 @@
                     </td>
                 </tr>
             `).join('');
-
             totalEl.textContent = meta.total;
             showingEl.textContent = rows.length;
-
             renderPagination(meta.page, meta.total_pages);
         }
 
+        // băm chuỗi trên trình duyệt
         function escapeHtml(str) {
             if (!str) return '';
             return String(str)
@@ -365,6 +220,7 @@
                 .replace(/'/g, '&#39;');
         }
 
+        // tạo giao diện phân trang 
         function renderPagination(page, totalPages) {
             const container = document.getElementById('pagination');
             if (totalPages <= 1) {
@@ -396,9 +252,8 @@
                 <li class="page-item ${item.disabled ? 'disabled' : ''} ${item.active ? 'active' : ''}"><a class="page-link" href="#" data-page="${item.page}">${item.label}</a></li>
             `).join('');
 
-            // attach handlers
             Array.from(container.querySelectorAll('a[data-page]')).forEach(a => {
-                a.addEventListener('click', function(e) {
+                a.addEventListener('click', function (e) {
                     e.preventDefault();
                     const p = parseInt(this.getAttribute('data-page'));
                     if (!isNaN(p) && p !== currentPage) {
@@ -408,7 +263,7 @@
             });
         }
 
-        // --- 4. FILTER LOGIC ---
+        // tạo params truyền vào api
         function buildQueryParams(page = 1) {
             const params = new URLSearchParams();
             params.set('page', page);
@@ -422,6 +277,7 @@
             return params.toString();
         }
 
+        // gọi api lấy danh sách
         async function fetchQuestions(page = 1) {
             currentPage = page;
             const tbody = document.getElementById('questions-table-body');
@@ -435,7 +291,6 @@
                     tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-danger">${escapeHtml(json.message || 'Lỗi server')}</td></tr>`;
                     return;
                 }
-
                 const rows = json.data || [];
                 const meta = json.meta || { total: 0, page: 1, per_page: perPage, total_pages: 1 };
                 renderTable(rows, meta);
@@ -448,15 +303,13 @@
         // --- 5. EVENT LISTENERS ---
         function debounce(fn, wait = 300) {
             let t;
-            return function(...args) {
+            return function (...args) {
                 clearTimeout(t);
                 t = setTimeout(() => fn.apply(this, args), wait);
             };
         }
-
         const debouncedLoad = debounce(() => { currentPage = 1; fetchQuestions(1); }, 300);
 
-        // Attach safely and add logs for debugging
         const si = document.getElementById('search-input');
         const ft = document.getElementById('filter-type');
         const fs = document.getElementById('filter-survey');
@@ -465,7 +318,7 @@
             let composing = false;
             si.addEventListener('compositionstart', () => { composing = true; });
             si.addEventListener('compositionend', (e) => { composing = false; fetchQuestions(1); });
-            si.addEventListener('input', function(e) { console.log('[questions] input', e.target.value, 'composing=', composing); if (!composing) debouncedLoad(); });
+            si.addEventListener('input', function (e) {if (!composing) debouncedLoad(); });
             console.log('[questions] search-input listener attached');
         } else {
             console.warn('[questions] search-input element not found');
@@ -473,9 +326,8 @@
 
         if (ft) ft.addEventListener('change', () => { currentPage = 1; fetchQuestions(1); }); else console.warn('[questions] filter-type not found');
         if (fs) fs.addEventListener('change', () => { currentPage = 1; fetchQuestions(1); }); else console.warn('[questions] filter-survey not found');
-        
-        // Modal Logic (Toggle Input Area based on Type)
-        document.getElementById('modal-type-select').addEventListener('change', function() {
+
+        document.getElementById('modal-type-select').addEventListener('change', function () {
             const type = this.value;
             const optionsArea = document.getElementById('options-area');
             if (type === 'text' || type === 'rating') {
@@ -485,15 +337,16 @@
             }
         });
 
-        // Global functions for buttons
-        window.resetFilters = function() {
+        // nút đặt lại bộ lọc
+        window.resetFilters = function () {
             document.getElementById('search-input').value = '';
             document.getElementById('filter-type').value = '';
             document.getElementById('filter-survey').value = '';
             fetchQuestions(1);
         };
 
-        window.openCreateModal = function() {
+        // modal tạo mới / chi tiết
+        window.openCreateModal = function () {
             const modal = new bootstrap.Modal(document.getElementById('questionModal'));
             document.getElementById('modalTitle').textContent = 'Tạo câu hỏi mới';
             document.getElementById('question-form').reset();
@@ -501,15 +354,14 @@
             modal.show();
         };
 
-        window.editQuestion = function(id) {
-            // Load detail and open modal (placeholder)
+        // nút chỉnh sửa
+        window.editQuestion = function (id) {
             fetch('/api/questions?id=' + encodeURIComponent(id))
                 .then(r => r.json())
                 .then(json => {
                     if (json && !json.error && json.data) {
                         const modal = new bootstrap.Modal(document.getElementById('questionModal'));
                         document.getElementById('modalTitle').textContent = 'Cập nhật câu hỏi #' + id;
-                        // TODO: fill form fields from json.data
                         modal.show();
                     } else {
                         alert('Không tải được dữ liệu câu hỏi.');
@@ -517,8 +369,9 @@
                 }).catch(err => { console.error(err); alert('Lỗi kết nối'); });
         };
 
-        window.deleteQuestion = function(id) {
-            if(confirm('Bạn có chắc chắn muốn xóa câu hỏi #' + id + '?')) {
+        // nút xoá
+        window.deleteQuestion = function (id) {
+            if (confirm('Bạn có chắc chắn muốn xóa câu hỏi #' + id + '?')) {
                 fetch('/api/questions', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) })
                     .then(r => r.json())
                     .then(json => {

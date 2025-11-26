@@ -12,8 +12,10 @@
                 <div class="col-md-4">
                     <label class="form-label fw-bold small text-uppercase text-muted">Tìm kiếm</label>
                     <div class="input-group">
-                        <span class="input-group-text bg-light border-end-0"><i class="fas fa-search text-muted"></i></span>
-                        <input type="text" id="filter-search" class="form-control border-start-0 ps-0" placeholder="Tìm theo tên, email hoặc chủ đề...">
+                        <span class="input-group-text bg-light border-end-0"><i
+                                class="fas fa-search text-muted"></i></span>
+                        <input type="text" id="filter-search" class="form-control border-start-0 ps-0"
+                            placeholder="Tìm theo tên, email hoặc chủ đề...">
                     </div>
                 </div>
                 <div class="col-md-4 d-flex align-items-end">
@@ -99,14 +101,16 @@
                         </div>
                         <div class="col-12">
                             <label class="form-label fw-bold">Phản hồi (phanHoi)</label>
-                            <textarea id="contact-phanHoi" class="form-control" rows="4" placeholder="Ghi phản hồi cho người gửi..."></textarea>
+                            <textarea id="contact-phanHoi" class="form-control" rows="4"
+                                placeholder="Ghi phản hồi cho người gửi..."></textarea>
                         </div>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                <button type="button" class="btn btn-danger" id="btn-delete-contact" onclick="deleteContact()">Xóa</button>
+                <button type="button" class="btn btn-danger" id="btn-delete-contact"
+                    onclick="deleteContact()">Xóa</button>
                 <button type="button" class="btn btn-primary" id="btn-save-contact" onclick="saveContact()">
                     <i class="fas fa-save me-2"></i>Lưu phản hồi
                 </button>
@@ -118,7 +122,7 @@
 <script src="/public/assets/js/admin-helpers.js"></script>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         let currentPage = 1;
         const itemsPerPage = 10;
         const totalEl = document.getElementById('total-contacts');
@@ -167,7 +171,7 @@
                         <div class="d-flex align-items-center gap-2">
                             <div class="rounded-circle text-white d-flex align-items-center justify-content-center" 
                                  style="width:32px; height:32px; font-size:0.8rem; background: ${window.AdminHelpers ? AdminHelpers.getAvatarColor(it.hoTen || '') : '#6c757d'}">
-                                ${(it.hoTen || 'Ẩn danh').split(' ').map(s=>s[0]).slice(0,2).join('').toUpperCase()}
+                                ${(it.hoTen || 'Ẩn danh').split(' ').map(s => s[0]).slice(0, 2).join('').toUpperCase()}
                             </div>
                             <div class="d-flex flex-column" style="line-height:1.1;">
                                 <span class="fw-bold small">${it.hoTen || 'Ẩn danh'}</span>
@@ -192,20 +196,38 @@
             const totalPages = Math.max(1, Math.ceil(total / limit));
             if (totalPages <= 1) { container.innerHTML = ''; return; }
 
-            let html = '<nav><ul class="pagination mb-0">';
-            for (let p = 1; p <= totalPages; p++) {
-                html += `<li class="page-item ${p === page ? 'active' : ''}"><a href="#" class="page-link" data-page="${p}">${p}</a></li>`;
+            let html = '<ul class="pagination mb-0">';
+
+            // Previous (always visible, disabled when on first page)
+            if (page > 1) {
+                html += `<li class="page-item"><a href="#" class="page-link" data-page="${page - 1}"><i class="fas fa-chevron-left"></i></a></li>`;
+            } else {
+                html += `<li class="page-item disabled"><span class="page-link" aria-disabled="true"><i class="fas fa-chevron-left"></i></span></li>`;
             }
-            html += '</ul></nav>';
+
+            for (let p = 1; p <= totalPages; p++) {
+                if (p === page) html += `<li class="page-item active"><span class="page-link">${p}</span></li>`;
+                else html += `<li class="page-item"><a href="#" class="page-link" data-page="${p}">${p}</a></li>`;
+            }
+
+            // Next (always visible, disabled when on last page)
+            if (page < totalPages) {
+                html += `<li class="page-item"><a href="#" class="page-link" data-page="${page + 1}"><i class="fas fa-chevron-right"></i></a></li>`;
+            } else {
+                html += `<li class="page-item disabled"><span class="page-link" aria-disabled="true"><i class="fas fa-chevron-right"></i></span></li>`;
+            }
+
+            html += '</ul>';
             container.innerHTML = html;
 
-            container.querySelectorAll('.page-link').forEach(a => {
-                a.addEventListener('click', (e) => { e.preventDefault(); currentPage = parseInt(a.dataset.page); loadContacts(); });
+            // Only attach handlers to links that have a data-page attribute
+            container.querySelectorAll('.page-link[data-page]').forEach(a => {
+                a.addEventListener('click', (e) => { e.preventDefault(); const p = parseInt(a.dataset.page); if (!isNaN(p)) { currentPage = p; loadContacts(); } });
             });
         }
 
         // Open contact modal
-        window.openContact = async function(id) {
+        window.openContact = async function (id) {
             const modal = new bootstrap.Modal(document.getElementById('contactModal'));
             try {
                 const res = await fetch(`/api/contact-messages/show?id=${id}`);
@@ -228,7 +250,7 @@
             }
         }
 
-        window.saveContact = async function() {
+        window.saveContact = async function () {
             const id = document.getElementById('contact-id').value;
             const phanHoi = document.getElementById('contact-phanHoi').value.trim();
             if (!id) return alert('ID không xác định');
@@ -248,7 +270,7 @@
             }
         }
 
-        window.deleteContact = async function(id) {
+        window.deleteContact = async function (id) {
             const confirmed = confirm('Bạn có chắc muốn xóa mục này?');
             if (!confirmed) return;
             try {
@@ -267,10 +289,10 @@
         window.loadContacts = loadContacts;
 
         // reset handler usable via onclick
-        window.resetFilters = function() { searchInput.value = ''; currentPage = 1; loadContacts(); };
+        window.resetFilters = function () { searchInput.value = ''; currentPage = 1; loadContacts(); };
 
         // keep key handling for Enter but expose a global helper
-        window.onContactSearchKeyUp = function(e) { if (e.key === 'Enter') { currentPage = 1; loadContacts(); } };
+        window.onContactSearchKeyUp = function (e) { if (e.key === 'Enter') { currentPage = 1; loadContacts(); } };
         searchInput.addEventListener('keyup', (e) => { if (e.key === 'Enter') { currentPage = 1; loadContacts(); } });
 
         loadContacts();
