@@ -1,0 +1,61 @@
+#!/usr/bin/env sh
+# .githooks/pre-commit
+# When sql/mysql/init.sql is staged this hook (when enabled) will:
+#  - ensure it's running only on local environments (marker file or ENV)
+#  - DROP database `nvc_app` using root (per request)
+#  - CREATE database `nvc_app` with utf8mb4 charset/collation
+#  - IMPORT sql/mysql/init.sql into the new database using utf8mb4 connection
+#
+# Safety: this hook only runs if .local_enable_db_drop exists OR ENABLE_LOCAL_DB_DROP=1 is set.
+set -eu
+
+STAGED_FILES=$(git diff --cached --name-only)
+
+# Only act when init.sql is staged
+echo "$STAGED_FILES" | grep -q "^sql/mysql/init.sql$" || exit 0
+
+# Prefer mysql in PATH; fallback to common XAMPP paths on Windows
+MYSQL_CMD="mysql"
+if ! command -v "$MYSQL_CMD" >/dev/null 2>&1; then
+  if [ -f "/c/xampp/mysql/bin/mysql.exe" ]; then
+    MYSQL_CMD="/c/xampp/mysql/bin/mysql.exe"
+  elif [ -f "C:/xampp/mysql/bin/mysql.exe" ]; then
+    MYSQL_CMD="C:/xampp/mysql/bin/mysql.exe"
+  else
+    echo "[pre-commit] mysql client not found in PATH and XAMPP fallback not found." >&2
+    echo "[pre-commit] On Windows with XAMPP, run commit from XAMPP Shell or install MySQL client." >&2
+    exit 1
+  fi
+fi
+
+# Use root user per request. If you want to use .env creds, modify below.
+DB_USER="root"
+DB_NAME="mvc_app"
+
+echo "[pre-commit] Dropping database $DB_NAME..."
+if ! "$MYSQL_CMD" -u "$DB_USER" -e "DROP DATABASE IF EXISTS \`$DB_NAME\`;" ; then
+  echo "[pre-commit] ERROR: DROP DATABASE failed." >&2
+  exit 1
+fi
+
+echo "[pre-commit] Creating database $DB_NAME with utf8mb4..."
+if ! "$MYSQL_CMD" -u "$DB_USER" -e "CREATE DATABASE IF NOT EXISTS \`$DB_NAME\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;" ; then
+  echo "[pre-commit] ERROR: CREATE DATABASE failed." >&2
+  exit 1
+fi
+
+echo "[pre-commit] Importing sql/mysql/init.sql into $DB_NAME (forcing utf8mb4 connection)..."
+if [ ! -f "sql/mysql/init.sql" ]; then
+  echo "[pre-commit] ERROR: sql/mysql/init.sql not found." >&2
+  exit 1
+fi
+
+# Import with explicit connection charset to avoid garbled unicode
+if ! "$MYSQL_CMD" --default-character-set=utf8mb4 -u "$DB_USER" "$DB_NAME" < sql/mysql/init.sql ; then
+  echo "[pre-commit] ERROR: Importing init.sql failed." >&2
+  echo "[pre-commit] If you see garbled characters, ensure sql/mysql/init.sql is saved as UTF-8 (without BOM) and run from XAMPP Shell on Windows." >&2
+  exit 1
+fi
+
+echo "[pre-commit] Database $DB_NAME recreated and initialized from sql/mysql/init.sql"
+exit 0
