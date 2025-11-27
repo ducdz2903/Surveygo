@@ -118,7 +118,7 @@
             document.getElementById('feedback-binhLuan').value = f.binhLuan || '';
             bsModal.show();
         } catch (err) {
-            alert('Lỗi khi lấy feedback: ' + err.message);
+            showToast('error', 'Lỗi khi lấy feedback: ' + err.message);
         }
     }
 
@@ -131,7 +131,7 @@
             if (json.error) throw new Error(json.message || 'Delete failed');
             loadFeedbacks();
         } catch (err) {
-            alert('Xóa thất bại: ' + err.message);
+            showToast('error', 'Xóa thất bại: ' + err.message);
         }
     }
 
@@ -163,7 +163,7 @@
             bsModal.hide();
             loadFeedbacks();
         } catch (err) {
-            alert('Lưu thất bại: ' + err.message);
+            showToast('error', 'Lưu thất bại: ' + err.message);
         }
     }
 

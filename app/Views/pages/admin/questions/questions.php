@@ -336,7 +336,7 @@
                 document.getElementById('modalTitle').textContent = 'Cập nhật câu hỏi #' + id;
                 new bootstrap.Modal(document.getElementById('questionModal')).show();
             } catch (e) {
-                alert('Lỗi lấy dữ liệu: ' + e.message);
+                showToast('error', 'Lỗi lấy dữ liệu: ' + e.message);
             }
         };
 
@@ -362,9 +362,9 @@
                 if (res.ok) {
                     bootstrap.Modal.getInstance(document.getElementById('questionModal')).hide();
                     loadQuestions();
-                    alert('Lưu thành công!');
+                    showToast('success', 'Lưu thành công!');
                 } else {
-                    alert('Có lỗi xảy ra!');
+                    showToast('error', 'Có lỗi xảy ra!');
                 }
             } catch (e) {
                 console.error(e);
@@ -378,9 +378,9 @@
                     const res = await fetch(`/api/questions/${id}`, { method: 'DELETE' });
                     if (res.ok) {
                         loadQuestions();
-                        alert('Xóa thành công!');
+                        showToast('success', 'Xóa thành công!');
                     } else {
-                        alert('Không thể xóa!');
+                        showToast('error', 'Không thể xóa!');
                     }
                 } catch (e) {
                     console.error(e);

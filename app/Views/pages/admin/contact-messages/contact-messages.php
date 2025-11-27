@@ -331,7 +331,7 @@
                 new bootstrap.Modal(document.getElementById('contactModal')).show();
             } catch (err) {
                 console.error(err);
-                alert('Không thể tải chi tiết: ' + err.message);
+                showToast('error', 'Không thể tải chi tiết: ' + err.message);
             }
         };
 
@@ -340,7 +340,7 @@
             const id = document.getElementById('contact-id').value;
             const phanHoi = document.getElementById('contact-phanHoi').value.trim();
             
-            if (!id) return alert('ID không xác định');
+            if (!id) return showToast('warning', 'ID không xác định');
 
             try {
                 const res = await fetch(`/api/contact-messages/${id}`, {
@@ -356,10 +356,10 @@
 
                 bootstrap.Modal.getInstance(document.getElementById('contactModal')).hide();
                 loadContacts();
-                alert('Lưu phản hồi thành công!');
+                showToast('success', 'Lưu phản hồi thành công!');
             } catch (err) {
                 console.error(err);
-                alert('Không thể lưu: ' + err.message);
+                showToast('error', 'Không thể lưu: ' + err.message);
             }
         };
 
@@ -378,17 +378,17 @@
                 if (json.error) throw new Error(json.message || 'Lỗi server');
 
                 loadContacts();
-                alert('Xóa thành công!');
+                showToast('success', 'Xóa thành công!');
             } catch (err) {
                 console.error(err);
-                alert('Không thể xóa: ' + err.message);
+                showToast('error', 'Không thể xóa: ' + err.message);
             }
         };
 
         // tạo modal xóa
         window.deleteContactFromModal = async () => {
             const id = document.getElementById('contact-id').value;
-            if (!id) return alert('ID không xác định');
+            if (!id) return showToast('warning', 'ID không xác định');
 
             if (!confirm('Bạn có chắc muốn xóa liên hệ này?')) return;
 
@@ -404,10 +404,10 @@
 
                 bootstrap.Modal.getInstance(document.getElementById('contactModal')).hide();
                 loadContacts();
-                alert('Xóa thành công!');
+                showToast('success', 'Xóa thành công!');
             } catch (err) {
                 console.error(err);
-                alert('Không thể xóa: ' + err.message);
+                showToast('error', 'Không thể xóa: ' + err.message);
             }
         };
 

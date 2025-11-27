@@ -317,11 +317,11 @@
             loadSurveys(1);
         };
         window.createSurvey = function() {
-            alert("Tính năng đang phát triển: Gọi API tạo mới tại đây");
+            showToast('info', 'Tính năng đang phát triển: Gọi API tạo mới tại đây');
         };
         window.deleteSurvey = function(id) {
             if(confirm('Bạn có chắc chắn muốn xóa khảo sát #' + id + '?')) {
-                alert('Đã gửi yêu cầu xóa ' + id);
+                showToast('info', 'Đã gửi yêu cầu xóa ' + id);
             }
         };
 

@@ -149,10 +149,10 @@
                     </td>
                     <td class="text-end pe-4">
                         <div class="btn-group">
-                            <button class="btn btn-sm btn-light text-primary" title="Xem chi tiết" onclick="alert('Xem chi tiết ID: ${ev.id}')">
+                            <button class="btn btn-sm btn-light text-primary" title="Xem chi tiết" onclick="showToast('info', 'Xem chi tiết ID: ${ev.id}')">
                                 <i class="fas fa-eye"></i>
                             </button>
-                            <button class="btn btn-sm btn-light text-success" title="Chỉnh sửa" onclick="alert('Sửa ID: ${ev.id}')">
+                            <button class="btn btn-sm btn-light text-success" title="Chỉnh sửa" onclick="showToast('info', 'Sửa ID: ${ev.id}')">
                                 <i class="fas fa-edit"></i>
                             </button>
                             <button class="btn btn-sm btn-light text-danger" title="Xóa" onclick="deleteEvent(${ev.id})">

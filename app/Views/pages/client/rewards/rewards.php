@@ -383,7 +383,7 @@ $url = static fn($urls_array, $key, $default) => $urls_array[$key] ?? $default;
 
             // Xử lý xác nhận
             document.getElementById('confirmBtn').addEventListener('click', function () {
-                alert('Đổi điểm thành công! Xin cảm ơn.');
+                showToast('success', 'Đổi điểm thành công! Xin cảm ơn.');
                 confirmModal.hide();
             });
         });

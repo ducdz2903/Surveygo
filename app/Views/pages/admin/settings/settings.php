@@ -177,26 +177,26 @@
         setTimeout(() => {
             btn.innerHTML = originalText;
             btn.disabled = false;
-            alert(`Đã lưu cài đặt phần: ${section.toUpperCase()} thành công!`);
+            showToast('success', `Đã lưu cài đặt phần: ${section.toUpperCase()} thành công!`);
         }, 800);
     }
 
     function clearCache() {
         if(confirm('Bạn có chắc muốn xóa toàn bộ Cache hệ thống? Hành động này có thể làm chậm ứng dụng trong giây lát.')) {
-            alert('Đã xóa cache thành công!');
+            showToast('success', 'Đã xóa cache thành công!');
         }
     }
 
     function testEmail() {
         const email = prompt("Nhập email nhận thử nghiệm:");
-        if(email) alert(`Đã gửi email test đến ${email}. Vui lòng kiểm tra hộp thư.`);
+        if(email) showToast('success', `Đã gửi email test đến ${email}. Vui lòng kiểm tra hộp thư.`);
     }
 
     function copyToClipboard(id) {
         const copyText = document.getElementById(id);
         copyText.select();
         navigator.clipboard.writeText(copyText.value);
-        alert("Đã sao chép vào bộ nhớ tạm!");
+            showToast('success', "Đã sao chép vào bộ nhớ tạm!");
     }
 
     function toggleSecret() {
@@ -207,8 +207,8 @@
 
     function regenerateKey() {
         if(confirm("Tạo khóa mới sẽ làm khóa cũ vô hiệu lực ngay lập tức. Tiếp tục?")) {
-            document.getElementById('secret-key').value = "sk_live_" + Math.random().toString(36).substr(2, 16);
-            alert("Khóa mới đã được tạo.");
-        }
+                document.getElementById('secret-key').value = "sk_live_" + Math.random().toString(36).substr(2, 16);
+                showToast('success', "Khóa mới đã được tạo.");
+            }
     }
 </script>

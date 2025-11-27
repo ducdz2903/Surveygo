@@ -291,7 +291,7 @@
                 document.getElementById('modalTitle').textContent = 'Cập nhật Feedback #' + id;
                 new bootstrap.Modal(document.getElementById('feedbackModal')).show();
             } catch (e) {
-                alert('Lỗi lấy dữ liệu: ' + e.message);
+                showToast('error', 'Lỗi lấy dữ liệu: ' + e.message);
             }
         };
 
@@ -316,9 +316,9 @@
                 if(res.ok) {
                     bootstrap.Modal.getInstance(document.getElementById('feedbackModal')).hide();
                     loadFeedbacks(); // Reload table
-                    alert('Lưu thành công!');
+                    showToast('success', 'Lưu thành công!');
                 } else {
-                    alert('Có lỗi xảy ra!');
+                    showToast('error', 'Có lỗi xảy ra!');
                 }
             } catch (e) {
                 console.error(e);
@@ -332,7 +332,7 @@
                     if(res.ok) {
                         loadFeedbacks();
                     } else {
-                        alert('Không thể xóa!');
+                        showToast('error', 'Không thể xóa!');
                     }
                 } catch(e) { console.error(e); }
             }

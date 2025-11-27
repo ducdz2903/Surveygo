@@ -312,7 +312,7 @@ $__publicBase = $__base . '/public';
             const isTodayClaimed = window.rewardData.lastClaimed === today;
 
             if (isTodayClaimed) {
-                alert('Bạn đã điểm danh hôm nay rồi!');
+                showToast('warning', 'Bạn đã điểm danh hôm nay rồi!');
                 return;
             }
 

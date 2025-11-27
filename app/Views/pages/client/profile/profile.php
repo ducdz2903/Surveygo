@@ -342,7 +342,7 @@ $urls = $urls ?? []; // Giả định $urls được truyền vào
                         if (avatarImg) avatarImg.src = dataUrl;
                     } catch (err) {
                         console.error('Lỗi đọc file avatar:', err);
-                        alert('Không thể đọc file ảnh. Vui lòng thử lại.');
+                        showToast('error', 'Không thể đọc file ảnh. Vui lòng thử lại.');
                     }
                 });
             }

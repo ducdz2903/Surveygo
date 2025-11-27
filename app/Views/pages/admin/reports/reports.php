@@ -5,10 +5,10 @@
             <p class="text-muted mb-0">Tổng hợp số liệu hoạt động của hệ thống</p>
         </div>
         <div class="btn-group">
-            <button class="btn btn-outline-primary" onclick="alert('Đang xuất PDF...')">
+            <button class="btn btn-outline-primary" onclick="showToast('info', 'Đang xuất PDF...')">
                 <i class="fas fa-file-pdf me-2"></i>Xuất PDF
             </button>
-            <button class="btn btn-outline-success" onclick="alert('Đang xuất Excel...')">
+            <button class="btn btn-outline-success" onclick="showToast('info', 'Đang xuất Excel...')">
                 <i class="fas fa-file-excel me-2"></i>Xuất Excel
             </button>
         </div>

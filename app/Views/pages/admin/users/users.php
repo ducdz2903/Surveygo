@@ -4,7 +4,7 @@
             <h4 class="mb-1">Quản lý Người dùng</h4>
             <p class="text-muted mb-0">Danh sách tài khoản và phân quyền hệ thống</p>
         </div>
-        <button class="btn btn-primary" onclick="alert('Chức năng tạo mới đang phát triển')">
+        <button class="btn btn-primary" onclick="showToast('info', 'Chức năng tạo mới đang phát triển')">
             <i class="fas fa-plus me-2"></i>Tạo user mới
         </button>
     </div>
@@ -159,8 +159,8 @@
                     <td><small class="text-muted">${user.joinedAt ? new Date(user.joinedAt).toLocaleDateString('vi-VN') : '-'}</small></td>
                     <td class="text-end pe-4">
                         <div class="btn-group">
-                            <button class="btn btn-sm btn-light text-primary" title="Xem" onclick="alert('Xem User ${user.id}')"><i class="fas fa-eye"></i></button>
-                            <button class="btn btn-sm btn-light text-success" title="Sửa" onclick="alert('Sửa User ${user.id}')"><i class="fas fa-edit"></i></button>
+                            <button class="btn btn-sm btn-light text-primary" title="Xem" onclick="showToast('info', 'Xem User ${user.id}')"><i class="fas fa-eye"></i></button>
+                            <button class="btn btn-sm btn-light text-success" title="Sửa" onclick="showToast('info', 'Sửa User ${user.id}')"><i class="fas fa-edit"></i></button>
                             <button class="btn btn-sm btn-light text-danger" title="Khóa" onclick="toggleStatus(${user.id})"><i class="fas fa-trash"></i></button>
                         </div>
                     </td>
