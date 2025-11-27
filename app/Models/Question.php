@@ -268,6 +268,16 @@ class Question
             'updated_at' => $row['updated_at'],
         ], $rows);
     }
+    public static function countBySurvey(int $surveyId): int
+    {
+        /** @var PDO $db */
+        $db = Container::get('db');
+
+        $statement = $db->prepare('SELECT COUNT(*) as count FROM questions WHERE maKhaoSat = :surveyId');
+        $statement->execute([':surveyId' => $surveyId]);
+        $row = $statement->fetch();
+        return (int)$row['count'];
+    }
 
     /**
      * Chuyển đổi thành array
