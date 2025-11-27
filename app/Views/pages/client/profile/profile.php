@@ -93,19 +93,19 @@ $urls = $urls ?? []; // Giả định $urls được truyền vào
                                         <div class="row g-3">
                                             <div class="col-md-6">
                                                 <label class="form-label">Họ tên</label>
-                                                <input type="text" class="form-control" value="Tên Người Dùng">
+                                                <input id="profile-name" type="text" class="form-control" value="Tên Người Dùng">
                                             </div>
                                             <div class="col-md-6">
                                                 <label class="form-label">Email</label>
-                                                <input type="email" class="form-control" value="user@email.com">
+                                                <input id="profile-email" type="email" class="form-control" value="user@email.com">
                                             </div>
                                             <div class="col-md-6">
                                                 <label class="form-label">Số điện thoại</label>
-                                                <input type="text" class="form-control" placeholder="Chưa cập nhật">
+                                                <input id="profile-phone" type="text" class="form-control" placeholder="Chưa cập nhật">
                                             </div>
                                             <div class="col-md-6">
                                                 <label class="form-label">Giới tính</label>
-                                                <select class="form-select">
+                                                <select id="profile-gender" class="form-select">
                                                     <option value="male">Nam</option>
                                                     <option value="female">Nữ</option>
                                                     <option value="other">Khác</option>
@@ -222,6 +222,50 @@ $urls = $urls ?? []; // Giả định $urls được truyền vào
                         if (emailInput) {
                             emailInput.value = user.email;
                         }
+                    }
+
+                    // Số điện thoại
+                    const phoneInput = document.getElementById('profile-phone');
+                    if (phoneInput) {
+                        phoneInput.value = user.phone || '';
+                    }
+
+                    // Giới tính
+                    const genderSelect = document.getElementById('profile-gender');
+                    if (genderSelect) {
+                        // set value only if provided and matches option
+                        if (user.gender && Array.from(genderSelect.options).some(o => o.value === user.gender)) {
+                            genderSelect.value = user.gender;
+                        }
+
+                        // update localStorage when user changes selection
+                        genderSelect.addEventListener('change', function () {
+                            try {
+                                const raw = localStorage.getItem('app.user');
+                                if (!raw) return;
+                                const u = JSON.parse(raw);
+                                u.gender = this.value;
+                                localStorage.setItem('app.user', JSON.stringify(u));
+                                console.log('Cập nhật giới tính trong localStorage:', u.gender);
+                            } catch (e) {
+                                console.error('Lỗi khi cập nhật giới tính:', e);
+                            }
+                        });
+                    }
+
+                    if (phoneInput) {
+                        phoneInput.addEventListener('change', function () {
+                            try {
+                                const raw = localStorage.getItem('app.user');
+                                if (!raw) return;
+                                const u = JSON.parse(raw);
+                                u.phone = this.value || null;
+                                localStorage.setItem('app.user', JSON.stringify(u));
+                                console.log('Cập nhật phone trong localStorage:', u.phone);
+                            } catch (e) {
+                                console.error('Lỗi khi cập nhật số điện thoại:', e);
+                            }
+                        });
                     }
 
                     // Cập nhật avatar với tên user

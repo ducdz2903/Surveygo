@@ -48,6 +48,7 @@ class UserController extends Controller
                 'name' => $arr['name'],
                 'email' => $arr['email'],
                 'phone' => $arr['phone'] ?? '',
+                'gender' => $arr['gender'] ?? 'other',
                 'role' => $arr['role'],
                 'status' => 'active',
                 'surveys' => $surveys,

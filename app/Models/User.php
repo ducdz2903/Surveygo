@@ -15,6 +15,7 @@ class User
     private string $email;
     private ?string $phone;
     private string $password;
+    private string $gender;
     private string $role;
     private string $createdAt;
     private string $updatedAt;      
@@ -27,6 +28,7 @@ class User
         $this->email = $attributes['email'];
         $this->phone = $attributes['phone'] ?? null;
         $this->password = $attributes['password'];
+        $this->gender = $attributes['gender'];
         $this->role = $attributes['role'];
         $this->createdAt = $attributes['created_at'];
         $this->updatedAt = $attributes['updated_at'];
@@ -39,13 +41,14 @@ class User
 
         $now = (new \DateTimeImmutable())->format('Y-m-d H:i:s');
 
-        $statement = $db->prepare('INSERT INTO users (code, name, email, phone , password, role, created_at, updated_at) VALUES (:code, :name, :email, :phone , :password, :role, :created_at, :updated_at)');
+        $statement = $db->prepare('INSERT INTO users (code, name, email, phone , password, gender , role, created_at, updated_at) VALUES (:code, :name, :email, :phone , :password, :gender, :role, :created_at, :updated_at)');
         $statement->execute([
             ':code' => 'US' . str_pad((string)($db->lastInsertId() + 1), 3, '0', STR_PAD_LEFT),
             ':name' => $name,
             ':email' => $email,
             ':phone' => null,
             ':password' => $hashedPassword,
+            ':gender' => 'other',
             ':role' => $role,
             ':created_at' => $now,
             ':updated_at' => $now,
@@ -116,6 +119,7 @@ class User
             'name' => $this->name,
             'email' => $this->email,
             'phone' => $this->phone,
+            'gender' => $this->gender,
             'role' => $this->role,
             'created_at' => $this->createdAt,
             'updated_at' => $this->updatedAt,

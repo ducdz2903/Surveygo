@@ -55,6 +55,7 @@
                             <th style="min-width: 200px;">Thông tin User</th>
                             <th>Email</th>
                             <th>Số điện thoại</th>
+                            <th style="width: 100px;">Giới tính</th>
                             <th style="width: 140px;">Vai trò</th>
                             <th style="width: 140px;">Trạng thái</th>
                             <th class="text-center" style="width: 100px;">Khảo sát</th>
@@ -65,7 +66,7 @@
                     </thead>
                     <tbody id="users-table-body">
                         <tr>
-                            <td colspan="10" class="text-center py-5">
+                            <td colspan="11" class="text-center py-5">
                                 <div class="spinner-border text-primary" role="status">
                                     <span class="visually-hidden">Đang tải...</span>
                                 </div>
@@ -105,6 +106,12 @@
             getStatusText: (s) => s
         };
 
+        const GenderLabel = {
+            male: 'Nam',
+            female: 'Nữ',
+            other: 'Khác'
+        };
+
         function getInitials(name) {
             if (!name) return 'U';
             const parts = name.trim().split(/\s+/).filter(Boolean);
@@ -117,7 +124,7 @@
             const tbody = document.getElementById('users-table-body');
             
             if (!users || users.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="10" class="text-center py-5 text-muted"><i class="fas fa-user-slash mb-2 display-6"></i><br>Không tìm thấy người dùng nào.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="11" class="text-center py-5 text-muted"><i class="fas fa-user-slash mb-2 display-6"></i><br>Không tìm thấy người dùng nào.</td></tr>`;
                 return;
             }
 
@@ -136,6 +143,7 @@
                     </td>
                     <td>${user.email}</td>
                     <td>${user.phone || user.soDienThoai || user.sdt || '-'}</td>
+                    <td class="text-center">${GenderLabel[user.gender] || '-'}</td>
                     <td>
                         <span>
                             ${Helpers.getRoleText(user.role)}
@@ -207,7 +215,7 @@
         // gọi api phân trang 
         async function loadUsers() {
             const tbody = document.getElementById('users-table-body');
-            tbody.innerHTML = `<tr><td colspan="10" class="text-center py-5"><div class="spinner-border text-primary"></div></td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="11" class="text-center py-5"><div class="spinner-border text-primary"></div></td></tr>`;
 
             const params = new URLSearchParams();
             params.set('page', currentPage);
@@ -234,7 +242,7 @@
 
             } catch (err) {
                 console.error(err);
-                tbody.innerHTML = `<tr><td colspan="10" class="text-center py-4 text-danger">Không thể tải dữ liệu: ${err.message}</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="11" class="text-center py-4 text-danger">Không thể tải dữ liệu: ${err.message}</td></tr>`;
                 document.getElementById('users-pagination').innerHTML = '';
             }
         }
