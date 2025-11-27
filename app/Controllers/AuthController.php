@@ -9,7 +9,8 @@ use App\Core\Container;
 use App\Core\Controller;
 use App\Core\Request;
 use App\Models\User;
-
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 class AuthController extends Controller
 {
     public function register(Request $request)
@@ -240,4 +241,67 @@ class AuthController extends Controller
 
         return $this->json(['error' => false, 'message' => 'Password changed.']);
     }
+    public function sendResetOtp(Request $request)
+    {
+        $identifier = strtolower(trim((string)$request->input('email_or_phone')));
+        $user = User::findByEmail($identifier);
+        if (!$user) {
+            return $this->json(['error'=>true,'message'=>'Không tìm thấy tài khoản.'],404);
+        }
+
+        $otp = random_int(100000,999999);
+        $expire = (new \DateTimeImmutable('+5 minutes'))->format('Y-m-d H:i:s');
+
+        $db = Container::get('db');
+        $stmt = $db->prepare("UPDATE users SET reset_otp=:otp, reset_expire=:exp WHERE id=:id");
+        $stmt->execute([':otp'=>$otp,':exp'=>$expire,':id'=>$user->getId()]);
+
+        $this->sendOtpEmail($user->getEmail(), $otp);
+
+        return $this->json(['error'=>false,'message'=>'OTP đã được gửi.']);
+    }
+
+    public function verifyOtp(Request $request)
+    {
+        $identifier = strtolower(trim((string)$request->input('email_or_phone')));
+        $otp = (string)$request->input('otp');
+        $newPassword = (string)$request->input('new_password');
+
+        $db = Container::get('db');
+        $stmt = $db->prepare("SELECT * FROM users WHERE email=:id AND reset_otp=:otp LIMIT 1");
+        $stmt->execute([':id'=>$identifier,':otp'=>$otp]);
+        $userData = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+        if(!$userData || strtotime($userData['reset_expire'])<time()) {
+            return $this->json(['error'=>true,'message'=>'OTP không hợp lệ hoặc hết hạn.'],400);
+        }
+
+        $hashed = password_hash($newPassword,PASSWORD_BCRYPT);
+        $stmt = $db->prepare("UPDATE users SET password=:pw, reset_otp=NULL, reset_expire=NULL WHERE id=:id");
+        $stmt->execute([':pw'=>$hashed,':id'=>$userData['id']]);
+
+        return $this->json(['error'=>false,'message'=>'Đổi mật khẩu thành công.']);
+    }
+    private function sendOtpEmail(string $email,int $otp)
+    {
+        $mail = new PHPMailer(true);
+        try{
+            $mail->isSMTP();
+            $mail->Host='smtp.gmail.com';
+            $mail->SMTPAuth=true;
+            $mail->Username='youremail@gmail.com';
+            $mail->Password='app-password';
+            $mail->SMTPSecure=PHPMailer::ENCRYPTION_SMTPS;
+            $mail->Port=465;
+            $mail->setFrom('youremail@gmail.com','SurveyGo');
+            $mail->addAddress($email);
+            $mail->isHTML(true);
+            $mail->Subject='Mã OTP lấy lại mật khẩu';
+            $mail->Body="Mã OTP của bạn là: <b>$otp</b>. Có hiệu lực 5 phút.";
+            $mail->send();
+        }catch(Exception $e){
+            error_log("Mailer error: ".$mail->ErrorInfo);
+        }
+    }
+
 }
