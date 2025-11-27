@@ -325,3 +325,7 @@ INSERT IGNORE INTO feedbacks (id,ma, idKhaoSat, idNguoiDung, tenNguoiDung , danh
   (13, 'FB013', 8, NULL, 'Khách Ẩn Danh', 4, 'Khảo sát gọn và dễ thao tác.', NOW(), NOW()),
   (14, 'FB014', 9, NULL, 'Khách Ẩn Danh', 5, 'Rất tốt, tôi thích khảo sát dạng này.', NOW(), NOW()),
   (15, 'FB015', 7, NULL, 'Khách Ẩn Danh', 4, 'Nội dung hữu ích, nên giữ.', NOW(), NOW());
+--- Thêm OTP flow
+ALTER TABLE users
+ADD COLUMN reset_otp VARCHAR(6) NULL,
+ADD COLUMN reset_expire DATETIME NULL;
