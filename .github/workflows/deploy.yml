@@ -101,4 +101,3 @@ jobs:
 
           # Nếu không chứa "status":"ok" thì fail pipeline
           echo "$RESPONSE" | grep '"status":"ok"' >/dev/null 2>&1
-

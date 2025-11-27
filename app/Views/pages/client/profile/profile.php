@@ -86,27 +86,29 @@ $urls = $urls ?? []; // Giả định $urls được truyền vào
                             <div class="info-card">
                                 <div class="card-header-custom">
                                     <h5><i class="fas fa-user-edit me-2"></i>Thông tin cá nhân</h5>
-                                    <button id="btn-update-profile" type="button" class="btn btn-primary-gradient btn-sm">Cập nhật</button>
+                                    <button class="btn btn-primary-gradient btn-sm">Cập nhật</button>
                                 </div>
                                 <div class="card-body">
                                     <form>
                                         <div class="row g-3">
                                             <div class="col-md-6">
                                                 <label class="form-label">Họ tên</label>
-                                                <input id="input-name" type="text" class="form-control" value="Tên Người Dùng">
+                                                <input id="profile-name" type="text" class="form-control"
+                                                    value="Tên Người Dùng">
                                             </div>
                                             <div class="col-md-6">
                                                 <label class="form-label">Email</label>
-                                                <input id="input-email" type="email" class="form-control" value="user@email.com">
+                                                <input id="profile-email" type="email" class="form-control"
+                                                    value="user@email.com">
                                             </div>
                                             <div class="col-md-6">
                                                 <label class="form-label">Số điện thoại</label>
-                                                <input id="input-phone" name="phone" type="text" class="form-control" placeholder="Số điện thoại">
+                                                <input id="profile-phone" type="text" class="form-control"
+                                                    placeholder="Chưa cập nhật">
                                             </div>
                                             <div class="col-md-6">
                                                 <label class="form-label">Giới tính</label>
-                                                <select id="input-gender" class="form-select">
-                                                    <option value="">-- Chọn --</option>
+                                                <select id="profile-gender" class="form-select">
                                                     <option value="male">Nam</option>
                                                     <option value="female">Nữ</option>
                                                     <option value="other">Khác</option>
@@ -122,7 +124,7 @@ $urls = $urls ?? []; // Giả định $urls được truyền vào
                             <div class="info-card">
                                 <div class="card-header-custom">
                                     <h5><i class="fas fa-lock me-2"></i>Bảo mật & Mật khẩu</h5>
-                                    <button id="btn-update-password" type="button" class="btn btn-primary-gradient btn-sm">Cập nhật</button>
+                                    <button class="btn btn-primary-gradient btn-sm">Cập nhật</button>
                                 </div>
                                 <div class="card-body">
                                     <form>
@@ -202,7 +204,6 @@ $urls = $urls ?? []; // Giả định $urls được truyền vào
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        const API_BASE = window.location.origin;
         // Lấy thông tin user từ localStorage khi trang load
         document.addEventListener('DOMContentLoaded', function () {
             try {
@@ -213,17 +214,61 @@ $urls = $urls ?? []; // Giả định $urls được truyền vào
                     // Cập nhật thông tin cá nhân
                     if (user.name) {
                         document.querySelector('.user-fullname').textContent = user.name;
-                        const nameInput = document.getElementById('input-name');
-                        if (nameInput) {
-                            nameInput.value = user.name;
+                        const fullNameInput = document.querySelector('input[value="Tên Người Dùng"]');
+                        if (fullNameInput) {
+                            fullNameInput.value = user.name;
                         }
                     }
 
                     if (user.email) {
-                        const emailInput = document.getElementById('input-email');
+                        const emailInput = document.querySelector('input[type="email"]');
                         if (emailInput) {
                             emailInput.value = user.email;
                         }
+                    }
+
+                    // Số điện thoại
+                    const phoneInput = document.getElementById('profile-phone');
+                    if (phoneInput) {
+                        phoneInput.value = user.phone || '';
+                    }
+
+                    // Giới tính
+                    const genderSelect = document.getElementById('profile-gender');
+                    if (genderSelect) {
+                        // set value only if provided and matches option
+                        if (user.gender && Array.from(genderSelect.options).some(o => o.value === user.gender)) {
+                            genderSelect.value = user.gender;
+                        }
+
+                        // update localStorage when user changes selection
+                        genderSelect.addEventListener('change', function () {
+                            try {
+                                const raw = localStorage.getItem('app.user');
+                                if (!raw) return;
+                                const u = JSON.parse(raw);
+                                u.gender = this.value;
+                                localStorage.setItem('app.user', JSON.stringify(u));
+                                console.log('Cập nhật giới tính trong localStorage:', u.gender);
+                            } catch (e) {
+                                console.error('Lỗi khi cập nhật giới tính:', e);
+                            }
+                        });
+                    }
+
+                    if (phoneInput) {
+                        phoneInput.addEventListener('change', function () {
+                            try {
+                                const raw = localStorage.getItem('app.user');
+                                if (!raw) return;
+                                const u = JSON.parse(raw);
+                                u.phone = this.value || null;
+                                localStorage.setItem('app.user', JSON.stringify(u));
+                                console.log('Cập nhật phone trong localStorage:', u.phone);
+                            } catch (e) {
+                                console.error('Lỗi khi cập nhật số điện thoại:', e);
+                            }
+                        });
                     }
 
                     // Cập nhật avatar với tên user
@@ -233,20 +278,6 @@ $urls = $urls ?? []; // Giả định $urls được truyền vào
                             const encodedName = encodeURIComponent(user.name);
                             avatarImg.src = `https://ui-avatars.com/api/?name=${encodedName}&background=ec4899&color=fff&size=150`;
                         }
-                    }
-
-                    const phoneInput = document.getElementById('input-phone');
-                    if (user.phone) {
-                        console.log('Cập nhật số điện thoại:', user.phone);
-                        if (phoneInput) {
-                            phoneInput.value = user.phone;
-                        }
-                    }
-
-                    // Set gender select from user data
-                    const genderSelect = document.getElementById('input-gender');
-                    if (genderSelect && user.gender) {
-                        genderSelect.value = user.gender;
                     }
 
                     // Cập nhật member since date
@@ -283,7 +314,6 @@ $urls = $urls ?? []; // Giả định $urls được truyền vào
                 icon.classList.add('fa-eye');
             }
         }
-
         // Helper: convert file to base64 data URL
         function fileToBase64(file) {
             return new Promise((resolve, reject) => {

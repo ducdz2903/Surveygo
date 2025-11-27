@@ -12,37 +12,74 @@ class AdminController extends Controller
 {
     public function dashboard(Request $request)
     {
-        return $this->view('pages/admin/dashboard/dashboard', $this->pageData($request));
+        $view = new \App\Core\View();
+        $data = $this->pageData($request);
+        $content = $view->render('pages/admin/dashboard/dashboard', $data);
+        return \App\Core\Response::html($view->render('layouts/admin', array_merge($data, ['content' => $content])));
     }
 
     public function surveys(Request $request)
     {
-        return $this->view('pages/admin/surveys/surveys', $this->pageData($request));
+        $view = new \App\Core\View();
+        $data = $this->pageData($request);
+        $content = $view->render('pages/admin/surveys/surveys', $data);
+        return \App\Core\Response::html($view->render('layouts/admin', array_merge($data, ['content' => $content])));
     }
 
     public function users(Request $request)
     {
-        return $this->view('pages/admin/users/users', $this->pageData($request));
+        $view = new \App\Core\View();
+        $data = $this->pageData($request);
+        $content = $view->render('pages/admin/users/users', $data);
+        return \App\Core\Response::html($view->render('layouts/admin', array_merge($data, ['content' => $content])));
     }
 
     public function questions(Request $request)
     {
-        return $this->view('pages/admin/questions/questions', $this->pageData($request));
+        $view = new \App\Core\View();
+        $data = $this->pageData($request);
+        $content = $view->render('pages/admin/questions/questions', $data);
+        return \App\Core\Response::html($view->render('layouts/admin', array_merge($data, ['content' => $content])));
     }
 
     public function reports(Request $request)
     {
-        return $this->view('pages/admin/reports/reports', $this->pageData($request));
+        $view = new \App\Core\View();
+        $data = $this->pageData($request);
+        $content = $view->render('pages/admin/reports/reports', $data);
+        return \App\Core\Response::html($view->render('layouts/admin', array_merge($data, ['content' => $content])));
     }
 
     public function events(Request $request)
     {
-        return $this->view('pages/admin/events/events', $this->pageData($request));
+        $view = new \App\Core\View();
+        $data = $this->pageData($request);
+        $content = $view->render('pages/admin/events/events', $data);
+        return \App\Core\Response::html($view->render('layouts/admin', array_merge($data, ['content' => $content])));
     }
 
     public function settings(Request $request)
     {
-        return $this->view('pages/admin/settings/settings', $this->pageData($request));
+        $view = new \App\Core\View();
+        $data = $this->pageData($request);
+        $content = $view->render('pages/admin/settings/settings', $data);
+        return \App\Core\Response::html($view->render('layouts/admin', array_merge($data, ['content' => $content])));
+    }
+
+    public function feedbacks(Request $request)
+    {
+        $view = new \App\Core\View();
+        $data = $this->pageData($request);
+        $content = $view->render('pages/admin/feedbacks/feedbacks', $data);
+        return \App\Core\Response::html($view->render('layouts/admin', array_merge($data, ['content' => $content])));
+    }
+
+    public function contactMessages(Request $request)
+    {
+        $view = new \App\Core\View();
+        $data = $this->pageData($request);
+        $content = $view->render('pages/admin/contact-messages/contact-messages', $data);
+        return \App\Core\Response::html($view->render('layouts/admin', array_merge($data, ['content' => $content])));
     }
 
     private function pageData(Request $request): array

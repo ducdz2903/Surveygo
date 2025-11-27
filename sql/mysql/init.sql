@@ -1,11 +1,11 @@
 CREATE TABLE IF NOT EXISTS users (
   id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  code VARCHAR(20) NOT NULL UNIQUE,
+  phone VARCHAR(20) DEFAULT NULL,
   name VARCHAR(255) NOT NULL,
   email VARCHAR(255) NOT NULL UNIQUE,
-  phone VARCHAR(20) DEFAULT NULL,
   password VARCHAR(255) NOT NULL,
-  gender ENUM('male','female','other') DEFAULT NULL,
-  avatar LONGTEXT DEFAULT NULL,
+  gender ENUM('male','female','other') NOT NULL DEFAULT 'other',
   role ENUM('admin','moderator','user') NOT NULL DEFAULT 'user',
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
@@ -126,7 +126,7 @@ CREATE TABLE IF NOT EXISTS contact_messages (
   idNguoiDung INT UNSIGNED DEFAULT NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  response TEXT DEFAULT NULL,
+  phanHoi TEXT DEFAULT NULL,
   FOREIGN KEY (idNguoiDung) REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -134,7 +134,8 @@ CREATE TABLE IF NOT EXISTS feedbacks (
   id int UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   ma varchar(20) NOT NULL UNIQUE,
   idKhaoSat INT UNSIGNED NOT NULL,
-  idNguoiDung INT UNSIGNED NOT NULL,
+  idNguoiDung INT UNSIGNED ,
+  tenNguoiDung VARCHAR(255),
   danhGia int UNSIGNED NOT NULL,
   binhLuan TEXT DEFAULT NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -143,11 +144,24 @@ CREATE TABLE IF NOT EXISTS feedbacks (
   FOREIGN KEY (idNguoiDung) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-INSERT IGNORE INTO users (id, name, email, phone, gender, password, role, created_at, updated_at) VALUES
-  (1, 'Nguyễn Văn A', 'user1@example.com', '0123456789', 'male', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'user', NOW(), NOW()),
-  (2, 'Trần Thị B', 'user2@example.com', '0123456789', 'female', '$2y$10$92IXUNpkjO0rOO5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'user', NOW(), NOW()),
-  (3, 'Phạm Văn C', 'admin1@example.com', '0123456789', 'male', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin', NOW(), NOW());
+INSERT IGNORE INTO users (id, code, name, email, phone, password, gender, role, created_at, updated_at) VALUES
+  (1, 'US001','Nguyễn Văn A', 'user1@example.com', NULL, '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'other', 'user', NOW(), NOW()),
+  (2, 'US002' ,'Trần Thị B', 'user2@example.com', NULL, '$2y$10$92IXUNpkjO0rOO5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'other', 'user', NOW(), NOW()),
+  (3, 'US003', 'Phạm Văn C', 'admin1@example.com', NULL, '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'other', 'admin', NOW(), NOW()),
+  (4, 'US004', 'Phạm Minh H', 'user4@example.com', NULL, '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'other', 'user', NOW(), NOW()),
+  (5, 'US005', 'Nguyễn Văn J', 'user5@example.com', NULL, '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'other', 'user', NOW(), NOW()),
+  (6, 'US006', 'Đặng Thị K', 'user6@example.com', NULL, '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'other', 'user', NOW(), NOW()),
+  (7, 'US007', 'Bùi Văn L', 'user7@example.com', NULL, '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'other', 'user', NOW(), NOW()),
+  (8, 'US008', 'Vũ Thị M', 'user8@example.com', NULL, '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'other', 'user', NOW(), NOW()),
+  (9, 'US009', 'Hồ Thị P', 'user9@example.com', NULL, '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'other', 'user', NOW(), NOW()),
+  (10, 'US010', 'Lý Văn Q', 'user10@example.com', NULL, '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'other', 'user', NOW(), NOW()),
+  (11, 'US011', 'Mai Thị R', 'user11@example.com', NULL, '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'other', 'user', NOW(), NOW()),
+  (12, 'US012', 'Đỗ Văn S', 'user12@example.com', NULL, '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'other', 'user', NOW(), NOW()),
+  (13, 'US013', 'Trịnh Thị T', 'user13@example.com', NULL, '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'other', 'user', NOW(), NOW()),
+  (14, 'US014', 'Cao Văn U', 'user14@example.com', NULL, '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'other', 'user', NOW(), NOW()),
+  (15, 'US015', 'Phan Thị V', 'user15@example.com', NULL, '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'other', 'user', NOW(), NOW());
 
+  
 INSERT IGNORE INTO events (id, maSuKien, tenSuKien, thoiGianBatDau, thoiGianKetThuc, trangThai, soNguoiThamGia, soKhaoSat, diaDiem, maNguoiTao, created_at, updated_at) VALUES
   (1, 'SK001', 'Sự kiện Khởi động Năm Mới', '2024-01-01 09:00:00', '2024-01-01 17:00:00', 'completed', 150, 3, 'Hội trường A', 1, NOW(), NOW()),
   (2, 'SK002', 'Hội thảo Sức khỏe Cộng đồng', '2024-02-15 10:00:00', '2024-02-15 16:00:00', 'completed', 120, 2, 'Trung tâm Hội nghị', 2, NOW(), NOW()),
@@ -276,17 +290,37 @@ INSERT IGNORE INTO answers (id, maCauHoi, noiDungCauTraLoi, laDung, creator_id, 
 
 
 -- dữ liệu cho bảng contact mesages
-INSERT IGNORE INTO contact_messages (id,ma, hoTen, email, soDienThoai, chuDe, tinNhan, idNguoiDung, created_at, updated_at, response) VALUES
-  (1, 'CM001' ,'Lê Văn D', 'levand@example.com', '0909123456', 'Hỗ trợ khảo sát', 'Tôi không thể gửi kết quả khảo sát, báo lỗi khi submit.', 1, NOW(), NOW(), NULL),
-  (2, 'CM002','Ngô Thị E', 'ngothe@example.com', NULL, 'Yêu cầu hợp tác', 'Công ty chúng tôi muốn hợp tác tổ chức sự kiện cùng bạn.', NULL, NOW(), NOW(), 'Cám ơn, đã nhận yêu cầu. Chúng tôi sẽ liên hệ.'),
-  (3, 'CM003','Hoàng Văn F', 'hoangvf@example.com', '0912345678', 'Báo lỗi', 'Gặp lỗi khi xem kết quả khảo sát KS003.', 2, NOW(), NOW(), NULL),
-  (4, 'CM004','Trương Thị G', 'truongtg@example.com', '0987654321', 'Góp ý giao diện', 'Giao diện dark mode vẫn còn một số chỗ chưa tối.', 3, NOW(), NOW(), 'Cảm ơn góp ý, chúng tôi sẽ xem xét.'),
-  (5, 'CM005', 'Khách Ẩn Danh', 'anonymous@example.com', NULL, 'Góp ý chung', 'Mong có thêm tính năng xuất báo cáo PDF.', NULL, NOW(), NOW(), NULL);
+INSERT IGNORE INTO contact_messages (id, ma, hoTen, email, soDienThoai, chuDe, tinNhan, idNguoiDung, created_at, updated_at, phanHoi) VALUES
+  (1, 'CM001', 'Lê Văn D', 'levand@example.com', '0909123456', 'Hỗ trợ khảo sát', 'Tôi không thể gửi kết quả khảo sát, báo lỗi khi submit.', 1, NOW(), NOW(), NULL),
+  (2, 'CM002', 'Ngô Thị E', 'ngothe@example.com', NULL, 'Yêu cầu hợp tác', 'Công ty chúng tôi muốn hợp tác tổ chức sự kiện cùng bạn.', NULL, NOW(), NOW(), 'Cám ơn, đã nhận yêu cầu. Chúng tôi sẽ liên hệ.'),
+  (3, 'CM003', 'Hoàng Văn F', 'hoangvf@example.com', '0912345678', 'Báo lỗi', 'Gặp lỗi khi xem kết quả khảo sát KS003.', 2, NOW(), NOW(), NULL),
+  (4, 'CM004', 'Trương Thị G', 'truongtg@example.com', '0987654321', 'Góp ý giao diện', 'Giao diện dark mode vẫn còn một số chỗ chưa tối.', 3, NOW(), NOW(), 'Cảm ơn góp ý, chúng tôi sẽ xem xét.'),
+  (5, 'CM005', 'Khách Ẩn Danh', 'anonymous@example.com', NULL, 'Góp ý chung', 'Mong có thêm tính năng xuất báo cáo PDF.', NULL, NOW(), NOW(), NULL),
+  (6, 'CM006', 'Phạm Minh H', 'phamminhh@example.com', '0933111222', 'Lỗi đăng nhập', 'Tôi bị quên mật khẩu và không nhận được email khôi phục.', 4, NOW(), NOW(), NULL),
+  (7, 'CM007', 'Trần Thu I', 'tranthui@example.com', NULL, 'Hỏi về giá', 'Cho tôi hỏi chi phí nâng cấp lên tài khoản Premium.', NULL, NOW(), NOW(), 'Đã gửi thông tin báo giá qua email.'),
+  (8, 'CM008', 'Nguyễn Văn J', 'nguyenvanj@example.com', '0905556667', 'Lỗi hiển thị', 'Ảnh trong bài khảo sát không load được trên điện thoại.', 5, NOW(), NOW(), NULL),
+  (9, 'CM009', 'Đặng Thị K', 'dangthik@example.com', '0918889999', 'Khiếu nại', 'Tôi đã thanh toán nhưng tài khoản chưa được kích hoạt.', 6, NOW(), NOW(), 'Đã kiểm tra và kích hoạt thủ công. Xin lỗi vì sự bất tiện.'),
+  (10, 'CM010', 'Bùi Văn L', 'buivanl@example.com', NULL, 'Hỏi tính năng', 'Hệ thống có hỗ trợ xuất dữ liệu ra Excel không?', 7, NOW(), NOW(), NULL),
+  (11, 'CM011', 'Vũ Thị M', 'vuthim@example.com', '0966777888', 'Spam khảo sát', 'Tôi nhận được quá nhiều email thông báo khảo sát mới.', 8, NOW(), NOW(), NULL),
+  (12, 'CM012', 'Đỗ Văn N', 'dovann@example.com', '0944333222', 'Tuyển dụng', 'Bên mình còn tuyển vị trí Content Marketing không?', NULL, NOW(), NOW(), 'Hiện tại chưa có đợt tuyển dụng mới.'),
+  (13, 'CM013', 'Hồ Thị P', 'hothip@example.com', NULL, 'Góp ý câu hỏi', 'Nên thêm tùy chọn câu hỏi dạng lưới (matrix).', 9, NOW(), NOW(), NULL),
+  (14, 'CM014', 'Lý Văn Q', 'lyvanq@example.com', '0388999111', 'Lỗi kết nối', 'Trang web thường xuyên bị timeout vào buổi tối.', 10, NOW(), NOW(), 'Bộ phận kỹ thuật đang kiểm tra server.'),
+  (15, 'CM015', 'Mai Thị R', 'maithir@example.com', NULL, 'Xóa tài khoản', 'Vui lòng hướng dẫn tôi cách xóa vĩnh viễn tài khoản.', 11, NOW(), NOW(), NULL);
 
 -- dữ liệu cho bảng feedbacks
-INSERT IGNORE INTO feedbacks (id,ma, idKhaoSat, idNguoiDung, danhGia, binhLuan, created_at, updated_at) VALUES
-  (1, 'FB001', 1, 1, 5, 'Khảo sát hữu ích, câu hỏi rõ ràng.', NOW(), NOW()),
-  (2,'FB002', 2, 2, 4, 'Nội dung tốt nhưng thời gian khảo sát hơi dài.', NOW(), NOW()),
-  (3,'FB002', 3, 1, 5, 'Rất phù hợp với mục tiêu nghiên cứu.', NOW(), NOW()),
-  (4, 'FB002',13, 2, 3, 'Quick poll hơi nhiều lựa chọn không cần thiết.', NOW(), NOW()),
-  (5,'FB002', 7, NULL, 4, 'Khảo sát nhanh, dễ trả lời.', NOW(), NOW());
+INSERT IGNORE INTO feedbacks (id,ma, idKhaoSat, idNguoiDung, tenNguoiDung , danhGia, binhLuan, created_at, updated_at) VALUES
+  (1, 'FB001', 1, 1 , 'Nguyễn Văn A', 5, 'Khảo sát hữu ích, câu hỏi rõ ràng.', NOW(), NOW()),
+  (2,'FB002', 2, 2,'Trần Thị B', 4, 'Nội dung tốt nhưng thời gian khảo sát hơi dài.', NOW(), NOW()),
+  (3,'FB003', 3, 1, 'Nguyễn Văn',  5, 'Rất phù hợp với mục tiêu nghiên cứu.', NOW(), NOW()),
+  (4, 'FB004',13, 2, 'Trần Thị B',3, 'Quick poll hơi nhiều lựa chọn không cần thiết.', NOW(), NOW()),
+  (5,'FB005', 7, NULL, 'Khách Ẩn Danh', 4, 'Khảo sát nhanh, dễ trả lời.', NOW(), NOW()),
+  (6, 'FB006', 3, NULL, 'Khách Ẩn Danh', 5, 'Khảo sát nhanh, thông tin rõ ràng.', NOW(), NOW()),
+  (7, 'FB007', 4, NULL, 'Khách Ẩn Danh', 4, 'Câu hỏi hợp lý và dễ hiểu.', NOW(), NOW()),
+  (8, 'FB008', 5, NULL, 'Khách Ẩn Danh', 5, 'Rất hữu ích, trả lời nhanh gọn.', NOW(), NOW()),
+  (9, 'FB009', 2, NULL, 'Khách Ẩn Danh', 3, 'Khảo sát hơi dài một chút.', NOW(), NOW()),
+  (10, 'FB010', 1, NULL, 'Khách Ẩn Danh', 4, 'Tạm ổn, thông tin đầy đủ.', NOW(), NOW()),
+  (11, 'FB011', 6, NULL, 'Khách Ẩn Danh', 5, 'Tôi thấy khảo sát chất lượng.', NOW(), NOW()),
+  (12, 'FB012', 2, NULL, 'Khách Ẩn Danh', 3, 'Cũng được, câu hỏi bình thường.', NOW(), NOW()),
+  (13, 'FB013', 8, NULL, 'Khách Ẩn Danh', 4, 'Khảo sát gọn và dễ thao tác.', NOW(), NOW()),
+  (14, 'FB014', 9, NULL, 'Khách Ẩn Danh', 5, 'Rất tốt, tôi thích khảo sát dạng này.', NOW(), NOW()),
+  (15, 'FB015', 7, NULL, 'Khách Ẩn Danh', 4, 'Nội dung hữu ích, nên giữ.', NOW(), NOW());

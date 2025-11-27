@@ -10,12 +10,12 @@ use PDO;
 class User
 {
     private int $id;
+    private string $code;
     private string $name;
     private string $email;
     private ?string $phone;
     private string $password;
-    private ?string $gender;
-    private ?string $avatar;
+    private string $gender;
     private string $role;
     private string $createdAt;
     private string $updatedAt;
@@ -23,13 +23,12 @@ class User
     public function __construct(array $attributes)
     {
         $this->id = (int) ($attributes['id'] ?? 0);
+        $this->code = (string) ($attributes['code'] ?? '');
         $this->name = $attributes['name'];
         $this->email = $attributes['email'];
-        $this->phone = $attributes['phone'];
-        $this->password = $attributes['password'];
         $this->phone = $attributes['phone'] ?? null;
-        $this->gender = $attributes['gender'] ?? null;
-        $this->avatar = $attributes['avatar'] ?? null;
+        $this->password = $attributes['password'];
+        $this->gender = $attributes['gender'];
         $this->role = $attributes['role'];
         $this->createdAt = $attributes['created_at'];
         $this->updatedAt = $attributes['updated_at'];
@@ -42,11 +41,14 @@ class User
 
         $now = (new \DateTimeImmutable())->format('Y-m-d H:i:s');
 
-        $statement = $db->prepare('INSERT INTO users (name, email, password, role, created_at, updated_at) VALUES (:name, :email, :password, :role, :created_at, :updated_at)');
+        $statement = $db->prepare('INSERT INTO users (code, name, email, phone , password, gender , role, created_at, updated_at) VALUES (:code, :name, :email, :phone , :password, :gender, :role, :created_at, :updated_at)');
         $statement->execute([
+            ':code' => 'US' . str_pad((string) ($db->lastInsertId() + 1), 3, '0', STR_PAD_LEFT),
             ':name' => $name,
             ':email' => $email,
+            ':phone' => null,
             ':password' => $hashedPassword,
+            ':gender' => 'other',
             ':role' => $role,
             ':created_at' => $now,
             ':updated_at' => $now,
@@ -109,29 +111,20 @@ class User
         return $this->name;
     }
 
-    public function getPhone(): ?string
-    {
-        return $this->phone;
-    }
-
     public function getGender(): ?string
     {
         return $this->gender;
-    }
-    public function getAvatar(): ?string
-    {
-        return $this->avatar;
     }
 
     public function toArray(): array
     {
         return [
             'id' => $this->id,
+            'code' => $this->code,
             'name' => $this->name,
             'email' => $this->email,
             'phone' => $this->phone,
             'gender' => $this->gender,
-            'avatar' => $this->avatar,
             'role' => $this->role,
             'created_at' => $this->createdAt,
             'updated_at' => $this->updatedAt,
@@ -153,7 +146,7 @@ class User
         $params = [];
 
         if (!empty($filters['search'])) {
-            $where[] = '(name LIKE :search OR email LIKE :search)';
+            $where[] = '(name LIKE :search OR email LIKE :search OR phone LIKE :search)';
             $params[':search'] = '%' . $filters['search'] . '%';
         }
 
@@ -190,6 +183,7 @@ class User
             'totalPages' => $totalPages,
         ];
     }
+
     public function updatePassword(string $newHashedPassword): void
     {
         /** @var \PDO $db */

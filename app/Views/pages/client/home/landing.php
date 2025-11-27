@@ -30,6 +30,7 @@ $url = static fn($urls_array, $key, $default) => $urls_array[$key] ?? $default;
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="icon" type="image/png" sizes="16x16" href="<?= htmlspecialchars(rtrim((string)$baseUrl, '/'), ENT_QUOTES, 'UTF-8') ?>/Asset/favIconSurveyGo_16x16.png">
+
     <link rel="stylesheet" href="public/assets/css/client/landing-page.css">
     <link rel="stylesheet" href="public/assets/css/app.css">
     <link rel="stylesheet" href="public/assets/css/components/footer.css">

@@ -4,19 +4,20 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Core\Container;
+
 use App\Core\Controller;
 use App\Core\Request;
-use App\Core\Container;
 use App\Models\User;
 
 class AuthController extends Controller
 {
     public function register(Request $request)
     {
-        $name = trim((string)$request->input('name'));
-        $email = strtolower(trim((string)$request->input('email')));
-        $password = (string)$request->input('password');
-        $role = trim((string)$request->input('role'));
+        $name = trim((string) $request->input('name'));
+        $email = strtolower(trim((string) $request->input('email')));
+        $password = (string) $request->input('password');
+        $role = trim((string) $request->input('role'));
 
         if (!$name || !$email || !$password) {
             return $this->json([
@@ -70,8 +71,8 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        $email = strtolower(trim((string)$request->input('email')));
-        $password = (string)$request->input('password');
+        $email = strtolower(trim((string) $request->input('email')));
+        $password = (string) $request->input('password');
 
         if (!$email || !$password) {
             return $this->json([
@@ -105,11 +106,12 @@ class AuthController extends Controller
             'message' => 'Profile endpoint disabled (JWT removed).',
         ], 404);
     }
+
     public function change_password(Request $request)
     {
-        $email = strtolower(trim((string)$request->input('email')));
-        $oldPassword = (string)$request->input('old_password');
-        $newPassword = (string)$request->input('new_password');
+        $email = strtolower(trim((string) $request->input('email')));
+        $oldPassword = (string) $request->input('old_password');
+        $newPassword = (string) $request->input('new_password');
 
         if (!$email || !$oldPassword || !$newPassword) {
             return $this->json([
@@ -144,7 +146,7 @@ class AuthController extends Controller
     }
     public function updateProfile(Request $request)
     {
-        $id = (int)$request->input('id');
+        $id = (int) $request->input('id');
         if (!$id) {
             return $this->json(['error' => true, 'message' => 'Missing user id.'], 422);
         }
@@ -154,8 +156,8 @@ class AuthController extends Controller
             return $this->json(['error' => true, 'message' => 'User not found.'], 404);
         }
 
-        $name = trim((string)$request->input('name')) ?: $user->getName();
-        $email = strtolower(trim((string)$request->input('email')));
+        $name = trim((string) $request->input('name')) ?: $user->getName();
+        $email = strtolower(trim((string) $request->input('email')));
         $phone = $request->input('phone') ?: $user->getPhone();
         $gender = $request->input('gender') ?: $user->getGender();
         $avatar = $request->input('avatar') ?: $user->getAvatar();
@@ -196,10 +198,10 @@ class AuthController extends Controller
 
     public function changePassword(Request $request)
     {
-        $id = (int)$request->input('id');
-        $current = (string)$request->input('current_password');
-        $new = (string)$request->input('new_password');
-        $confirm = (string)$request->input('confirm_password');
+        $id = (int) $request->input('id');
+        $current = (string) $request->input('current_password');
+        $new = (string) $request->input('new_password');
+        $confirm = (string) $request->input('confirm_password');
 
         if (!$id || !$current || !$new || !$confirm) {
             return $this->json(['error' => true, 'message' => 'Missing required fields.'], 422);

@@ -19,6 +19,7 @@
     /* Layout */
     --admin-sidebar-width: 260px;
     --admin-header-height: 70px;
+    --admin-footer-height: 56px;
 
     /* Text colors */
     --text-primary: #1e293b;
@@ -146,7 +147,8 @@ body {
 }
 
 .admin-header h5 {
-    font-size: 1.4rem;
+    /* Match homepage navbar brand sizing */
+    font-size: 1.8rem;
     font-weight: 600;
     color: var(--admin-dark);
     margin: 0;
@@ -157,6 +159,7 @@ body {
     display: flex;
     align-items: center;
     gap: 1rem;
+    font-size: 0.95rem; /* same as client nav links */
 }
 
 .admin-header .search-box {
@@ -169,6 +172,7 @@ body {
     border-radius: 20px;
     width: 250px;
     transition: all 0.3s;
+    font-size: 0.95rem; /* match client */
 }
 
 .admin-header .search-box input:focus {
@@ -220,6 +224,7 @@ body {
     padding: 0.5rem 1rem;
     border-radius: 25px;
     transition: background 0.3s;
+    font-size: 0.95rem; /* match client */
 }
 
 .admin-header .user-menu:hover {
@@ -227,8 +232,9 @@ body {
 }
 
 .admin-header .user-avatar {
-    width: 40px;
-    height: 40px;
+    /* use same avatar sizing as client navbar */
+    width: 35px;
+    height: 35px;
     border-radius: 50%;
     background: var(--admin-primary-gradient);
     display: flex;
@@ -238,7 +244,47 @@ body {
     font-weight: 600;
 }
 
-/* Global avatar styling used across admin tables, lists and headers */
+.admin-header .btn-link,
+.admin-header .btn-link:hover,
+.admin-header .btn-link:focus {
+    text-decoration: none;
+    color: inherit;
+}
+
+/* Make admin dropdown visually match client navbar dropdown */
+.admin-header .dropdown-menu {
+    border: none;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    padding: 0.5rem;
+    min-width: 220px;
+    margin-top: 0.5rem;
+    border-radius: 12px;
+}
+
+.admin-header .dropdown-item {
+    font-size: 0.9rem;
+    border-radius: 10px;
+    color: var(--text-primary);
+    padding: 0.5rem 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.admin-header .dropdown-item:hover {
+    color: var(--admin-primary-dark);
+    background: rgba(16, 188, 211, 0.06);
+}
+
+.admin-header .dropdown-item i {
+    width: 20px;
+    text-align: center;
+}
+
+.admin-header .dropdown-divider {
+    margin: 0.5rem 0;
+}
+
 .user-avatar {
     display: inline-flex;
     align-items: center;
@@ -257,7 +303,37 @@ body {
     margin-left: var(--admin-sidebar-width);
     margin-top: var(--admin-header-height);
     padding: 2rem;
-    min-height: calc(100vh - var(--admin-header-height));
+    min-height: calc(100vh - var(--admin-header-height) - var(--admin-footer-height));
+}
+
+/* ==================== FOOTER ==================== */
+.admin-footer {
+    margin-left: var(--admin-sidebar-width);
+    padding: 0.75rem 2rem;
+    height: var(--admin-footer-height);
+    background: white;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: var(--text-secondary);
+    z-index: 900;
+}
+
+.admin-footer p {
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+    .admin-footer {
+        margin-left: 0;
+        text-align: center;
+        height: auto;
+        padding: 1rem;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
 }
 
 /* ==================== STAT CARDS ==================== */
@@ -458,7 +534,7 @@ body {
 
 /* ==================== BUTTONS ==================== */
 .btn {
-    padding: 0.6rem 1.5rem;
+    padding: 0.4rem 1.5rem;
     border-radius: 8px;
     font-weight: 600;
     transition: all 0.3s;

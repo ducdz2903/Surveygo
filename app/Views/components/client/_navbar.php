@@ -104,7 +104,7 @@ $url = static function (array $urls, string $key, string $fallbackPath = '/') us
             try {
                 var raw = localStorage.getItem('app.user');
                 user = raw ? JSON.parse(raw) : null;
-            } catch (e) {}
+            } catch (e) { }
 
             var userDropdown = document.getElementById('nav-user');
             var registerBtn = document.getElementById('register-btn');
@@ -140,9 +140,7 @@ $url = static function (array $urls, string $key, string $fallbackPath = '/') us
                             if (existingAdmin) existingAdmin.remove();
                         }
                     }
-                } catch (e) {
-                    /* ignore DOM errors */
-                }
+                } catch (e) { /* ignore DOM errors */ }
             } else {
                 // User not logged in
                 if (userDropdown) userDropdown.style.display = 'none';
@@ -152,14 +150,12 @@ $url = static function (array $urls, string $key, string $fallbackPath = '/') us
             }
 
             if (logoutBtn) {
-                logoutBtn.addEventListener('click', function() {
-                    try {
-                        localStorage.removeItem('app.user');
-                    } catch (e) {}
+                logoutBtn.addEventListener('click', function () {
+                    try { localStorage.removeItem('app.user'); } catch (e) { }
                     window.location.href = window.location.origin + '/login';
                 });
             }
-        } catch (e) {}
+        } catch (e) { }
     }
 
     // Chạy ngay khi script load (không chờ DOM)
@@ -174,7 +170,7 @@ $url = static function (array $urls, string $key, string $fallbackPath = '/') us
     window.addEventListener('focus', updateNavbarAuth);
 
     // Lắng nghe thay đổi localStorage
-    window.addEventListener('storage', function(e) {
+    window.addEventListener('storage', function (e) {
         if (e.key === 'app.user' || e.key === null) {
             updateNavbarAuth();
         }
