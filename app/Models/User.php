@@ -13,10 +13,11 @@ class User
     private string $code ;
     private string $name;
     private string $email;
+    private ?string $phone;
     private string $password;
     private string $role;
     private string $createdAt;
-    private string $updatedAt;
+    private string $updatedAt;      
 
     public function __construct(array $attributes)
     {
@@ -24,6 +25,7 @@ class User
         $this->code = (string) ($attributes['code'] ??'');
         $this->name = $attributes['name'];
         $this->email = $attributes['email'];
+        $this->phone = $attributes['phone'] ?? null;
         $this->password = $attributes['password'];
         $this->role = $attributes['role'];
         $this->createdAt = $attributes['created_at'];
@@ -37,11 +39,12 @@ class User
 
         $now = (new \DateTimeImmutable())->format('Y-m-d H:i:s');
 
-        $statement = $db->prepare('INSERT INTO users (code, name, email, password, role, created_at, updated_at) VALUES (:code, :name, :email, :password, :role, :created_at, :updated_at)');
+        $statement = $db->prepare('INSERT INTO users (code, name, email, phone , password, role, created_at, updated_at) VALUES (:code, :name, :email, :phone , :password, :role, :created_at, :updated_at)');
         $statement->execute([
             ':code' => 'US' . str_pad((string)($db->lastInsertId() + 1), 3, '0', STR_PAD_LEFT),
             ':name' => $name,
             ':email' => $email,
+            ':phone' => null,
             ':password' => $hashedPassword,
             ':role' => $role,
             ':created_at' => $now,
@@ -112,6 +115,7 @@ class User
             'code' => $this->code ,
             'name' => $this->name,
             'email' => $this->email,
+            'phone' => $this->phone,
             'role' => $this->role,
             'created_at' => $this->createdAt,
             'updated_at' => $this->updatedAt,
@@ -133,7 +137,7 @@ class User
         $params = [];
 
         if (!empty($filters['search'])) {
-            $where[] = '(name LIKE :search OR email LIKE :search)';
+            $where[] = '(name LIKE :search OR email LIKE :search OR phone LIKE :search)';
             $params[':search'] = '%' . $filters['search'] . '%';
         }
 
