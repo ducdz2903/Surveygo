@@ -6,7 +6,6 @@ namespace App\Controllers;
 
 use App\Core\Controller;
 use App\Core\Request;
-use App\Core\Container;
 use App\Models\Survey;
 use App\Models\Question;
 use App\Models\User;
@@ -81,8 +80,9 @@ class SurveyController extends Controller
         }
 
         $questions = Question::findBySurvey($survey->getId());
-
+        $questionCount = Question::countBySurvey($survey->getId());
         $surveyData = $survey->toArray();
+        $surveyData['questionCount'] = $questionCount;
         $surveyData['questions'] = array_map(fn($q) => $q->toArray(), $questions);
 
         return $this->json([

@@ -6,6 +6,7 @@ require_once dirname(__DIR__) . '/bootstrap.php';
 
 use App\Controllers\HomeController;
 use App\Controllers\AdminController;
+use App\Controllers\DailyRewardController;
 use App\Core\Request;
 use App\Core\Response;
 use App\Core\Router;
@@ -88,6 +89,10 @@ $router->delete('/api/contact-messages', [App\Controllers\ContactController::cla
 $router->post('/api/questions', [App\Controllers\QuestionController::class, 'create']); // Tạo câu hỏi mới
 $router->put('/api/questions', [App\Controllers\QuestionController::class, 'update']); // Cập nhật câu hỏi
 $router->delete('/api/questions', [App\Controllers\QuestionController::class, 'delete']); // Xóa câu hỏi
+
+// Daily rewards API
+$router->get('/api/daily-rewards/status', [DailyRewardController::class, 'status']);
+$router->post('/api/daily-rewards/claim', [DailyRewardController::class, 'claim']);
 
 // Users API
 $router->get('/api/users', [App\Controllers\UserController::class, 'index']); // Lấy danh sách users (phân trang + tìm kiếm)
