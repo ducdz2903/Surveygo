@@ -166,7 +166,13 @@
         function renderTable(feedbacks) {
             const tbody = document.getElementById('feedback-table-body');
             if (!feedbacks || feedbacks.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-5 text-muted">Không tìm thấy phản hồi nào.</td></tr>`;
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="text-center py-5 text-muted">
+                            <i class="fas fa-comment-dots mb-2 display-6"></i><br>
+                            Không tìm thấy phản hồi nào
+                        </td>
+                    </tr>`;
                 return;
             }
 
@@ -332,7 +338,6 @@
             }
         };
 
-        // --- 5. Event Listeners ---
         function debounce(fn, delay) {
             let timeout;
             return function(...args) {
@@ -344,7 +349,6 @@
         searchInput.addEventListener('input', debounce(() => { currentPage = 1; loadFeedbacks(); }, 400));
         ratingFilter.addEventListener('change', () => { currentPage = 1; loadFeedbacks(); });
 
-        // expose loadFeedbacks and reset handler for inline usage
         window.loadFeedbacks = loadFeedbacks;
         window.resetFilters = function() {
             searchInput.value = '';

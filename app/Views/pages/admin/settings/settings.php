@@ -167,10 +167,8 @@
 </div>
 
 <script>
-    // --- Mock Scripts ---
     function saveSettings(event, section) {
         event.preventDefault();
-        // Giả lập loading
         const btn = event.target.querySelector('button[type="submit"]');
         const originalText = btn.innerHTML;
         btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Đang lưu...';
@@ -179,7 +177,6 @@
         setTimeout(() => {
             btn.innerHTML = originalText;
             btn.disabled = false;
-            // Hiển thị toast hoặc alert đẹp hơn nếu có thư viện
             alert(`Đã lưu cài đặt phần: ${section.toUpperCase()} thành công!`);
         }, 800);
     }

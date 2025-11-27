@@ -9,17 +9,18 @@
     <div class="card mb-4 fade-in">
         <div class="card-body">
             <div class="row g-3">
-                <div class="col-md-4">
+                <div class="col-md-6">
                     <label class="form-label fw-bold small text-uppercase text-muted">Tìm kiếm</label>
                     <div class="input-group">
-                        <span class="input-group-text bg-light border-end-0"><i
-                                class="fas fa-search text-muted"></i></span>
+                        <span class="input-group-text bg-light border-end-0">
+                            <i class="fas fa-search text-muted"></i>
+                        </span>
                         <input type="text" id="filter-search" class="form-control border-start-0 ps-0"
                             placeholder="Tìm theo tên, email hoặc chủ đề...">
                     </div>
                 </div>
-                <div class="col-md-4 d-flex align-items-end">
-                    <button class="btn btn-light w-100 border" id="reset-filters" onclick="resetFilters()">
+                <div class="col-md-3 d-flex align-items-end">
+                    <button class="btn btn-light w-100 border" onclick="resetFilters()">
                         <i class="fas fa-redo me-2"></i>Đặt lại bộ lọc
                     </button>
                 </div>
@@ -100,7 +101,7 @@
                             <textarea id="contact-tinNhan" class="form-control" rows="4" readonly></textarea>
                         </div>
                         <div class="col-12">
-                            <label class="form-label fw-bold">Phản hồi (phanHoi)</label>
+                            <label class="form-label fw-bold">Phản hồi</label>
                             <textarea id="contact-phanHoi" class="form-control" rows="4"
                                 placeholder="Ghi phản hồi cho người gửi..."></textarea>
                         </div>
@@ -109,9 +110,10 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                <button type="button" class="btn btn-danger" id="btn-delete-contact"
-                    onclick="deleteContact()">Xóa</button>
-                <button type="button" class="btn btn-primary" id="btn-save-contact" onclick="saveContact()">
+                <button type="button" class="btn btn-danger" onclick="deleteContactFromModal()">
+                    <i class="fas fa-trash me-2"></i>Xóa
+                </button>
+                <button type="button" class="btn btn-primary" onclick="saveContact()">
                     <i class="fas fa-save me-2"></i>Lưu phản hồi
                 </button>
             </div>
@@ -128,19 +130,48 @@
         const totalEl = document.getElementById('total-contacts');
         const searchInput = document.getElementById('filter-search');
 
+
+        const formatDate = (d) => {
+            if (window.AdminHelpers && window.AdminHelpers.formatDate) 
+                return window.AdminHelpers.formatDate(d);
+            return new Date(d).toLocaleDateString('vi-VN');
+        };
+
+        const getAvatarColor = (name) => {
+            if (window.AdminHelpers && window.AdminHelpers.getAvatarColor) 
+                return window.AdminHelpers.getAvatarColor(name);
+            return '#6c757d';
+        };
+
+        const getInitials = (name) => {
+            if (!name) return 'NA';
+            return name.split(' ').map(s => s[0]).slice(0, 2).join('').toUpperCase();
+        };
+
+        // gọi api phân trang 
         async function loadContacts() {
             const tbody = document.getElementById('contact-table-body');
             tbody.innerHTML = `<tr><td colspan="6" class="text-center py-5"><div class="spinner-border text-primary"></div></td></tr>`;
 
-            const params = new URLSearchParams({ page: currentPage, limit: itemsPerPage });
+            const params = new URLSearchParams({
+                page: currentPage,
+                limit: itemsPerPage
+            });
+
             if (searchInput.value.trim()) params.set('search', searchInput.value.trim());
 
             try {
                 const res = await fetch(`/api/contact-messages?${params.toString()}`);
                 if (!res.ok) throw new Error(`HTTP Error ${res.status}`);
+
                 const json = await res.json();
                 const data = Array.isArray(json.data) ? json.data : (json.data || []);
-                const meta = json.meta || { total: data.length, page: currentPage, limit: itemsPerPage, totalPages: 1 };
+                const meta = json.meta || { 
+                    total: data.length, 
+                    page: currentPage, 
+                    limit: itemsPerPage, 
+                    totalPages: 1 
+                };
 
                 renderTable(data);
                 renderPagination(meta.total, meta.page, meta.limit);
@@ -152,88 +183,142 @@
             }
         }
 
+        // hàm tạo giao diện bảng
         function renderTable(items) {
             const tbody = document.getElementById('contact-table-body');
+            
             if (!items || items.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-5 text-muted">Không tìm thấy liên hệ nào.</td></tr>`;
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="text-center py-5 text-muted">
+                            <i class="fas fa-envelope-open mb-2 display-6"></i><br>
+                            Không tìm thấy liên hệ nào
+                        </td>
+                    </tr>`;
                 return;
-            }
-
-            const formatDate = (d) => {
-                if (window.AdminHelpers && window.AdminHelpers.formatDate) return window.AdminHelpers.formatDate(d);
-                return new Date(d).toLocaleDateString('vi-VN');
             }
 
             tbody.innerHTML = items.map(it => `
                 <tr class="slide-in">
-                    <td class="ps-4"><span class="font-monospace text-dark">#${it.ma || it.id}</span></td>
+                    <td class="ps-4">
+                        <span class="font-monospace text-dark">#${it.ma || it.id}</span>
+                    </td>
                     <td>
                         <div class="d-flex align-items-center gap-2">
                             <div class="rounded-circle text-white d-flex align-items-center justify-content-center" 
-                                 style="width:32px; height:32px; font-size:0.8rem; background: ${window.AdminHelpers ? AdminHelpers.getAvatarColor(it.hoTen || '') : '#6c757d'}">
-                                ${(it.hoTen || 'Ẩn danh').split(' ').map(s => s[0]).slice(0, 2).join('').toUpperCase()}
+                                 style="width:32px; height:32px; font-size:0.8rem; background: ${getAvatarColor(it.hoTen || '')}">
+                                ${getInitials(it.hoTen || 'Ẩn danh')}
                             </div>
                             <div class="d-flex flex-column" style="line-height:1.1;">
                                 <span class="fw-bold small">${it.hoTen || 'Ẩn danh'}</span>
                             </div>
                         </div>
                     </td>
-                    <td><div class="text-truncate" style="max-width:180px;">${it.email || ''}</div></td>
-                    <td>${it.chuDe || ''}</td>
-                    <td><small class="text-muted">${formatDate(it.created_at || it.updated_at)}</small></td>
+                    <td>
+                        <div class="text-truncate" style="max-width:180px;" title="${it.email || ''}">
+                            ${it.email || '<span class="text-muted fst-italic">Chưa có</span>'}
+                        </div>
+                    </td>
+                    <td>
+                        <div class="text-truncate" style="max-width:200px;" title="${it.chuDe || ''}">
+                            ${it.chuDe || '<span class="text-muted fst-italic">Không có chủ đề</span>'}
+                        </div>
+                    </td>
+                    <td>
+                        <small class="text-muted">${formatDate(it.created_at || it.updated_at)}</small>
+                    </td>
                     <td class="text-end pe-4">
                         <div class="btn-group">
-                            <button class="btn btn-sm btn-light text-primary" onclick="openContact(${it.id})" title="Xem/Sửa"><i class="fas fa-eye"></i></button>
-                            <button class="btn btn-sm btn-light text-danger" onclick="deleteContact(${it.id})" title="Xóa"><i class="fas fa-trash"></i></button>
+                            <button class="btn btn-sm btn-light text-primary" 
+                                    onclick="openContact(${it.id})" 
+                                    title="Xem chi tiết">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="btn btn-sm btn-light text-danger" 
+                                    onclick="deleteContact(${it.id})" 
+                                    title="Xóa">
+                                <i class="fas fa-trash"></i>
+                            </button>
                         </div>
                     </td>
                 </tr>
             `).join('');
         }
 
-        function renderPagination(total, page, limit) {
+        // hàm tạo giao diện phân trang
+        function renderPagination(total, page, pageSize) {
             const container = document.getElementById('contact-pagination');
-            const totalPages = Math.max(1, Math.ceil(total / limit));
-            if (totalPages <= 1) { container.innerHTML = ''; return; }
+            const totalPages = Math.ceil(total / pageSize) || 1;
 
-            let html = '<ul class="pagination mb-0">';
-
-            // Previous (always visible, disabled when on first page)
-            if (page > 1) {
-                html += `<li class="page-item"><a href="#" class="page-link" data-page="${page - 1}"><i class="fas fa-chevron-left"></i></a></li>`;
-            } else {
-                html += `<li class="page-item disabled"><span class="page-link" aria-disabled="true"><i class="fas fa-chevron-left"></i></span></li>`;
+            if (totalPages <= 1) {
+                container.innerHTML = '';
+                return;
             }
 
-            for (let p = 1; p <= totalPages; p++) {
-                if (p === page) html += `<li class="page-item active"><span class="page-link">${p}</span></li>`;
-                else html += `<li class="page-item"><a href="#" class="page-link" data-page="${p}">${p}</a></li>`;
+            let html = '<ul class="pagination pagination-sm mb-0">';
+
+            html += `<li class="page-item ${page === 1 ? 'disabled' : ''}">
+                        <button class="page-link" onclick="changePage(${page - 1})">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                     </li>`;
+
+            const start = Math.max(1, page - 1);
+            const end = Math.min(totalPages, page + 1);
+
+            if (start > 1) {
+                html += `<li class="page-item">
+                            <button class="page-link" onclick="changePage(1)">1</button>
+                         </li>`;
+            }
+            if (start > 2) {
+                html += `<li class="page-item disabled">
+                            <span class="page-link">...</span>
+                         </li>`;
             }
 
-            // Next (always visible, disabled when on last page)
-            if (page < totalPages) {
-                html += `<li class="page-item"><a href="#" class="page-link" data-page="${page + 1}"><i class="fas fa-chevron-right"></i></a></li>`;
-            } else {
-                html += `<li class="page-item disabled"><span class="page-link" aria-disabled="true"><i class="fas fa-chevron-right"></i></span></li>`;
+            for (let i = start; i <= end; i++) {
+                html += `<li class="page-item ${i === page ? 'active' : ''}">
+                            <button class="page-link" onclick="changePage(${i})">${i}</button>
+                         </li>`;
             }
+
+            if (end < totalPages - 1) {
+                html += `<li class="page-item disabled">
+                            <span class="page-link">...</span>
+                         </li>`;
+            }
+            if (end < totalPages) {
+                html += `<li class="page-item">
+                            <button class="page-link" onclick="changePage(${totalPages})">${totalPages}</button>
+                         </li>`;
+            }
+
+            html += `<li class="page-item ${page === totalPages ? 'disabled' : ''}">
+                        <button class="page-link" onclick="changePage(${page + 1})">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                     </li>`;
 
             html += '</ul>';
             container.innerHTML = html;
-
-            // Only attach handlers to links that have a data-page attribute
-            container.querySelectorAll('.page-link[data-page]').forEach(a => {
-                a.addEventListener('click', (e) => { e.preventDefault(); const p = parseInt(a.dataset.page); if (!isNaN(p)) { currentPage = p; loadContacts(); } });
-            });
         }
 
-        // Open contact modal
-        window.openContact = async function (id) {
-            const modal = new bootstrap.Modal(document.getElementById('contactModal'));
+        // hàm thay đổi trang
+        window.changePage = (p) => {
+            currentPage = p;
+            loadContacts();
+        };
+
+        // hàm tạo modal xem chi tiết
+        window.openContact = async (id) => {
             try {
-                const res = await fetch(`/api/contact-messages/show?id=${id}`);
+                const res = await fetch(`/api/contact-messages/${id}`);
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                
                 const json = await res.json();
                 const d = json.data || json;
+
                 document.getElementById('contact-id').value = d.id || '';
                 document.getElementById('contact-hoTen').value = d.hoTen || '';
                 document.getElementById('contact-email').value = d.email || '';
@@ -243,58 +328,110 @@
                 document.getElementById('contact-tinNhan').value = d.tinNhan || '';
                 document.getElementById('contact-phanHoi').value = d.phanHoi || '';
 
-                modal.show();
+                new bootstrap.Modal(document.getElementById('contactModal')).show();
             } catch (err) {
                 console.error(err);
                 alert('Không thể tải chi tiết: ' + err.message);
             }
-        }
+        };
 
-        window.saveContact = async function () {
+        // hàm lưu
+        window.saveContact = async () => {
             const id = document.getElementById('contact-id').value;
             const phanHoi = document.getElementById('contact-phanHoi').value.trim();
+            
             if (!id) return alert('ID không xác định');
+
             try {
-                const res = await fetch(`/api/contact-messages?id=${id}`, {
+                const res = await fetch(`/api/contact-messages/${id}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ phanHoi })
                 });
+
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                
                 const json = await res.json();
-                if (!res.ok || json.error) throw new Error(json.message || 'Lỗi');
+                if (json.error) throw new Error(json.message || 'Lỗi server');
+
                 bootstrap.Modal.getInstance(document.getElementById('contactModal')).hide();
                 loadContacts();
+                alert('Lưu phản hồi thành công!');
             } catch (err) {
                 console.error(err);
                 alert('Không thể lưu: ' + err.message);
             }
-        }
+        };
 
-        window.deleteContact = async function (id) {
-            const confirmed = confirm('Bạn có chắc muốn xóa mục này?');
-            if (!confirmed) return;
+        // hàm xóa
+        window.deleteContact = async (id) => {
+            if (!confirm('Bạn có chắc muốn xóa liên hệ này?')) return;
+
             try {
-                const res = await fetch(`/api/contact-messages?id=${id}`, { method: 'DELETE' });
+                const res = await fetch(`/api/contact-messages/${id}`, { 
+                    method: 'DELETE' 
+                });
+
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                
                 const json = await res.json();
-                if (!res.ok || json.error) throw new Error(json.message || 'Lỗi');
-                bootstrap.Modal.getInstance(document.getElementById('contactModal'))?.hide();
+                if (json.error) throw new Error(json.message || 'Lỗi server');
+
                 loadContacts();
+                alert('Xóa thành công!');
             } catch (err) {
                 console.error(err);
                 alert('Không thể xóa: ' + err.message);
             }
+        };
+
+        // tạo modal xóa
+        window.deleteContactFromModal = async () => {
+            const id = document.getElementById('contact-id').value;
+            if (!id) return alert('ID không xác định');
+
+            if (!confirm('Bạn có chắc muốn xóa liên hệ này?')) return;
+
+            try {
+                const res = await fetch(`/api/contact-messages/${id}`, { 
+                    method: 'DELETE' 
+                });
+
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                
+                const json = await res.json();
+                if (json.error) throw new Error(json.message || 'Lỗi server');
+
+                bootstrap.Modal.getInstance(document.getElementById('contactModal')).hide();
+                loadContacts();
+                alert('Xóa thành công!');
+            } catch (err) {
+                console.error(err);
+                alert('Không thể xóa: ' + err.message);
+            }
+        };
+
+        function debounce(fn, delay) {
+            let timeout;
+            return function (...args) {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => fn.apply(this, args), delay);
+            }
         }
 
-        // expose loadContacts so inline handlers can call it
+        searchInput.addEventListener('input', debounce(() => {
+            currentPage = 1;
+            loadContacts();
+        }, 300));
+
         window.loadContacts = loadContacts;
+        window.resetFilters = function () {
+            searchInput.value = '';
+            currentPage = 1;
+            loadContacts();
+        };
 
-        // reset handler usable via onclick
-        window.resetFilters = function () { searchInput.value = ''; currentPage = 1; loadContacts(); };
-
-        // keep key handling for Enter but expose a global helper
-        window.onContactSearchKeyUp = function (e) { if (e.key === 'Enter') { currentPage = 1; loadContacts(); } };
-        searchInput.addEventListener('keyup', (e) => { if (e.key === 'Enter') { currentPage = 1; loadContacts(); } });
-
+        // Init
         loadContacts();
     });
 </script>

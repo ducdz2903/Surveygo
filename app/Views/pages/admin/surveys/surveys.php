@@ -152,7 +152,6 @@
         const itemsPerPage = 10;
         const totalSurveysEl = document.getElementById('total-surveys');
         
-        // Mock AdminHelpers
         const AdminHelpers = window.AdminHelpers || {
             getStatusBadge: (status) => {
                 const map = { 'approved': 'success', 'pending': 'warning', 'draft': 'secondary', 'rejected': 'danger' };
@@ -168,8 +167,7 @@
             }
         };
 
-        // --- Core Functions ---
-
+        // gọi api phân trang
         async function loadSurveys(page = 1) {
             currentPage = page; 
             
@@ -212,6 +210,7 @@
             }
         }
 
+        // tạo giao diện table
         function renderSurveysTable(surveys) {
             const tbody = document.getElementById('surveys-table-body');
             tbody.innerHTML = surveys.map(s => `
@@ -235,9 +234,9 @@
                             ${AdminHelpers.getStatusText(s.trangThai || 'draft')}
                         </span>
                     </td>
-                    <td class="text-center"><span class="badge bg-light text-dark border">0</span></td>
-                    <td class="text-center"><span class="fw-bold text-dark">0</span></td>
-                    <td><small>${AdminHelpers.formatDate(s.created_at || s.createdAt)}</small></td>
+                    <td class="text-center"><span class="text-dark">0</span></td>
+                    <td class="text-center"><span class="text-dark">0</span></td>
+                    <td><small class="text-muted">${AdminHelpers.formatDate(s.created_at || s.createdAt)}</small></td>
                     <td class="text-end pe-4">
                         <div class="btn-group">
                             <button class="btn btn-sm btn-light text-primary" title="Xem" onclick="window.location.href='/admin/surveys/view?id=${s.id}'"><i class="fas fa-eye"></i></button>
@@ -249,6 +248,7 @@
             `).join('');
         }
 
+        // tạo giao diện phân trang
         function renderPagination(meta) {
             const container = document.getElementById('pagination-container');
             if (!meta || meta.totalPages <= 1) {
@@ -257,7 +257,6 @@
             }
 
             let html = '<ul class="pagination pagination-sm mb-0">';
-            // Prev
             html += `<li class="page-item ${meta.page === 1 ? 'disabled' : ''}">
                         <button class="page-link" onclick="loadSurveys(${meta.page - 1})"><i class="fas fa-chevron-left"></i></button>
                      </li>`;
@@ -281,7 +280,6 @@
                 html += `<li class="page-item"><button class="page-link" onclick="loadSurveys(${meta.totalPages})">${meta.totalPages}</button></li>`;
             }
 
-            // Next
             html += `<li class="page-item ${meta.page === meta.totalPages ? 'disabled' : ''}">
                         <button class="page-link" onclick="loadSurveys(${meta.page + 1})"><i class="fas fa-chevron-right"></i></button>
                      </li>`;
@@ -300,15 +298,15 @@
 
         const debouncedLoad = debounce(() => loadSurveys(1));
 
+        // event listeners cho filters
         document.getElementById('filter-status').addEventListener('change', () => loadSurveys(1));
         document.getElementById('filter-category').addEventListener('change', () => loadSurveys(1));
         document.getElementById('filter-search')?.addEventListener('input', debouncedLoad);
 
-        // expose functions for inline handlers
         window.loadSurveys = loadSurveys;
         window.debouncedLoad = debouncedLoad;
 
-        // reset handler (callable via onclick attribute)
+        // hàm đặt lại bộ lọc
         window.resetFilters = function() {
             const fs = document.getElementById('filter-status');
             const fc = document.getElementById('filter-category');

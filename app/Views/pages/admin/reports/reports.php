@@ -75,7 +75,6 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // --- 1. Define Mock Data (Local) ---
         const reportData = {
             topSurveys: [
                 { title: "Khảo sát thói quen đọc sách 2024", responses: 1250, rating: 4.8 },
@@ -101,8 +100,6 @@
                 responses: [200, 250, 300, 450, 500, 600, 750, 800, 950, 1100, 1200, 1500]
             }
         };
-
-        // --- 2. Helper Functions ---
         function getAvatarColor(name) {
             const colors = ['#3498db', '#e74c3c', '#2ecc71', '#f1c40f', '#9b59b6', '#1abc9c'];
             let hash = 0;
@@ -110,7 +107,7 @@
             return colors[Math.abs(hash) % colors.length];
         }
 
-        // --- 3. Render Top Surveys ---
+        // hàm tạo giao diện top khảo sát
         const surveysList = document.getElementById('top-surveys-list');
         if(surveysList) {
             surveysList.innerHTML = reportData.topSurveys.map((s, i) => `
@@ -131,7 +128,7 @@
             `).join('');
         }
 
-        // --- 4. Render Top Users ---
+        // hàm tạo giao diện top người dùng
         const usersList = document.getElementById('top-users-list');
         if(usersList) {
             usersList.innerHTML = reportData.topUsers.map((u, i) => `
@@ -155,11 +152,11 @@
             `).join('');
         }
 
-        // --- 5. Render Category Chart (Pie/Bar) ---
+        // hàm tạo biểu đồ danh mục
         const catCtx = document.getElementById('categoryChart');
         if (catCtx) {
             new Chart(catCtx, {
-                type: 'doughnut', // Thay đổi thành 'bar' nếu muốn
+                type: 'doughnut', 
                 data: {
                     labels: reportData.categories.labels,
                     datasets: [{
@@ -181,7 +178,7 @@
             });
         }
 
-        // --- 6. Render Growth Chart (Line) ---
+        // hàm tạo biểu đồ tăng trưởng
         const growthCtx = document.getElementById('growthChart');
         if (growthCtx) {
             new Chart(growthCtx, {

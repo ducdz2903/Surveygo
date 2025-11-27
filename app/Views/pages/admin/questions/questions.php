@@ -15,9 +15,10 @@
                 <div class="col-md-3">
                     <label class="form-label fw-bold small text-uppercase text-muted">Tìm kiếm</label>
                     <div class="input-group">
-                        <span class="input-group-text bg-light border-end-0"><i
-                                class="fas fa-search text-muted"></i></span>
-                        <input type="text" id="search-input" class="form-control border-start-0 ps-0"
+                        <span class="input-group-text bg-light border-end-0">
+                            <i class="fas fa-search text-muted"></i>
+                        </span>
+                        <input type="text" id="filter-search" class="form-control border-start-0 ps-0"
                             placeholder="Nhập nội dung câu hỏi...">
                     </div>
                 </div>
@@ -41,8 +42,7 @@
                 </div>
                 <div class="col-md-3 d-flex align-items-end">
                     <button class="btn btn-light w-100 border" onclick="resetFilters()">
-                        <i class="fas fa-redo"></i>
-                        Đặt lại bộ lọc
+                        <i class="fas fa-redo me-2"></i>Đặt lại bộ lọc
                     </button>
                 </div>
             </div>
@@ -55,18 +55,19 @@
                 <table class="table table-hover align-middle mb-0">
                     <thead class="bg-light">
                         <tr>
-                            <th class="ps-4" style="width: 80px;">#ID</th>
-                            <th style="width: 40%;">Nội dung câu hỏi</th>
+                            <th class="ps-4" style="width: 80px;">Mã</th>
+                            <th style="width: 50%;">Nội dung câu hỏi</th>
                             <th style="width: 150px;">Loại</th>
-                            <th>Thuộc khảo sát</th>
                             <th style="width: 150px;">Ngày tạo</th>
                             <th class="text-end pe-4" style="width: 150px;">Thao tác</th>
                         </tr>
                     </thead>
                     <tbody id="questions-table-body">
                         <tr>
-                            <td colspan="6" class="text-center py-5">
-                                <div class="spinner-border text-primary" role="status"></div>
+                            <td colspan="5" class="text-center py-5">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Đang tải...</span>
+                                </div>
                             </td>
                         </tr>
                     </tbody>
@@ -76,12 +77,9 @@
         <div class="card-footer bg-white border-top-0 py-3">
             <div class="d-flex justify-content-between align-items-center">
                 <div class="text-muted small">
-                    Hiển thị <span id="showing-count">0</span> / <span id="total-count">0</span> câu hỏi
+                    Hiển thị <span id="total-questions">0</span> kết quả
                 </div>
-                <nav>
-                    <ul class="pagination pagination-sm mb-0" id="pagination">
-                    </ul>
-                </nav>
+                <div id="questions-pagination"></div>
             </div>
         </div>
     </div>
@@ -96,9 +94,10 @@
             </div>
             <div class="modal-body">
                 <form id="question-form">
+                    <input type="hidden" id="question-id">
                     <div class="mb-3">
                         <label class="form-label fw-bold">Nội dung câu hỏi <span class="text-danger">*</span></label>
-                        <textarea class="form-control" rows="2" required
+                        <textarea id="question-content" class="form-control" rows="2" required
                             placeholder="Nhập câu hỏi của bạn..."></textarea>
                     </div>
                     <div class="row mb-3">
@@ -113,7 +112,7 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-bold">Gán vào khảo sát</label>
-                            <select class="form-select">
+                            <select class="form-select" id="modal-survey-select">
                                 <option value="">-- Chọn khảo sát --</option>
                                 <option value="1">Khảo sát thói quen đọc</option>
                                 <option value="2">Đánh giá dịch vụ</option>
@@ -126,14 +125,16 @@
                             <div class="input-group mb-2">
                                 <span class="input-group-text">A</span>
                                 <input type="text" class="form-control" placeholder="Nhập lựa chọn...">
-                                <button type="button" class="btn btn-outline-danger"><i
-                                        class="fas fa-times"></i></button>
+                                <button type="button" class="btn btn-outline-danger">
+                                    <i class="fas fa-times"></i>
+                                </button>
                             </div>
                             <div class="input-group mb-2">
                                 <span class="input-group-text">B</span>
                                 <input type="text" class="form-control" placeholder="Nhập lựa chọn...">
-                                <button type="button" class="btn btn-outline-danger"><i
-                                        class="fas fa-times"></i></button>
+                                <button type="button" class="btn btn-outline-danger">
+                                    <i class="fas fa-times"></i>
+                                </button>
                             </div>
                         </div>
                         <button type="button" class="btn btn-sm btn-outline-primary mt-2">
@@ -144,7 +145,9 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                <button type="button" class="btn btn-primary">Lưu câu hỏi</button>
+                <button type="button" class="btn btn-primary" onclick="saveQuestion()">
+                    <i class="fas fa-save me-2"></i>Lưu câu hỏi
+                </button>
             </div>
         </div>
     </div>
@@ -152,9 +155,12 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        const API_BASE = '/api/questions';
         let currentPage = 1;
-        let perPage = 10;
+        const itemsPerPage = 10;
+        const totalEl = document.getElementById('total-questions');
+        const searchInput = document.getElementById('filter-search');
+        const typeFilter = document.getElementById('filter-type');
+        const surveyFilter = document.getElementById('filter-survey');
 
         const getTypeBadge = (type) => {
             const map = {
@@ -169,48 +175,7 @@
                     </span>`;
         };
 
-        // hàm tạo giao diện bảng
-        function renderTable(rows, meta) {
-            const tbody = document.getElementById('questions-table-body');
-            const totalEl = document.getElementById('total-count');
-            const showingEl = document.getElementById('showing-count');
-
-            if (!rows || rows.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-5 text-muted">Không tìm thấy câu hỏi nào phù hợp.</td></tr>`;
-                totalEl.textContent = meta ? meta.total : 0;
-                showingEl.textContent = 0;
-                document.getElementById('pagination').innerHTML = '';
-                return;
-            }
-
-            tbody.innerHTML = rows.map(q => `
-                <tr class="slide-in align-middle">
-                    <td class="ps-4"><span class="text-muted small">#${q.id}</span></td>
-                    <td>
-                        <div class="fw-bold text-dark text-truncate" style="max-width: 350px;" title="${escapeHtml(q.noiDungCauHoi)}">${escapeHtml(q.noiDungCauHoi)}</div>
-                    </td>
-                    <td>${getTypeBadge(q.loaiCauHoi)}</td>
-                    <td>
-                        <span class="badge bg-light text-dark border">
-                            <i class="fas fa-poll-h me-1 text-muted"></i>${escapeHtml(q.maKhaoSat ? ('#' + q.maKhaoSat) : '')}
-                        </span>
-                    </td>
-                    <td><small class="text-muted">${q.created_at ? q.created_at.split(' ')[0] : ''}</small></td>
-                    <td class="text-end pe-4">
-                        <div class="btn-group">
-                            <button class="btn btn-sm btn-light text-primary" onclick="editQuestion(${q.id})" title="Sửa"><i class="fas fa-edit"></i></button>
-                            <button class="btn btn-sm btn-light text-danger" onclick="deleteQuestion(${q.id})" title="Xóa"><i class="fas fa-trash"></i></button>
-                        </div>
-                    </td>
-                </tr>
-            `).join('');
-            totalEl.textContent = meta.total;
-            showingEl.textContent = rows.length;
-            renderPagination(meta.page, meta.total_pages);
-        }
-
-        // băm chuỗi trên trình duyệt
-        function escapeHtml(str) {
+        const escapeHtml = (str) => {
             if (!str) return '';
             return String(str)
                 .replace(/&/g, '&amp;')
@@ -218,174 +183,250 @@
                 .replace(/>/g, '&gt;')
                 .replace(/"/g, '&quot;')
                 .replace(/'/g, '&#39;');
+        };
+
+        // gọi api phân trang
+        async function loadQuestions() {
+            const tbody = document.getElementById('questions-table-body');
+            tbody.innerHTML = `<tr><td colspan="6" class="text-center py-5"><div class="spinner-border text-primary"></div></td></tr>`;
+
+            const params = new URLSearchParams({
+                page: currentPage,
+                limit: itemsPerPage
+            });
+
+            if (searchInput.value.trim()) params.set('search', searchInput.value.trim());
+            if (typeFilter.value) params.set('loaiCauHoi', typeFilter.value);
+            if (surveyFilter.value) params.set('maKhaoSat', surveyFilter.value);
+
+            try {
+                const res = await fetch(`/api/questions?${params.toString()}`);
+                if (!res.ok) throw new Error(`HTTP Error ${res.status}`);
+
+                const json = await res.json();
+                const data = Array.isArray(json.data) ? json.data : (json.data || []);
+                const metaRaw = json.meta || {};
+
+                const total = metaRaw.total ?? metaRaw.total_items ?? data.length;
+                const page = metaRaw.page ?? metaRaw.current_page ?? currentPage;
+                const pageSize = metaRaw.limit ?? metaRaw.per_page ?? itemsPerPage;
+
+                renderTable(data);
+                renderPagination(total, page, pageSize);
+                if (totalEl) totalEl.textContent = total || 0;
+
+            } catch (err) {
+                console.error(err);
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-danger">Không thể tải dữ liệu: ${err.message}</td></tr>`;
+            }
         }
 
-        // tạo giao diện phân trang 
-        function renderPagination(page, totalPages) {
-            const container = document.getElementById('pagination');
+        // hàm tạo giao diện bảng
+        function renderTable(questions) {
+            const tbody = document.getElementById('questions-table-body');
+            if (!questions || questions.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="text-center py-5 text-muted">
+                            <i class="fas fa-question-circle mb-2 display-6"></i><br>
+                            Không tìm thấy câu hỏi nào
+                        </td>
+                    </tr>`;
+                return;
+            }
+
+            tbody.innerHTML = questions.map(q => `
+                <tr class="slide-in">
+                    <td class="ps-4"><span class="font-monospace text-dark">#${q.maCauHoi || q.id}</span></td>
+                    <td>
+                        <div class="fw-bold text-dark text-truncate" style="max-width: 350px;" 
+                             title="${escapeHtml(q.noiDungCauHoi)}">${escapeHtml(q.noiDungCauHoi)}</div>
+                    </td>
+                    <td>${getTypeBadge(q.loaiCauHoi)}</td>
+                    <td><small class="text-muted">${q.created_at ? q.created_at.split(' ')[0] : ''}</small></td>
+                    <td class="text-end pe-4">
+                        <div class="btn-group">
+                            <button class="btn btn-sm btn-light text-primary" onclick="editQuestion(${q.id})" title="Sửa">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-light text-danger" onclick="deleteQuestion(${q.id})" title="Xóa">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // hàm tạo giao diện phân trang
+        function renderPagination(total, page, pageSize) {
+            const container = document.getElementById('questions-pagination');
+            const totalPages = Math.ceil(total / pageSize) || 1;
+
             if (totalPages <= 1) {
                 container.innerHTML = '';
                 return;
             }
 
-            const pages = [];
-            const start = Math.max(1, page - 2);
-            const end = Math.min(totalPages, page + 2);
+            let html = '<ul class="pagination pagination-sm mb-0">';
 
-            if (page > 1) {
-                pages.push({ label: '<', page: page - 1, disabled: false });
-            } else {
-                pages.push({ label: '<', page: 1, disabled: true });
+            // Nút Prev
+            html += `<li class="page-item ${page === 1 ? 'disabled' : ''}">
+                        <button class="page-link" onclick="changePage(${page - 1})">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                     </li>`;
+
+            const start = Math.max(1, page - 1);
+            const end = Math.min(totalPages, page + 1);
+
+            if (start > 1) html += `<li class="page-item"><button class="page-link" onclick="changePage(1)">1</button></li>`;
+            if (start > 2) html += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+
+            for (let i = start; i <= end; i++) {
+                html += `<li class="page-item ${i === page ? 'active' : ''}">
+                            <button class="page-link" onclick="changePage(${i})">${i}</button>
+                         </li>`;
             }
 
-            for (let p = start; p <= end; p++) {
-                pages.push({ label: p, page: p, active: p === page });
-            }
+            if (end < totalPages - 1) html += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+            if (end < totalPages) html += `<li class="page-item"><button class="page-link" onclick="changePage(${totalPages})">${totalPages}</button></li>`;
 
-            if (page < totalPages) {
-                pages.push({ label: '>', page: page + 1, disabled: false });
-            } else {
-                pages.push({ label: '>', page: totalPages, disabled: true });
-            }
+            // Nút Next
+            html += `<li class="page-item ${page === totalPages ? 'disabled' : ''}">
+                        <button class="page-link" onclick="changePage(${page + 1})">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                     </li>`;
 
-            container.innerHTML = pages.map(item => `
-                <li class="page-item ${item.disabled ? 'disabled' : ''} ${item.active ? 'active' : ''}"><a class="page-link" href="#" data-page="${item.page}">${item.label}</a></li>
-            `).join('');
-
-            Array.from(container.querySelectorAll('a[data-page]')).forEach(a => {
-                a.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    const p = parseInt(this.getAttribute('data-page'));
-                    if (!isNaN(p) && p !== currentPage) {
-                        fetchQuestions(p);
-                    }
-                });
-            });
+            html += '</ul>';
+            container.innerHTML = html;
         }
 
-        // tạo params truyền vào api
-        function buildQueryParams(page = 1) {
-            const params = new URLSearchParams();
-            params.set('page', page);
-            params.set('per_page', perPage);
-            const search = document.getElementById('search-input').value.trim();
-            if (search) params.set('search', search);
-            const type = document.getElementById('filter-type').value;
-            if (type) params.set('loaiCauHoi', type);
-            const survey = document.getElementById('filter-survey').value;
-            if (survey) params.set('maKhaoSat', survey);
-            return params.toString();
-        }
 
-        // gọi api lấy danh sách
-        async function fetchQuestions(page = 1) {
-            currentPage = page;
-            const tbody = document.getElementById('questions-table-body');
-            tbody.innerHTML = '<tr><td colspan="6" class="text-center py-5"><div class="spinner-border text-primary" role="status"></div></td></tr>';
+        // hàm đổi trang
+        window.changePage = (p) => { currentPage = p; loadQuestions(); };
+
+        // hàm tạo modal 
+        window.openCreateModal = () => {
+            document.getElementById('question-form').reset();
+            document.getElementById('question-id').value = '';
+            document.getElementById('modalTitle').textContent = 'Tạo câu hỏi mới';
+            document.getElementById('options-area').style.display = 'block';
+            new bootstrap.Modal(document.getElementById('questionModal')).show();
+        };
+
+        // hàm sửa
+        window.editQuestion = async (id) => {
+            try {
+                const res = await fetch(`/api/questions/${id}`);
+                const json = await res.json();
+                const data = json.data || json;
+
+                document.getElementById('question-id').value = data.id;
+                document.getElementById('question-content').value = data.noiDungCauHoi;
+                document.getElementById('modal-type-select').value = data.loaiCauHoi;
+                document.getElementById('modal-survey-select').value = data.maKhaoSat || '';
+
+                // Toggle options area
+                const type = data.loaiCauHoi;
+                document.getElementById('options-area').style.display = 
+                    (type === 'text' || type === 'rating') ? 'none' : 'block';
+
+                document.getElementById('modalTitle').textContent = 'Cập nhật câu hỏi #' + id;
+                new bootstrap.Modal(document.getElementById('questionModal')).show();
+            } catch (e) {
+                alert('Lỗi lấy dữ liệu: ' + e.message);
+            }
+        };
+
+        // hàm lưu
+        window.saveQuestion = async () => {
+            const id = document.getElementById('question-id').value;
+            const payload = {
+                noiDungCauHoi: document.getElementById('question-content').value,
+                loaiCauHoi: document.getElementById('modal-type-select').value,
+                maKhaoSat: document.getElementById('modal-survey-select').value || null
+            };
+
+            const url = id ? `/api/questions/${id}` : '/api/questions';
+            const method = id ? 'PUT' : 'POST';
 
             try {
-                const qs = buildQueryParams(page);
-                const res = await fetch(API_BASE + '?' + qs);
-                const json = await res.json();
-                if (json.error) {
-                    tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-danger">${escapeHtml(json.message || 'Lỗi server')}</td></tr>`;
-                    return;
+                const res = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (res.ok) {
+                    bootstrap.Modal.getInstance(document.getElementById('questionModal')).hide();
+                    loadQuestions();
+                    alert('Lưu thành công!');
+                } else {
+                    alert('Có lỗi xảy ra!');
                 }
-                const rows = json.data || [];
-                const meta = json.meta || { total: 0, page: 1, per_page: perPage, total_pages: 1 };
-                renderTable(rows, meta);
-            } catch (err) {
-                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-danger">Lỗi kết nối</td></tr>`;
-                console.error(err);
+            } catch (e) {
+                console.error(e);
+            }
+        };
+
+        // hàm xóa
+        window.deleteQuestion = async (id) => {
+            if (confirm('Bạn có chắc muốn xóa câu hỏi này?')) {
+                try {
+                    const res = await fetch(`/api/questions/${id}`, { method: 'DELETE' });
+                    if (res.ok) {
+                        loadQuestions();
+                        alert('Xóa thành công!');
+                    } else {
+                        alert('Không thể xóa!');
+                    }
+                } catch (e) {
+                    console.error(e);
+                }
+            }
+        };
+
+        function debounce(fn, delay) {
+            let timeout;
+            return function (...args) {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => fn.apply(this, args), delay);
             }
         }
 
-        // --- 5. EVENT LISTENERS ---
-        function debounce(fn, wait = 300) {
-            let t;
-            return function (...args) {
-                clearTimeout(t);
-                t = setTimeout(() => fn.apply(this, args), wait);
-            };
-        }
-        const debouncedLoad = debounce(() => { currentPage = 1; fetchQuestions(1); }, 300);
+        searchInput.addEventListener('input', debounce(() => {
+            currentPage = 1;
+            loadQuestions();
+        }, 300));
 
-        const si = document.getElementById('search-input');
-        const ft = document.getElementById('filter-type');
-        const fs = document.getElementById('filter-survey');
+        typeFilter.addEventListener('change', () => {
+            currentPage = 1;
+            loadQuestions();
+        });
 
-        if (si) {
-            let composing = false;
-            si.addEventListener('compositionstart', () => { composing = true; });
-            si.addEventListener('compositionend', (e) => { composing = false; fetchQuestions(1); });
-            si.addEventListener('input', function (e) {if (!composing) debouncedLoad(); });
-            console.log('[questions] search-input listener attached');
-        } else {
-            console.warn('[questions] search-input element not found');
-        }
-
-        if (ft) ft.addEventListener('change', () => { currentPage = 1; fetchQuestions(1); }); else console.warn('[questions] filter-type not found');
-        if (fs) fs.addEventListener('change', () => { currentPage = 1; fetchQuestions(1); }); else console.warn('[questions] filter-survey not found');
+        surveyFilter.addEventListener('change', () => {
+            currentPage = 1;
+            loadQuestions();
+        });
 
         document.getElementById('modal-type-select').addEventListener('change', function () {
             const type = this.value;
             const optionsArea = document.getElementById('options-area');
-            if (type === 'text' || type === 'rating') {
-                optionsArea.style.display = 'none';
-            } else {
-                optionsArea.style.display = 'block';
-            }
+            optionsArea.style.display = (type === 'text' || type === 'rating') ? 'none' : 'block';
         });
 
-        // nút đặt lại bộ lọc
+        window.loadQuestions = loadQuestions;
         window.resetFilters = function () {
-            document.getElementById('search-input').value = '';
-            document.getElementById('filter-type').value = '';
-            document.getElementById('filter-survey').value = '';
-            fetchQuestions(1);
+            searchInput.value = '';
+            typeFilter.value = '';
+            surveyFilter.value = '';
+            currentPage = 1;
+            loadQuestions();
         };
 
-        // modal tạo mới / chi tiết
-        window.openCreateModal = function () {
-            const modal = new bootstrap.Modal(document.getElementById('questionModal'));
-            document.getElementById('modalTitle').textContent = 'Tạo câu hỏi mới';
-            document.getElementById('question-form').reset();
-            document.getElementById('options-area').style.display = 'block';
-            modal.show();
-        };
-
-        // nút chỉnh sửa
-        window.editQuestion = function (id) {
-            fetch('/api/questions?id=' + encodeURIComponent(id))
-                .then(r => r.json())
-                .then(json => {
-                    if (json && !json.error && json.data) {
-                        const modal = new bootstrap.Modal(document.getElementById('questionModal'));
-                        document.getElementById('modalTitle').textContent = 'Cập nhật câu hỏi #' + id;
-                        modal.show();
-                    } else {
-                        alert('Không tải được dữ liệu câu hỏi.');
-                    }
-                }).catch(err => { console.error(err); alert('Lỗi kết nối'); });
-        };
-
-        // nút xoá
-        window.deleteQuestion = function (id) {
-            if (confirm('Bạn có chắc chắn muốn xóa câu hỏi #' + id + '?')) {
-                fetch('/api/questions', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) })
-                    .then(r => r.json())
-                    .then(json => {
-                        if (!json.error) {
-                            alert('Đã xóa thành công');
-                            fetchQuestions(currentPage);
-                        } else {
-                            alert(json.message || 'Xóa thất bại');
-                        }
-                    }).catch(err => { console.error(err); alert('Lỗi kết nối'); });
-            }
-        };
-
-        // Init Load
-        fetchQuestions(1);
+        // Init
+        loadQuestions();
     });
 </script>

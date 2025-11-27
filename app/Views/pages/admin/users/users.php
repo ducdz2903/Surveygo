@@ -89,7 +89,6 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // --- 1. Configuration ---
         let currentPage = 1;
         const itemsPerPage = 10;
         const totalUsersEl = document.getElementById('total-users');
@@ -97,8 +96,6 @@
         const roleFilter = document.getElementById('filter-role');
         const statusFilter = document.getElementById('filter-status');
 
-        // --- 2. Helper Functions (Fallback) ---
-        // Đảm bảo code không lỗi nếu AdminHelpers chưa load
         const Helpers = window.AdminHelpers || {
             getAvatarColor: () => '#6c757d',
             getRoleBadge: () => 'badge bg-secondary',
@@ -114,7 +111,7 @@
             return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
         }
 
-        // --- 3. Render Functions ---
+        // tạo giao diện bảng
         function renderTable(users) {
             const tbody = document.getElementById('users-table-body');
             
@@ -147,9 +144,9 @@
                             ${Helpers.getStatusText(user.status || 'active')}
                         </span>
                     </td>
-                    <td class="text-center"><span class="fw-bold text-primary">${user.surveys || 0}</span></td>
-                    <td class="text-center"><span>${user.responses || 0}</span></td>
-                    <td>${user.joinedAt ? new Date(user.joinedAt).toLocaleDateString('vi-VN') : '-'}</td>
+                    <td class="text-center"><span class="text-dark">${user.surveys || 0}</span></td>
+                    <td class="text-center"><span class="text-dark">${user.responses || 0}</span></td>
+                    <td><small class="text-muted">${user.joinedAt ? new Date(user.joinedAt).toLocaleDateString('vi-VN') : '-'}</small></td>
                     <td class="text-end pe-4">
                         <div class="btn-group">
                             <button class="btn btn-sm btn-light text-primary" title="Xem" onclick="alert('Xem User ${user.id}')"><i class="fas fa-eye"></i></button>
@@ -161,6 +158,7 @@
             `).join('');
         }
 
+        // tạo giao diện phân trang
         function renderPagination(total, page, pageSize) {
             const container = document.getElementById('users-pagination');
             if (!container) return;
@@ -173,12 +171,10 @@
 
             let html = '<ul class="pagination pagination-sm mb-0">';
             
-            // Prev
             html += `<li class="page-item ${page === 1 ? 'disabled' : ''}">
                         <button class="page-link" onclick="changePage(${page - 1})"><i class="fas fa-chevron-left"></i></button>
                      </li>`;
 
-            // Logic rút gọn trang
             const start = Math.max(1, page - 1);
             const end = Math.min(totalPages, page + 1);
 
@@ -198,7 +194,6 @@
                 html += `<li class="page-item"><button class="page-link" onclick="changePage(${totalPages})">${totalPages}</button></li>`;
             }
 
-            // Next
             html += `<li class="page-item ${page === totalPages ? 'disabled' : ''}">
                         <button class="page-link" onclick="changePage(${page + 1})"><i class="fas fa-chevron-right"></i></button>
                      </li>`;
@@ -207,8 +202,7 @@
             container.innerHTML = html;
         }
 
-        // --- 4. API & Logic ---
-        
+        // gọi api phân trang 
         async function loadUsers() {
             const tbody = document.getElementById('users-table-body');
             tbody.innerHTML = `<tr><td colspan="9" class="text-center py-5"><div class="spinner-border text-primary"></div></td></tr>`;
@@ -219,7 +213,6 @@
             
             if (searchInput.value.trim()) params.set('search', searchInput.value.trim());
             if (roleFilter.value) params.set('role', roleFilter.value);
-            // Nếu API hỗ trợ lọc status:
             if (statusFilter.value) params.set('status', statusFilter.value);
 
             try {
@@ -253,9 +246,7 @@
             }
         }
 
-        // --- 5. Event Listeners ---
-        
-        // Expose function for pagination
+        // hàm khi thay đổi trang
         window.changePage = function(page) {
             currentPage = page;
             loadUsers();
@@ -263,7 +254,6 @@
 
         window.toggleStatus = function(id) {
             if(confirm('Bạn có chắc muốn thay đổi trạng thái user này?')) {
-                // Logic API PUT status
                 console.log('Toggle status', id);
             }
         };
@@ -277,7 +267,6 @@
         roleFilter.addEventListener('change', () => { currentPage = 1; loadUsers(); });
         statusFilter.addEventListener('change', () => { currentPage = 1; loadUsers(); });
 
-        // expose loadUsers and resetFilters for inline usage
         window.loadUsers = loadUsers;
         window.resetFilters = function() {
             searchInput.value = '';

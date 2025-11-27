@@ -78,12 +78,10 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // --- Configuration ---
         let eventsCurrentPage = 1;
         const itemsPerPage = 10;
         const totalEventsEl = document.getElementById('total-events');
         
-        // --- Helper: Initials (Nếu AdminHelpers chưa có) ---
         function getInitials(name) {
             if (!name) return 'EV';
             const parts = name.trim().split(/\s+/).filter(Boolean);
@@ -91,9 +89,7 @@
             return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
         }
 
-        // --- Core Functions ---
-
-        // 1. Render Table
+        // hàm tạo giao diện bảng
         function renderEventsTable(events) {
             const tbody = document.getElementById('events-table-body');
             
@@ -131,10 +127,10 @@
                         </div>
                     </td>
                     <td>
-                        <div class="small">
-                            <div><i class="fas fa-clock me-1 text-muted"></i>${Helpers.formatDateTime(ev.startDate)}</div>
-                            <div class="text-muted ms-3">↓</div>
-                            <div><i class="fas fa-flag-checkered me-1 text-muted"></i>${Helpers.formatDateTime(ev.endDate)}</div>
+                        <div class="d-flex flex-column">
+                            <div class="small text-muted"><i class="fas fa-clock me-1"></i>${Helpers.formatDateTime(ev.startDate)}</div>
+                            <div class="small text-muted ms-3">↓</div>
+                            <div class="small text-muted"><i class="fas fa-flag-checkered me-1"></i>${Helpers.formatDateTime(ev.endDate)}</div>
                         </div>
                     </td>
                     <td>
@@ -149,7 +145,7 @@
                         </div>
                     </td>
                     <td class="text-center">
-                        <span class="fw-bold text-primary">${ev.surveys || 0}</span>
+                        <span class="text-dark">${ev.surveys || 0}</span>
                     </td>
                     <td class="text-end pe-4">
                         <div class="btn-group">
@@ -168,7 +164,7 @@
             `).join('');
         }
 
-        // 2. Render Pagination
+        // hàm tạo giao diện phan trang
         function renderPagination(total, page, pageSize) {
             const container = document.getElementById('events-pagination');
             if (!container) return;
@@ -214,7 +210,7 @@
             container.innerHTML = html;
         }
 
-        // 3. API Call Function
+        // hàm gọ api
         async function loadEvents() {
             const tbody = document.getElementById('events-table-body');
             tbody.innerHTML = `<tr><td colspan="6" class="text-center py-5"><div class="spinner-border text-primary" role="status"></div></td></tr>`;
@@ -239,7 +235,6 @@
                 
                 const json = await res.json();
                 
-                // Chuẩn hóa dữ liệu trả về (hỗ trợ cả format {data: []} hoặc [])
                 const data = Array.isArray(json.data) ? json.data : (Array.isArray(json) ? json : []);
                 const meta = json.meta || { total: data.length, page: eventsCurrentPage, limit: itemsPerPage, totalPages: 1 };
 
@@ -255,19 +250,19 @@
             }
         }
 
-        // Expose function for pagination onclick
+        // hàm thay đổi trang
         window.changePage = function(page) {
             eventsCurrentPage = page;
             loadEvents();
         }
         
+        // hàm xóa
         window.deleteEvent = function(id) {
             if(confirm('Bạn có chắc chắn muốn xóa sự kiện này?')) {
                 console.log('Delete event', id);
             }
         }
 
-        // Debounce Filter
         function debounce(fn, wait = 300) {
             let timer;
             return function(...args) {
@@ -288,7 +283,6 @@
         
         document.getElementById('filter-search')?.addEventListener('input', debouncedLoad);
         
-        // expose loadEvents and reset handler
         window.loadEvents = loadEvents;
         window.debouncedLoad = debouncedLoad;
         window.resetFilters = function() {
