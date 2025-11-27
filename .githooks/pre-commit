@@ -1,0 +1,76 @@
+#!/usr/bin/env sh
+# .githooks/pre-commit
+# When sql/mysql/init.sql is staged this hook (when enabled) will:
+#  - ensure it's running only on local environments (marker file or ENV)
+#  - DROP DATABASE IF EXISTS `mvc_app`
+#  - CREATE DATABASE `mvc_app` with utf8mb4 charset/collation
+#  - IMPORT sql/mysql/init.sql into the new database
+#
+# Safety: this hook only runs if .local_enable_db_drop exists OR ENABLE_LOCAL_DB_DROP=1 is set.
+# Put .local_enable_db_drop into .gitignore (or create it locally), do NOT commit it.
+set -eu
+
+# Get staged files
+STAGED_FILES=$(git diff --cached --name-only)
+
+# If init.sql is not staged, nothing to do
+echo "$STAGED_FILES" | grep -q "^sql/mysql/init.sql$" || exit 0
+
+# Require explicit marker OR environment var
+if [ ! -f ".local_enable_db_drop" ] && [ "${ENABLE_LOCAL_DB_DROP:-}" != "1" ]; then
+  echo "[pre-commit] sql/mysql/init.sql changed but .local_enable_db_drop not found and ENABLE_LOCAL_DB_DROP!=1 -> skipping DB drop/import"
+  exit 0
+fi
+
+# Load .env entries if present (simple parse, ignores quotes)
+if [ -f .env ]; then
+  DB_USER=$(grep -E '^DB_USER=' .env 2>/dev/null | head -n1 | cut -d'=' -f2- || true)
+  DB_PASS=$(grep -E '^DB_PASS=' .env 2>/dev/null | head -n1 | cut -d'=' -f2- || true)
+  DB_HOST=$(grep -E '^DB_HOST=' .env 2>/dev/null | head -n1 | cut -d'=' -f2- || true)
+  DB_PORT=$(grep -E '^DB_PORT=' .env 2>/dev/null | head -n1 | cut -d'=' -f2- || true)
+fi
+
+DB_USER=${DB_USER:-root}
+DB_PASS=${DB_PASS:-}
+DB_HOST=${DB_HOST:-127.0.0.1}
+DB_PORT=${DB_PORT:-3306}
+
+# Safety: ensure host is local
+if [ "$DB_HOST" != "127.0.0.1" ] && [ "$DB_HOST" != "localhost" ]; then
+  echo "[pre-commit] DB_HOST ($DB_HOST) is not local. Aborting for safety." >&2
+  exit 1
+fi
+
+# Helper to run mysql command
+_run_mysql_cmd() {
+  mysql -u"$DB_USER" -p"$DB_PASS" -h "$DB_HOST" -P "$DB_PORT" -e "$1"
+}
+
+# Perform operations
+echo "[pre-commit] Dropping database mvc_app (if exists)..."
+if ! _run_mysql_cmd "DROP DATABASE IF EXISTS \`mvc_app\`;" ; then
+  echo "[pre-commit] ERROR: DROP DATABASE failed." >&2
+  exit 1
+fi
+
+echo "[pre-commit] Creating database mvc_app..."
+if ! _run_mysql_cmd "CREATE DATABASE IF NOT EXISTS \`mvc_app\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;" ; then
+  echo "[pre-commit] ERROR: CREATE DATABASE failed." >&2
+  exit 1
+fi
+
+echo "[pre-commit] Importing sql/mysql/init.sql into mvc_app..."
+# Import using mysql client; ensure file exists
+if [ ! -f "sql/mysql/init.sql" ]; then
+  echo "[pre-commit] ERROR: sql/mysql/init.sql not found." >&2
+  exit 1
+fi
+
+# Use mysql client to import; protect from password prompt by providing -p"$DB_PASS" (empty allowed)
+if ! mysql -u"$DB_USER" -p"$DB_PASS" -h "$DB_HOST" -P "$DB_PORT" mvc_app < sql/mysql/init.sql ; then
+  echo "[pre-commit] ERROR: Import failed." >&2
+  exit 1
+fi
+
+echo "[pre-commit] Database mvc_app recreated and initialized from sql/mysql/init.sql"
+exit 0
