@@ -79,8 +79,6 @@ $urls['register'] = $urls['register'] ?? $__mk($__base, '/register');
 
                 const survey = result.data;
                 // Use thoiLuongDuTinh from API, fallback to 5 if not available
-                const estimatedTime = survey.thoiLuongDuTinh || 5;
-
                 const guideHTML = `
                     <div class="guide-header">
                         <div class="guide-icon">
@@ -95,7 +93,7 @@ $urls['register'] = $urls['register'] ?? $__mk($__base, '/register');
                     <div class="guide-info">
                         <div class="info-item">
                             <div class="info-label">Độ dài</div>
-                            <div class="info-value">${estimatedTime}</div>
+                            <div class="info-value">${survey.thoiLuongDuTinh || 5}</div>
                             <div class="text-muted">phút</div>
                         </div>
                         <div class="info-item">
