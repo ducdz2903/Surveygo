@@ -16,6 +16,9 @@ $router = new Router();
 // Authentication routes.
 $router->post('/api/register', [App\Controllers\AuthController::class, 'register']);
 $router->post('/api/login', [App\Controllers\AuthController::class, 'login']);
+// Profile update and password change endpoints
+$router->post('/api/auth/update-profile', [App\Controllers\AuthController::class, 'updateProfile']);
+$router->post('/api/auth/change-password', [App\Controllers\AuthController::class, 'changePassword']);
 
 // Landing pages.
 $router->get('/', [HomeController::class, 'home']);

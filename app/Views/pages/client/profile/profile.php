@@ -84,9 +84,9 @@ $urls = $urls ?? []; // Giả định $urls được truyền vào
 
                         <div class="tab-pane fade show active" id="account">
                             <div class="info-card">
-                                <div class="card-header-custom">
+                                    <div class="card-header-custom">
                                     <h5><i class="fas fa-user-edit me-2"></i>Thông tin cá nhân</h5>
-                                    <button class="btn btn-primary-gradient btn-sm">Cập nhật</button>
+                                    <button id="btn-update-profile" class="btn btn-primary-gradient btn-sm">Cập nhật</button>
                                 </div>
                                 <div class="card-body">
                                     <form>
@@ -124,7 +124,7 @@ $urls = $urls ?? []; // Giả định $urls được truyền vào
                             <div class="info-card">
                                 <div class="card-header-custom">
                                     <h5><i class="fas fa-lock me-2"></i>Bảo mật & Mật khẩu</h5>
-                                    <button class="btn btn-primary-gradient btn-sm">Cập nhật</button>
+                                    <button id="btn-update-password" class="btn btn-primary-gradient btn-sm">Cập nhật</button>
                                 </div>
                                 <div class="card-body">
                                     <form>
@@ -203,7 +203,9 @@ $urls = $urls ?? []; // Giả định $urls được truyền vào
     <?php include BASE_PATH . '/app/Views/components/client/_footer.php'; ?>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/public/assets/js/toast-helper.js"></script>
     <script>
+        const API_BASE = ''; // use relative paths; set to '' so fetch('/api/...') resolves to current origin
         // Lấy thông tin user từ localStorage khi trang load
         document.addEventListener('DOMContentLoaded', function () {
             try {
@@ -214,14 +216,14 @@ $urls = $urls ?? []; // Giả định $urls được truyền vào
                     // Cập nhật thông tin cá nhân
                     if (user.name) {
                         document.querySelector('.user-fullname').textContent = user.name;
-                        const fullNameInput = document.querySelector('input[value="Tên Người Dùng"]');
+                        const fullNameInput = document.getElementById('profile-name');
                         if (fullNameInput) {
                             fullNameInput.value = user.name;
                         }
                     }
 
                     if (user.email) {
-                        const emailInput = document.querySelector('input[type="email"]');
+                        const emailInput = document.getElementById('profile-email');
                         if (emailInput) {
                             emailInput.value = user.email;
                         }
@@ -350,15 +352,15 @@ $urls = $urls ?? []; // Giả định $urls được truyền vào
                 btnUpdateProfile.addEventListener('click', async () => {
                     try {
                         const stored = localStorage.getItem('app.user');
-                        if (!stored) return alert('Vui lòng đăng nhập trước khi cập nhật.');
+                        if (!stored) return showToast('warning', 'Vui lòng đăng nhập trước khi cập nhật.');
                         const currentUser = JSON.parse(stored);
 
                         const payload = {
                             id: currentUser.id,
-                            name: document.getElementById('input-name').value.trim(),
-                            email: document.getElementById('input-email').value.trim(),
-                            phone: (document.getElementById('input-phone') ? document.getElementById('input-phone').value.trim() : ''),
-                            gender: document.getElementById('input-gender').value || '',
+                            name: document.getElementById('profile-name').value.trim(),
+                            email: document.getElementById('profile-email').value.trim(),
+                            phone: (document.getElementById('profile-phone') ? document.getElementById('profile-phone').value.trim() : ''),
+                            gender: document.getElementById('profile-gender').value || '',
                         };
 
                         if (selectedAvatarData) {
@@ -366,8 +368,8 @@ $urls = $urls ?? []; // Giả định $urls được truyền vào
                         }
 
                         // Email validation
-                        if (!payload.name) return alert('Vui lòng nhập họ tên.');
-                        if (!payload.email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(payload.email)) return alert('Email không hợp lệ.');
+                        if (!payload.name) return showToast('warning', 'Vui lòng nhập họ tên.');
+                        if (!payload.email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(payload.email)) return showToast('warning', 'Email không hợp lệ.');
 
                         const res = await fetch(`${API_BASE}/api/auth/update-profile`, {
                             method: 'POST',
@@ -379,30 +381,23 @@ $urls = $urls ?? []; // Giả định $urls được truyền vào
                             data = await res.json();
                         } catch (e) {
                             console.error('Response is not JSON:', e);
-                            return alert('Máy chủ trả về phản hồi không mong muốn. Vui lòng thử lại.');
+                            return showToast('error', 'Máy chủ trả về phản hồi không mong muốn. Vui lòng thử lại.');
                         }
                         if (!res.ok || data.error) {
-                            return alert(data.message || 'Cập nhật thất bại.');
+                            return showToast('error', data.message || 'Cập nhật thất bại.');
                         }
-
-                        // Update local user
-                        const updatedUser = Object.assign({}, currentUser, {
-                            name: payload.name,
-                            email: payload.email,
-                            phone: payload.phone,
-                            gender: payload.gender || null,
-                            avatar: payload.avatar || currentUser.avatar || null,
-                        });
-                        localStorage.setItem('app.user', JSON.stringify(updatedUser));
-
-                        // Update UI
-                        const nameEl = document.querySelector('.user-fullname');
-                        if (nameEl) nameEl.textContent = updatedUser.name;
-
-                        alert('Cập nhật thông tin thành công.');
+                        showToast('success', 'Cập nhật thông tin thành công. Vui lòng đăng nhập lại.');
+                        try {
+                            localStorage.removeItem('app.user');
+                        } catch (e) {
+                            console.warn('Không thể xóa app.user từ localStorage:', e);
+                        }
+                        setTimeout(() => {
+                            window.location.href = '/login';
+                        }, 800);
                     } catch (err) {
                         console.error(err);
-                        alert('Đã có lỗi xảy ra khi cập nhật.');
+                        showToast('error', 'Đã có lỗi xảy ra khi cập nhật.');
                     }
                 });
             }
@@ -412,7 +407,7 @@ $urls = $urls ?? []; // Giả định $urls được truyền vào
                 btnUpdatePassword.addEventListener('click', async () => {
                     try {
                         const stored = localStorage.getItem('app.user');
-                        if (!stored) return alert('Vui lòng đăng nhập trước khi đổi mật khẩu.');
+                        if (!stored) return showToast('warning', 'Vui lòng đăng nhập trước khi đổi mật khẩu.');
                         const currentUser = JSON.parse(stored);
 
                         const payload = {
@@ -422,9 +417,9 @@ $urls = $urls ?? []; // Giả định $urls được truyền vào
                             confirm_password: document.getElementById('confirm-password').value,
                         };
 
-                        if (!payload.current_password || !payload.new_password || !payload.confirm_password) return alert('Vui lòng điền đầy đủ các trường mật khẩu.');
-                        if (payload.new_password.length < 6) return alert('Mật khẩu mới phải có ít nhất 6 ký tự.');
-                        if (payload.new_password !== payload.confirm_password) return alert('Mật khẩu mới không khớp.');
+                        if (!payload.current_password || !payload.new_password || !payload.confirm_password) return showToast('warning', 'Vui lòng điền đầy đủ các trường mật khẩu.');
+                        if (payload.new_password.length < 6) return showToast('warning', 'Mật khẩu mới phải có ít nhất 6 ký tự.');
+                        if (payload.new_password !== payload.confirm_password) return showToast('warning', 'Mật khẩu mới không khớp.');
 
                         const res = await fetch(`${API_BASE}/api/auth/change-password`, {
                             method: 'POST',
@@ -436,21 +431,27 @@ $urls = $urls ?? []; // Giả định $urls được truyền vào
                             data = await res.json();
                         } catch (e) {
                             console.error('Response is not JSON:', e);
-                            return alert('Máy chủ trả về phản hồi không mong muốn. Vui lòng thử lại.');
+                            return showToast('error', 'Máy chủ trả về phản hồi không mong muốn. Vui lòng thử lại.');
                         }
                         if (!res.ok || data.error) {
-                            return alert(data.message || 'Đổi mật khẩu thất bại.');
+                            return showToast('error', data.message || 'Đổi mật khẩu thất bại.');
                         }
 
-                        // Clear password text in box
                         document.getElementById('current-password').value = '';
                         document.getElementById('new-password').value = '';
                         document.getElementById('confirm-password').value = '';
-
-                        alert('Đổi mật khẩu thành công.');
+                        showToast('success', 'Đổi mật khẩu thành công. Vui lòng đăng nhập lại.');
+                        try {
+                            localStorage.removeItem('app.user');
+                        } catch (e) {
+                            console.warn('Không thể xóa app.user từ localStorage:', e);
+                        }
+                        setTimeout(() => {
+                            window.location.href = '/login';
+                        }, 800);
                     } catch (err) {
                         console.error(err);
-                        alert('Đã có lỗi xảy ra khi đổi mật khẩu.');
+                        showToast('error', 'Đã có lỗi xảy ra khi đổi mật khẩu.');
                     }
                 });
             }
