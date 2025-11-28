@@ -76,7 +76,8 @@ jobs:
             **/tests/**
             **/README.md
             **/.env
-
+            **/.git/**
+            **/.githooks/**
             # Giữ NGUYÊN config TRÊN SERVER
             config/**
             **/config/**
