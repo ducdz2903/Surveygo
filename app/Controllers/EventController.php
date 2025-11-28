@@ -63,4 +63,60 @@ class EventController extends Controller
             ],
         ]);
     }
+
+    // API to get user data for spinning wheel
+    public function getUserData(Request $request)
+    {
+        $userId = $request->query('userId');
+        if (!$userId) {
+            return $this->json(['error' => true, 'message' => 'User ID is required'], 400);
+        }
+
+        $user = User::findById((int) $userId);
+        if (!$user) {
+            return $this->json(['error' => true, 'message' => 'User not found'], 404);
+        }
+
+        return $this->json([
+            'error' => false,
+            'data' => [
+                'points' => $user->getPoints(),
+                'spins' => $user->getSpins(),
+            ],
+        ]);
+    }
+
+    // API to perform spin
+    public function spin(Request $request)
+    {
+        $userId = $request->input('userId');
+        if (!$userId) {
+            return $this->json(['error' => true, 'message' => 'User ID is required'], 400);
+        }
+
+        $user = User::findById((int) $userId);
+        if (!$user) {
+            return $this->json(['error' => true, 'message' => 'User not found'], 404);
+        }
+
+        if ($user->getSpins() <= 0) {
+            return $this->json(['error' => true, 'message' => 'No spins remaining'], 400);
+        }
+
+        // Simulate spin result (random points between 10-100)
+        $pointsWon = rand(10, 100);
+
+        // Update user data
+        $user->addPoints($pointsWon);
+        $user->subtractSpins(1);
+
+        return $this->json([
+            'error' => false,
+            'data' => [
+                'pointsWon' => $pointsWon,
+                'newPoints' => $user->getPoints(),
+                'remainingSpins' => $user->getSpins(),
+            ],
+        ]);
+    }
 }

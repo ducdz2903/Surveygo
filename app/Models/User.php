@@ -17,6 +17,8 @@ class User
     private ?string $gender;
     private ?string $avatar;
     private string $role;
+    private int $points;
+    private int $spins;
     private string $createdAt;
     private string $updatedAt;
 
@@ -31,6 +33,8 @@ class User
         $this->gender = $attributes['gender'] ?? null;
         $this->avatar = $attributes['avatar'] ?? null;
         $this->role = $attributes['role'];
+        $this->points = (int) ($attributes['points'] ?? 1250);
+        $this->spins = (int) ($attributes['spins'] ?? 3);
         $this->createdAt = $attributes['created_at'];
         $this->updatedAt = $attributes['updated_at'];
     }
@@ -123,6 +127,44 @@ class User
         return $this->avatar;
     }
 
+    public function getPoints(): int
+    {
+        return $this->points;
+    }
+
+    public function getSpins(): int
+    {
+        return $this->spins;
+    }
+
+    public function addPoints(int $points): void
+    {
+        $this->points += $points;
+        $this->updatePointsAndSpins();
+    }
+
+    public function subtractSpins(int $spins): void
+    {
+        $this->spins -= $spins;
+        if ($this->spins < 0) {
+            $this->spins = 0;
+        }
+        $this->updatePointsAndSpins();
+    }
+
+    private function updatePointsAndSpins(): void
+    {
+        /** @var PDO $db */
+        $db = Container::get('db');
+
+        $statement = $db->prepare('UPDATE users SET points = :points, spins = :spins, updated_at = NOW() WHERE id = :id');
+        $statement->execute([
+            ':points' => $this->points,
+            ':spins' => $this->spins,
+            ':id' => $this->id,
+        ]);
+    }
+
     public function toArray(): array
     {
         return [
@@ -133,6 +175,8 @@ class User
             'gender' => $this->gender,
             'avatar' => $this->avatar,
             'role' => $this->role,
+            'points' => $this->points,
+            'spins' => $this->spins,
             'created_at' => $this->createdAt,
             'updated_at' => $this->updatedAt,
         ];

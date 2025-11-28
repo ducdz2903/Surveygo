@@ -71,6 +71,8 @@ $router->get('/api/questions/show', [App\Controllers\QuestionController::class, 
 
 // Events API
 $router->get('/api/events', [App\Controllers\EventController::class, 'index']); // Lấy danh sách sự kiện (phân trang + tìm kiếm)
+$router->get('/api/events/user-data', [App\Controllers\EventController::class, 'getUserData']); // Lấy dữ liệu điểm và vé quay của user
+$router->post('/api/events/spin', [App\Controllers\EventController::class, 'spin']); // Thực hiện quay thưởng
 
 $router->post('/api/questions', [App\Controllers\QuestionController::class, 'create']); // Tạo câu hỏi mới
 $router->put('/api/questions', [App\Controllers\QuestionController::class, 'update']); // Cập nhật câu hỏi

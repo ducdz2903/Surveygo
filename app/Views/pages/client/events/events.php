@@ -158,6 +158,110 @@ $userData = [
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="public/assets/js/mission-hub.js" defer></script>
+    <script>
+        function getCurrentUserId() {
+            try {
+                const raw = localStorage.getItem('app.user');
+                if (!raw) {
+                    return null;
+                }
+                const user = JSON.parse(raw);
+                return user && user.id ? user.id : null;
+            } catch (e) {
+                return null;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const spinBtn = document.getElementById('spin-btn');
+            const spinCountEl = document.getElementById('spin-count');
+            const userPointsEl = document.getElementById('user-points');
+            const spinModal = new bootstrap.Modal(document.getElementById('spinModal'));
+            const congratsModal = new bootstrap.Modal(document.getElementById('congratsModal'));
+            const confirmSpinBtn = document.getElementById('confirm-spin');
+            const wonPointsEl = document.getElementById('won-points');
+
+            const userId = getCurrentUserId();
+
+            function updateUI(points, spins) {
+                spinCountEl.textContent = spins;
+                userPointsEl.textContent = points;
+                spinBtn.disabled = spins <= 0;
+                if (spins <= 0) {
+                    spinBtn.textContent = 'Hết lượt quay';
+                } else {
+                    spinBtn.textContent = 'Quay Ngay';
+                }
+            }
+
+            // Load user data from server
+            function loadUserData() {
+                if (!userId) {
+                    console.error('User not logged in');
+                    return;
+                }
+
+                fetch(`<?= rtrim($baseUrl, '/') ?>/api/events/user-data?userId=${userId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.error) {
+                            console.error('Error loading user data:', data.message);
+                            return;
+                        }
+                        updateUI(data.data.points, data.data.spins);
+                    })
+                    .catch(error => {
+                        console.error('Error loading user data:', error);
+                    });
+            }
+
+            // Load user data on page load
+            loadUserData();
+
+            // Spin button click
+            spinBtn.addEventListener('click', function() {
+                spinModal.show();
+            });
+
+            // Confirm spin
+            confirmSpinBtn.addEventListener('click', function() {
+                spinModal.hide();
+                confirmSpinBtn.blur(); // Remove focus to prevent aria-hidden issue
+
+                if (!userId) {
+                    alert('Vui lòng đăng nhập để quay');
+                    return;
+                }
+
+                // Perform spin via AJAX
+                fetch('<?= rtrim($baseUrl, '/') ?>/api/events/spin', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ userId: userId })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        alert(data.message);
+                        return;
+                    }
+
+                    // Update UI with new data
+                    updateUI(data.data.newPoints, data.data.remainingSpins);
+
+                    // Show congratulation modal
+                    wonPointsEl.textContent = '+' + data.data.pointsWon;
+                    congratsModal.show();
+                })
+                .catch(error => {
+                    console.error('Error performing spin:', error);
+                    alert('Có lỗi xảy ra khi quay. Vui lòng thử lại.');
+                });
+            });
+        });
+    </script>
 </body>
 
 </html>
