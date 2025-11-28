@@ -152,6 +152,12 @@ class User
         $this->updatePointsAndSpins();
     }
 
+    public function addSpins(int $spins): void
+    {
+        $this->spins += $spins;
+        $this->updatePointsAndSpins();
+    }
+
     private function updatePointsAndSpins(): void
     {
         /** @var PDO $db */

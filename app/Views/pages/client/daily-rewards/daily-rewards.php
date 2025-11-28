@@ -134,6 +134,20 @@ $__publicBase = $__base . '/public';
             { day: 30, points: 250, icon: 'crown' } // Milestone LỚN
         ];
 
+        // Function to get current user ID
+        function getCurrentUserId() {
+            try {
+                const raw = localStorage.getItem('app.user');
+                if (!raw) {
+                    return null;
+                }
+                const user = JSON.parse(raw);
+                return user && user.id ? user.id : null;
+            } catch (e) {
+                return null;
+            }
+        }
+
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', function () {
             loadRewardData();
@@ -225,9 +239,8 @@ $__publicBase = $__base . '/public';
             }
         }
 
-        // Claim daily reward (Giữ nguyên)
+        // Claim daily reward (Cập nhật để sử dụng API)
         function claimReward() {
-            // ... (Không cần thay đổi hàm này) ...
             const today = new Date().toDateString();
             const isTodayClaimed = window.rewardData.lastClaimed === today;
 
@@ -240,40 +253,74 @@ $__publicBase = $__base . '/public';
             claimBtn.disabled = true;
             claimBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Đang xử lý...';
 
-
-            window.rewardData.currentStreak++;
-            window.rewardData.lastClaimed = today;
-            window.rewardData.claimedDays.push(today);
-
-            // Xử lý trường hợp chuỗi > 30 ngày (quay vòng)
-            let rewardIndex = window.rewardData.currentStreak - 1;
-            if (rewardIndex >= rewardDays.length) {
-                // Nếu muốn quay vòng về ngày 1:
-                // rewardIndex = 0; 
-                // window.rewardData.currentStreak = 1; // reset streak
-
-                // Nếu muốn giữ phần thưởng ngày cuối:
-                rewardIndex = rewardDays.length - 1;
+            const userId = getCurrentUserId();
+            if (!userId) {
+                alert('Vui lòng đăng nhập để điểm danh');
+                claimBtn.disabled = false;
+                claimBtn.innerHTML = '<i class="fas fa-check-circle me-2"></i>Điểm danh hôm nay';
+                return;
             }
 
-            const reward = rewardDays[rewardIndex];
-            const pointsEarned = reward ? reward.points : 0;
+            // Call API to perform check-in
+            fetch('<?= rtrim($baseUrl, '/') ?>/api/events/daily-checkin', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    userId: userId,
+                    streak: window.rewardData.currentStreak + 1
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.message);
+                    claimBtn.disabled = false;
+                    claimBtn.innerHTML = '<i class="fas fa-check-circle me-2"></i>Điểm danh hôm nay';
+                    return;
+                }
 
-            localStorage.setItem('dailyRewards', JSON.stringify(window.rewardData));
+                // Update local data
+                window.rewardData.currentStreak++;
+                window.rewardData.lastClaimed = today;
+                window.rewardData.claimedDays.push(today);
 
-            const claimStatus = document.getElementById('claimStatus');
-            claimStatus.innerHTML = `
-                <div class="alert alert-success" role="alert">
-                    <i class="fas fa-check-circle me-2"></i>
-                    Chúc mừng! Bạn vừa nhận được <strong>+${pointsEarned} điểm</strong>
-                </div>
-            `;
+                const dailyStorageKey = userId ? 'dailyRewards_' + userId : 'dailyRewards';
+                localStorage.setItem(dailyStorageKey, JSON.stringify(window.rewardData));
 
-            setTimeout(() => {
-                renderRewardCards();
-                setupClaimButton();
-                claimStatus.innerHTML = `<small class="text-success">Hẹn gặp lại bạn vào ngày mai!</small>`;
-            }, 1500);
+                // Update spin data in localStorage
+                const spinStorageKey = userId ? 'spinUserData_' + userId : 'spinUserData';
+                localStorage.setItem(spinStorageKey, JSON.stringify({
+                    points: data.data.newPoints,
+                    spins: data.data.newSpins
+                }));
+
+                const claimStatus = document.getElementById('claimStatus');
+                let message = `Chúc mừng! Bạn vừa nhận được <strong>+${data.data.pointsEarned} điểm</strong>`;
+                if (data.data.addedSpin) {
+                    message += ` và <strong>1 vé quay thưởng</strong>`;
+                }
+
+                claimStatus.innerHTML = `
+                    <div class="alert alert-success" role="alert">
+                        <i class="fas fa-check-circle me-2"></i>
+                        ${message}
+                    </div>
+                `;
+
+                setTimeout(() => {
+                    renderRewardCards();
+                    setupClaimButton();
+                    claimStatus.innerHTML = `<small class="text-success">Hẹn gặp lại bạn vào ngày mai!</small>`;
+                }, 1500);
+            })
+            .catch(error => {
+                console.error('Error performing check-in:', error);
+                alert('Có lỗi xảy ra khi điểm danh. Vui lòng thử lại.');
+                claimBtn.disabled = false;
+                claimBtn.innerHTML = '<i class="fas fa-check-circle me-2"></i>Điểm danh hôm nay';
+            });
         }
     </script>
 </body>
