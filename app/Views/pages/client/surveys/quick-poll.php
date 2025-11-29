@@ -47,7 +47,7 @@ $urls['register'] = $urls['register'] ?? $__mk($__base, '/register');
 
             <!-- Filter Section -->
             <div class="row mb-4">
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <div class="input-group">
                         <span class="input-group-text"><i class="fas fa-search"></i></span>
                         <input type="text" class="form-control" id="search-input" placeholder="Tìm kiếm quick poll...">
@@ -58,11 +58,15 @@ $urls['register'] = $urls['register'] ?? $__mk($__base, '/register');
                         <option value="">Tất cả</option>
                         <option value="hoạtĐộng">Hot 🔥</option>
                         <option value="pending">Mới ⭐</option>
+                        <option value="chờDuyệt">Chờ duyệt ⏳</option>
                     </select>
                 </div>
-                <div class="col-md-3">
-                    <button class="btn btn-outline-primary" id="btn-reset-filters">
+                <div class="col-md-4 d-flex gap-2">
+                    <button class="btn btn-outline-primary flex-fill" id="btn-reset-filters">
                         <i class="fas fa-redo me-2"></i>Xóa bộ lọc
+                    </button>
+                    <button class="btn btn-primary-gradient flex-fill" id="btn-add-quickpoll">
+                        <i class="fas fa-plus me-2"></i>Thêm Quick-poll
                     </button>
                 </div>
             </div>
@@ -80,6 +84,65 @@ $urls['register'] = $urls['register'] ?? $__mk($__base, '/register');
             <nav aria-label="Page navigation" id="pagination-container"></nav>
         </div>
     </main>
+
+    <!-- Add Quick Poll Modal -->
+    <div class="modal fade" id="addQuickPollModal" tabindex="-1" aria-labelledby="addQuickPollModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content glass-card">
+                <div class="modal-header">
+                    <h5 class="modal-title text-gradient" id="addQuickPollModalLabel"><i class="fas fa-plus-circle me-2"></i>Thêm Quick Poll</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addQuickPollForm">
+                        <div class="mb-4">
+                            <label for="pollTopic" class="form-label fw-bold"><i class="fas fa-tag text-primary me-2"></i>Chủ đề</label>
+                            <input type="text" class="form-control form-control-lg" id="pollTopic" placeholder="Nhập chủ đề của quick poll" required style="border-radius: 12px; border: 2px solid var(--border-color);">
+                        </div>
+                        <div class="mb-4">
+                            <label for="pollQuestion" class="form-label fw-bold"><i class="fas fa-question-circle text-primary me-2"></i>Nội dung câu hỏi</label>
+                            <textarea class="form-control form-control-lg" id="pollQuestion" rows="3" placeholder="Nhập nội dung câu hỏi" required style="border-radius: 12px; border: 2px solid var(--border-color); resize: vertical;"></textarea>
+                        </div>
+                        <div class="mb-4">
+                            <label for="pollReward" class="form-label fw-bold"><i class="fas fa-coins text-warning me-2"></i>Số điểm thưởng</label>
+                            <input type="number" class="form-control form-control-lg" id="pollReward" placeholder="Nhập số điểm thưởng" min="1" required style="border-radius: 12px; border: 2px solid var(--border-color);">
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label fw-bold"><i class="fas fa-list-check text-success me-2"></i>Loại lựa chọn</label>
+                            <select class="form-select form-select-lg" id="pollType" style="border-radius: 12px; border: 2px solid var(--border-color);">
+                                <option value="single">Chọn 1 câu duy nhất</option>
+                                <option value="multiple">Chọn nhiều câu</option>
+                            </select>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label fw-bold"><i class="fas fa-reply-all text-info me-2"></i>Câu trả lời</label>
+                            <div id="answersContainer">
+                                <div class="input-group mb-3 answer-item" style="border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                                    <input type="text" class="form-control form-control-lg border-0" placeholder="Câu trả lời 1" required style="background: var(--background-light);">
+                                    <button type="button" class="btn btn-outline-danger remove-answer border-0" disabled style="background: var(--background-light);"><i class="fas fa-trash"></i></button>
+                                </div>
+                                <div class="input-group mb-3 answer-item" style="border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                                    <input type="text" class="form-control form-control-lg border-0" placeholder="Câu trả lời 2" required style="background: var(--background-light);">
+                                    <button type="button" class="btn btn-outline-danger remove-answer border-0" disabled style="background: var(--background-light);"><i class="fas fa-trash"></i></button>
+                                </div>
+                                <div class="input-group mb-3 answer-item" style="border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                                    <input type="text" class="form-control form-control-lg border-0" placeholder="Câu trả lời 3" required style="background: var(--background-light);">
+                                    <button type="button" class="btn btn-outline-danger remove-answer border-0" disabled style="background: var(--background-light);"><i class="fas fa-trash"></i></button>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-outline-primary btn-sm mt-3" id="addAnswerBtn" style="border-radius: 25px; padding: 0.5rem 1rem;">
+                                <i class="fas fa-plus me-1"></i>Thêm câu trả lời
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" style="border-radius: 25px; padding: 0.5rem 1.5rem;">Hủy</button>
+                    <button type="button" class="btn btn-primary-gradient" id="saveQuickPollBtn" style="border-radius: 25px; padding: 0.5rem 1.5rem;">Lưu Quick Poll</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <?php include BASE_PATH . '/app/Views/components/client/_footer.php'; ?>
 
@@ -242,6 +305,87 @@ $urls['register'] = $urls['register'] ?? $__mk($__base, '/register');
                 document.getElementById('search-input').value = '';
                 document.getElementById('status-filter').value = '';
                 loadQuickPolls(1, {});
+            });
+
+            // Add Quick Poll Modal functionality
+            const addQuickPollBtn = document.getElementById('btn-add-quickpoll');
+            const addQuickPollModal = new bootstrap.Modal(document.getElementById('addQuickPollModal'));
+            const addAnswerBtn = document.getElementById('addAnswerBtn');
+            const answersContainer = document.getElementById('answersContainer');
+            const saveQuickPollBtn = document.getElementById('saveQuickPollBtn');
+
+            addQuickPollBtn.addEventListener('click', function () {
+                addQuickPollModal.show();
+            });
+
+            addAnswerBtn.addEventListener('click', function () {
+                const answerCount = answersContainer.querySelectorAll('.answer-item').length;
+                const newAnswerItem = document.createElement('div');
+                newAnswerItem.className = 'input-group mb-3 answer-item';
+                newAnswerItem.style.cssText = 'border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);';
+                newAnswerItem.innerHTML = `
+                    <input type="text" class="form-control form-control-lg border-0" placeholder="Câu trả lời ${answerCount + 1}" required style="background: var(--background-light);">
+                    <button type="button" class="btn btn-outline-danger remove-answer border-0" style="background: var(--background-light);"><i class="fas fa-trash"></i></button>
+                `;
+                answersContainer.appendChild(newAnswerItem);
+                updateRemoveButtons();
+            });
+
+            answersContainer.addEventListener('click', function (e) {
+                if (e.target.classList.contains('remove-answer') || e.target.closest('.remove-answer')) {
+                    const answerItems = answersContainer.querySelectorAll('.answer-item');
+                    if (answerItems.length > 3) {
+                        e.target.closest('.answer-item').remove();
+                        updateRemoveButtons();
+                    }
+                }
+            });
+
+            function updateRemoveButtons() {
+                const answerItems = answersContainer.querySelectorAll('.answer-item');
+                answerItems.forEach((item, index) => {
+                    const removeBtn = item.querySelector('.remove-answer');
+                    removeBtn.disabled = answerItems.length <= 3;
+                });
+            }
+
+            saveQuickPollBtn.addEventListener('click', function () {
+                const form = document.getElementById('addQuickPollForm');
+                if (!form.checkValidity()) {
+                    form.reportValidity();
+                    return;
+                }
+
+                const pollData = {
+                    topic: document.getElementById('pollTopic').value,
+                    question: document.getElementById('pollQuestion').value,
+                    reward: parseInt(document.getElementById('pollReward').value),
+                    type: document.getElementById('pollType').value,
+                    answers: Array.from(answersContainer.querySelectorAll('.answer-item input')).map(input => input.value)
+                };
+
+                // TODO: Send data to backend API
+                console.log('Quick Poll Data:', pollData);
+
+                // For now, just show success message and close modal
+                alert('Quick Poll đã được tạo thành công!');
+                addQuickPollModal.hide();
+                form.reset();
+                // Reset answers to default 3
+                answersContainer.innerHTML = `
+                    <div class="input-group mb-3 answer-item" style="border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        <input type="text" class="form-control form-control-lg border-0" placeholder="Câu trả lời 1" required style="background: var(--background-light);">
+                        <button type="button" class="btn btn-outline-danger remove-answer border-0" disabled style="background: var(--background-light);"><i class="fas fa-trash"></i></button>
+                    </div>
+                    <div class="input-group mb-3 answer-item" style="border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        <input type="text" class="form-control form-control-lg border-0" placeholder="Câu trả lời 2" required style="background: var(--background-light);">
+                        <button type="button" class="btn btn-outline-danger remove-answer border-0" disabled style="background: var(--background-light);"><i class="fas fa-trash"></i></button>
+                    </div>
+                    <div class="input-group mb-3 answer-item" style="border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        <input type="text" class="form-control form-control-lg border-0" placeholder="Câu trả lời 3" required style="background: var(--background-light);">
+                        <button type="button" class="btn btn-outline-danger remove-answer border-0" disabled style="background: var(--background-light);"><i class="fas fa-trash"></i></button>
+                    </div>
+                `;
             });
         });
     </script>

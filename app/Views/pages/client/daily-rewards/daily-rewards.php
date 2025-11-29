@@ -79,6 +79,8 @@ $__publicBase = $__base . '/public';
                         <li>Bạn chỉ có thể điểm danh khi ấn vào nút "Điểm danh hôm nay".</li>
                         <li>Chuỗi điểm danh sẽ reset nếu bạn bỏ qua một ngày.</li>
                         <li>Càng nhiều ngày liên tiếp, phần thưởng càng lớn.</li>
+                        <li>Các ngày mốc (ngày 7, 14, 21, 28, 30) sẽ nhận được phần thưởng đặc biệt!</li>
+                        <li>Phần thưởng sẽ được cộng tự động vào tài khoản của bạn sau khi điểm danh thành công.</li>
                     </ul>
                 </div>
             </div>
