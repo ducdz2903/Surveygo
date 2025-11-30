@@ -43,7 +43,7 @@ class User
 
         $now = (new \DateTimeImmutable())->format('Y-m-d H:i:s');
 
-        $statement = $db->prepare('INSERT INTO users (name, avatar, email, phone, password, gender, role, created_at, updated_at) VALUES (:name, :avatar, :email, :phone, :password, :gender, :role, :created_at, :updated_at)');
+        $statement = $db->prepare('INSERT INTO users (name, avatar, email, phone, password, gender, role, code, created_at, updated_at) VALUES (:name, :avatar, :email, :phone, :password, :gender, :role, :code, :created_at, :updated_at)');
         $statement->execute([
             ':name' => $attributes['name'],
             ':avatar' => $attributes['avatar'] ?? '',
@@ -52,6 +52,7 @@ class User
             ':password' => $attributes['password'],
             ':gender' => $attributes['gender'] ?? 'other',
             ':role' => $attributes['role'] ?? 'user',
+            ':code' => '',
             ':created_at' => $now,
             ':updated_at' => $now,
         ]);
@@ -272,4 +273,3 @@ class User
         $stmt->execute([':password' => $newHashedPassword, ':updated_at' => $now, ':id' => $this->id]);
     }
 }
-
