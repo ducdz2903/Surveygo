@@ -35,11 +35,10 @@ CREATE TABLE IF NOT EXISTS surveys (
   moTa TEXT DEFAULT NULL,
   loaiKhaoSat VARCHAR(50) DEFAULT NULL,
   maNguoiTao INT UNSIGNED NOT NULL,
-  trangThai ENUM('draft','pending') NOT NULL DEFAULT 'draft',
+  trangThai ENUM('draft','pending','published','rejected') NOT NULL DEFAULT 'draft',
   diemThuong INT DEFAULT 10,
   danhMuc INT DEFAULT NULL,
   maSuKien INT UNSIGNED DEFAULT NULL,
-  trangThaiKiemDuyet ENUM('pending','approved','rejected') DEFAULT 'pending',
   thoiLuongDuTinh INT DEFAULT NULL,
   isQuickPoll BOOLEAN NOT NULL DEFAULT FALSE,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -49,17 +48,31 @@ CREATE TABLE IF NOT EXISTS surveys (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS questions (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    maCauHoi VARCHAR(10) NOT NULL UNIQUE,
+    maKhaoSat INT UNSIGNED DEFAULT NULL,
+    loaiCauHoi VARCHAR(50) NOT NULL,
+    noiDungCauHoi TEXT NOT NULL,
+    batBuocTraLoi BOOLEAN NOT NULL DEFAULT FALSE,
+    thuTu INT DEFAULT 0,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    quick_poll BOOLEAN NOT NULL DEFAULT FALSE,
+    CONSTRAINT fk_questions_survey FOREIGN KEY (maKhaoSat) REFERENCES surveys(id) ON DELETE SET NULL
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Bảng phụ liên kết nhiều-nhiều giữa khảo sát và câu hỏi (để tái sử dụng câu hỏi)
+CREATE TABLE IF NOT EXISTS survey_question_map (
   id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  maCauHoi VARCHAR(10) NOT NULL UNIQUE,
   maKhaoSat INT UNSIGNED NOT NULL,
-  loaiCauHoi VARCHAR(50) NOT NULL,
-  noiDungCauHoi TEXT NOT NULL,
-  batBuocTraLoi BOOLEAN NOT NULL DEFAULT FALSE,
+  maCauHoi INT UNSIGNED NOT NULL,
   thuTu INT DEFAULT 0,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  quick_poll BOOLEAN NOT NULL DEFAULT FALSE,
-  FOREIGN KEY (maKhaoSat) REFERENCES surveys(id) ON DELETE CASCADE
+  CONSTRAINT fk_sqm_survey FOREIGN KEY (maKhaoSat) REFERENCES surveys(id) ON DELETE CASCADE,
+  CONSTRAINT fk_sqm_question FOREIGN KEY (maCauHoi) REFERENCES questions(id) ON DELETE CASCADE,
+  UNIQUE KEY uniq_sqm (maKhaoSat, maCauHoi),
+  INDEX idx_sqm_order (maKhaoSat, thuTu)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS answers (
@@ -171,25 +184,25 @@ INSERT IGNORE INTO events (id, maSuKien, tenSuKien, thoiGianBatDau, thoiGianKetT
 
 INSERT IGNORE INTO surveys (
   id, maKhaoSat, tieuDe, moTa, loaiKhaoSat, maNguoiTao, trangThai, diemThuong, danhMuc, 
-  maSuKien, trangThaiKiemDuyet, thoiLuongDuTinh, isQuickPoll, created_at, updated_at
+  maSuKien, thoiLuongDuTinh, isQuickPoll, created_at, updated_at
 ) VALUES
-  (1, 'KS001', 'Khảo sát về thói quen đọc sách', 'Khảo sát nhằm tìm hiểu thói quen đọc sách của người Việt Nam.', 'Thói quen', 1, 'pending', 10, 1, NULL, 'approved', 15, FALSE, NOW(), NOW()),
-  (2, 'KS002', 'Khảo sát về sức khỏe cộng đồng', 'Khảo sát nhằm đánh giá tình trạng sức khỏe cộng đồng.', 'Sức khỏe', 2, 'draft', 15, 2, NULL, 'pending', 20, FALSE, NOW(), NOW()),
-  (3, 'KS003', 'Khảo sát về trang web thương mại điện tử', 'Đánh giá trải nghiệm mua sắm trực tuyến của bạn.', 'Thương mại', 1, 'pending', 12, 1, NULL, 'approved', 12, FALSE, NOW(), NOW()),
-  (4, 'KS004', 'Khảo sát về ứng dụng di động', 'Cho biết ý kiến của bạn về các ứng dụng di động yêu thích.', 'Công nghệ', 2, 'pending', 10, 2, NULL, 'approved', 10, FALSE, NOW(), NOW()),
-  (5, 'KS005', 'Khảo sát về dịch vụ khách hàng', 'Đánh giá chất lượng dịch vụ khách hàng.', 'Dịch vụ', 1, 'pending', 20, 1, NULL, 'approved', 18, FALSE, NOW(), NOW()),
-  (6, 'KS006', 'Khảo sát về nhu cầu giáo dục trực tuyến', 'Tìm hiểu nhu cầu về các khóa học trực tuyến.', 'Giáo dục', 2, 'pending', 15, 2, NULL, 'approved', 16, FALSE, NOW(), NOW()),
-  (7,'KS007','Mức độ hài lòng tổng quan','Khảo sát nhanh về mức độ hài lòng.','QuickPoll',1,'pending',5,1,NULL,'approved',1,TRUE,NOW(),NOW()),
-  (8,'KS008','Bạn hay uống cà phê không?','Khảo sát nhanh về thói quen uống cà phê.','QuickPoll',1,'pending',5,1,NULL,'approved',1,TRUE,NOW(),NOW()),
-  (9,'KS009','Thời gian dùng mạng xã hội','Khảo sát thời lượng dùng MXH.','QuickPoll',2,'pending',5,1,NULL,'approved',1,TRUE,NOW(),NOW()),
-  (10,'KS010','Bạn tập thể dục bao lâu?','Khảo sát về mức độ vận động.','QuickPoll',1,'pending',5,1,NULL,'approved',1,TRUE,NOW(),NOW()),
-  (11,'KS011','Bạn ngủ bao nhiêu giờ?','Khảo sát thói quen ngủ.','QuickPoll',1,'pending',5,1,NULL,'approved',1,TRUE,NOW(),NOW()),
-  (12,'KS012','Bạn xem phim thể loại gì?','Khảo sát thể loại phim yêu thích.','QuickPoll',1,'pending',5,1,NULL,'approved',1,TRUE,NOW(),NOW()),
-  (13,'QP013','Ý tưởng Year End Party','Thu thập ý kiến nhanh cho tiệc cuối năm.','QuickPoll',1,'pending',5,3,NULL,'approved',1,TRUE,NOW(),NOW()),
-  (14,'QP014','Phản hồi tính năng Dark Mode','Đánh giá nhanh giao diện tối mới cập nhật.','QuickPoll',2,'pending',5,2,NULL,'approved',1,TRUE,NOW(),NOW()),
-  (15,'QP015','Bữa trưa nay ăn gì?','Bình chọn món ăn cho team building trưa nay.','QuickPoll',1,'pending',0,3,NULL,'approved',1,TRUE,NOW(),NOW()),
-  (16,'QP016','Góp ý ẩn danh','Hòm thư góp ý nhanh ẩn danh hàng tuần.','QuickPoll',2,'pending',0,3,NULL,'approved',1,TRUE,NOW(),NOW());
-  
+  (1, 'KS001', 'Khảo sát về thói quen đọc sách', 'Khảo sát nhằm tìm hiểu thói quen đọc sách của người Việt Nam.', 'Thói quen', 1, 'pending', 10, 1, NULL, 15, FALSE, NOW(), NOW()),
+  (2, 'KS002', 'Khảo sát về sức khỏe cộng đồng', 'Khảo sát nhằm đánh giá tình trạng sức khỏe cộng đồng.', 'Sức khỏe', 2, 'draft', 15, 2, NULL, 20, FALSE, NOW(), NOW()),
+  (3, 'KS003', 'Khảo sát về trang web thương mại điện tử', 'Đánh giá trải nghiệm mua sắm trực tuyến của bạn.', 'Thương mại', 1, 'pending', 12, 1, NULL, 12, FALSE, NOW(), NOW()),
+  (4, 'KS004', 'Khảo sát về ứng dụng di động', 'Cho biết ý kiến của bạn về các ứng dụng di động yêu thích.', 'Công nghệ', 2, 'pending', 10, 2, NULL, 10, FALSE, NOW(), NOW()),
+  (5, 'KS005', 'Khảo sát về dịch vụ khách hàng', 'Đánh giá chất lượng dịch vụ khách hàng.', 'Dịch vụ', 1, 'pending', 20, 1, NULL, 18, FALSE, NOW(), NOW()),
+  (6, 'KS006', 'Khảo sát về nhu cầu giáo dục trực tuyến', 'Tìm hiểu nhu cầu về các khóa học trực tuyến.', 'Giáo dục', 2, 'pending', 15, 2, NULL, 16, FALSE, NOW(), NOW()),
+  (7,'KS007','Mức độ hài lòng tổng quan','Khảo sát nhanh về mức độ hài lòng.','QuickPoll',1,'pending',5,1,NULL,1,TRUE,NOW(),NOW()),
+  (8,'KS008','Bạn hay uống cà phê không?','Khảo sát nhanh về thói quen uống cà phê.','QuickPoll',1,'pending',5,1,NULL,1,TRUE,NOW(),NOW()),
+  (9,'KS009','Thời gian dùng mạng xã hội','Khảo sát thời lượng dùng MXH.','QuickPoll',2,'pending',5,1,NULL,1,TRUE,NOW(),NOW()),
+  (10,'KS010','Bạn tập thể dục bao lâu?','Khảo sát về mức độ vận động.','QuickPoll',1,'pending',5,1,NULL,1,TRUE,NOW(),NOW()),
+  (11,'KS011','Bạn ngủ bao nhiêu giờ?','Khảo sát thói quen ngủ.','QuickPoll',1,'pending',5,1,NULL,1,TRUE,NOW(),NOW()),
+  (12,'KS012','Bạn xem phim thể loại gì?','Khảo sát thể loại phim yêu thích.','QuickPoll',1,'pending',5,1,NULL,1,TRUE,NOW(),NOW()),
+  (13,'QP013','Ý tưởng Year End Party','Thu thập ý kiến nhanh cho tiệc cuối năm.','QuickPoll',1,'pending',5,3,NULL,1,TRUE,NOW(),NOW()),
+  (14,'QP014','Phản hồi tính năng Dark Mode','Đánh giá nhanh giao diện tối mới cập nhật.','QuickPoll',2,'pending',5,2,NULL,1,TRUE,NOW(),NOW()),
+  (15,'QP015','Bữa trưa nay ăn gì?','Bình chọn món ăn cho team building trưa nay.','QuickPoll',1,'pending',0,3,NULL,1,TRUE,NOW(),NOW()),
+  (16,'QP016','Góp ý ẩn danh','Hòm thư góp ý nhanh ẩn danh hàng tuần.','QuickPoll',2,'pending',0,3,NULL,1,TRUE,NOW(),NOW());
+
 INSERT IGNORE INTO questions (id, maCauHoi, maKhaoSat, loaiCauHoi, noiDungCauHoi, batBuocTraLoi, thuTu, quick_poll, created_at, updated_at) VALUES
   (1, 'CH001', 1, 'multiple_choice', 'Bạn thường đọc sách vào thời gian nào trong ngày?', TRUE, 1, FALSE, NOW(), NOW()),
   (2, 'CH002', 1, 'single_choice', 'Bạn thích thể loại sách nào nhất?', TRUE, 2, FALSE, NOW(), NOW()),

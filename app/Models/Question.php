@@ -115,6 +115,23 @@ class Question
         /** @var PDO $db */
         $db = Container::get('db');
 
+        // Ưu tiên lấy từ bảng map nhiều-nhiều nếu có dữ liệu
+        try {
+            $mapStmt = $db->prepare('SELECT q.*, sqm.thuTu AS mapThuTu FROM survey_question_map sqm JOIN questions q ON q.id = sqm.maCauHoi WHERE sqm.maKhaoSat = :surveyId ORDER BY sqm.thuTu ASC, q.thuTu ASC');
+            $mapStmt->execute([':surveyId' => $surveyId]);
+            $mapRows = $mapStmt->fetchAll();
+            if ($mapRows && count($mapRows) > 0) {
+                return array_map(function ($row) {
+                    if (isset($row['mapThuTu'])) {
+                        $row['thuTu'] = (int)$row['mapThuTu'];
+                    }
+                    return new self($row);
+                }, $mapRows);
+            }
+        } catch (\Throwable $e) {
+            // fallback below
+        }
+
         $statement = $db->prepare('SELECT * FROM questions WHERE maKhaoSat = :surveyId ORDER BY thuTu ASC');
         $statement->execute([':surveyId' => $surveyId]);
         $rows = $statement->fetchAll();
@@ -164,15 +181,17 @@ class Question
         $db = Container::get('db');
 
         // Check required 
-        if (empty($data['noiDungCauHoi']) || empty($data['maKhaoSat']) || empty($data['loaiCauHoi'])) {
+        if (empty($data['noiDungCauHoi']) || empty($data['loaiCauHoi'])) {
             return null;
         }
 
-        // Kiểm tra khóa ngoại maKhaoSat
-        $surveyStmt = $db->prepare('SELECT id FROM surveys WHERE id = :id LIMIT 1');
-        $surveyStmt->execute([':id' => $data['maKhaoSat']]);
-        if (!$surveyStmt->fetch()) {
-            return null; // Survey không tồn tại
+        // Kiểm tra khóa ngoại maKhaoSat nếu cung cấp
+        if (!empty($data['maKhaoSat'])) {
+            $surveyStmt = $db->prepare('SELECT id FROM surveys WHERE id = :id LIMIT 1');
+            $surveyStmt->execute([':id' => $data['maKhaoSat']]);
+            if (!$surveyStmt->fetch()) {
+                return null; // Survey không tồn tại
+            }
         }
 
         // Auto-gen maCauHoi nếu chưa có
@@ -188,7 +207,7 @@ class Question
 
             $statement->execute([
                 ':ma' => $maCauHoi,
-                ':surveyId' => $data['maKhaoSat'],
+                ':surveyId' => $data['maKhaoSat'] ?? null,
                 ':loai' => $data['loaiCauHoi'],
                 ':noidung' => $data['noiDungCauHoi'],
                 ':batbuoc' => (int)($data['batBuocTraLoi'] ?? false),
@@ -272,6 +291,19 @@ class Question
     {
         /** @var PDO $db */
         $db = Container::get('db');
+
+        // Ưu tiên bảng map nếu có
+        try {
+            $statement = $db->prepare('SELECT COUNT(*) as count FROM survey_question_map WHERE maKhaoSat = :surveyId');
+            $statement->execute([':surveyId' => $surveyId]);
+            $row = $statement->fetch();
+            $count = (int)($row['count'] ?? 0);
+            if ($count > 0) {
+                return $count;
+            }
+        } catch (\Throwable $e) {
+            // fallback
+        }
 
         $statement = $db->prepare('SELECT COUNT(*) as count FROM questions WHERE maKhaoSat = :surveyId');
         $statement->execute([':surveyId' => $surveyId]);

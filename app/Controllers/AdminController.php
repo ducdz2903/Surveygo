@@ -26,6 +26,22 @@ class AdminController extends Controller
         return \App\Core\Response::html($view->render('layouts/admin', array_merge($data, ['content' => $content])));
     }
 
+    public function surveyView(Request $request)
+    {
+        $view = new \App\Core\View();
+        $data = $this->pageData($request);
+        $data['surveyId'] = (int) ($request->query('id') ?? 0);
+
+        $content = $view->render('pages/admin/surveys/view', $data);
+
+        return \App\Core\Response::html($view->render('layouts/admin', array_merge($data, [
+            'content' => $content,
+            'title' => 'Chi tiet khao sat',
+            'headerTitle' => 'Chi tiet khao sat',
+            'headerIcon' => 'fas fa-eye',
+        ])));
+    }
+
     public function users(Request $request)
     {
         $view = new \App\Core\View();

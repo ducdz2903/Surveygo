@@ -20,7 +20,6 @@ class Survey
     private int $diemThuong;
     private ?int $danhMuc;
     private ?int $maSuKien;
-    private string $trangThaiKiemDuyet;
     private string $createdAt;
     private string $updatedAt;
     private ?string $event_id ;
@@ -39,7 +38,6 @@ class Survey
         $this->diemThuong = (int) ($attributes['diemThuong'] ?? 0);
         $this->danhMuc = $attributes['danhMuc'] ? (int) $attributes['danhMuc'] : null;
         $this->maSuKien = $attributes['maSuKien'] ? (int) $attributes['maSuKien'] : null;
-        $this->trangThaiKiemDuyet = $attributes['trangThaiKiemDuyet'] ?? 'pending';
         $this->createdAt = $attributes['created_at'] ?? '';
         $this->updatedAt = $attributes['updated_at'] ?? '';
         $this->event_id = $attributes['event_id'] ?? null;
@@ -199,8 +197,8 @@ class Survey
 
         try {
             $statement = $db->prepare(
-                'INSERT INTO surveys (maKhaoSat, tieuDe, moTa, loaiKhaoSat, thoiLuongDuTinh, isQuickPoll, maNguoiTao, trangThai, diemThuong, danhMuc, soLuongCauHoi, soNguoiThamGia, maSuKien, trangThaiKiemDuyet, created_at, updated_at, event_id)
-                VALUES (:ma, :tieu, :mo, :loai, :thoiluong, :isquickpoll, :user, :status, :diem, :danh, :soluong, :songuoi, :sukien, :kiemduyet, :created, :updated, :event_id?)'
+                'INSERT INTO surveys (maKhaoSat, tieuDe, moTa, loaiKhaoSat, thoiLuongDuTinh, isQuickPoll, maNguoiTao, trangThai, diemThuong, danhMuc, soLuongCauHoi, soNguoiThamGia, maSuKien, created_at, updated_at, event_id)
+                VALUES (:ma, :tieu, :mo, :loai, :thoiluong, :isquickpoll, :user, :status, :diem, :danh, :soluong, :songuoi, :sukien, :created, :updated, :event_id?)'
             );
 
             $statement->execute([
@@ -217,7 +215,6 @@ class Survey
                 ':soluong' => 0,
                 ':songuoi' => (int) ($data['soNguoiThamGia'] ?? 0),
                 ':sukien' => $data['maSuKien'] ?? null,
-                ':kiemduyet' => 'pending',
                 ':created' => $now,
                 ':updated' => $now,
                 ':event_id' => $data['event_id'] ?? null,
@@ -249,11 +246,10 @@ class Survey
         $diemThuong = $data['diemThuong'] ?? $this->diemThuong;
         $danhMuc = $data['danhMuc'] ?? $this->danhMuc;
         $maSuKien = $data['maSuKien'] ?? $this->maSuKien;
-        $trangThaiKiemDuyet = $data['trangThaiKiemDuyet'] ?? $this->trangThaiKiemDuyet;
 
         $statement = $db->prepare(
             'UPDATE surveys SET tieuDe = :tieu, moTa = :mo, loaiKhaoSat = :loai, thoiLuongDuTinh = :thoiluong, isQuickPoll = :isquickpoll,
-             trangThai = :status, diemThuong = :diem, danhMuc = :danh, maSuKien = :sukien, trangThaiKiemDuyet = :kiemduyet, updated_at = :updated, event_id = :event_id WHERE id = :id'
+             trangThai = :status, diemThuong = :diem, danhMuc = :danh, maSuKien = :sukien, updated_at = :updated, event_id = :event_id WHERE id = :id'
         );
 
         return $statement->execute([
@@ -266,7 +262,6 @@ class Survey
             ':diem' => (int) $diemThuong,
             ':danh' => $danhMuc,
             ':sukien' => $maSuKien,
-            ':kiemduyet' => $trangThaiKiemDuyet,
             ':updated' => $now,
             ':event_id' => $this->event_id,
             ':id' => $this->id,
@@ -305,15 +300,15 @@ class Survey
     /**
      * Cập nhật trạng thái kiểm duyệt
      */
-    public function updateVerificationStatus(string $trangThaiKiemDuyet): bool
+    public function updateVerificationStatus(string $trangThai): bool
     {
         $now = (new \DateTimeImmutable())->format('Y-m-d H:i:s');
         /** @var PDO $db */
         $db = Container::get('db');
 
-        $statement = $db->prepare('UPDATE surveys SET trangThaiKiemDuyet = :kiemduyet, updated_at = :updated WHERE id = :id');
+        $statement = $db->prepare('UPDATE surveys SET trangThai = :kiemduyet, updated_at = :updated WHERE id = :id');
         return $statement->execute([
-            ':kiemduyet' => $trangThaiKiemDuyet,
+            ':kiemduyet' => $trangThai,
             ':updated' => $now,
             ':id' => $this->id,
         ]);
@@ -337,7 +332,6 @@ class Survey
             'diemThuong' => $this->diemThuong,
             'danhMuc' => $this->danhMuc,
             'maSuKien' => $this->maSuKien,
-            'trangThaiKiemDuyet' => $this->trangThaiKiemDuyet,
             'created_at' => $this->createdAt,
             'updated_at' => $this->updatedAt,
         ];
@@ -377,10 +371,5 @@ class Survey
     public function getTrangThai(): string
     {
         return $this->trangThai;
-    }
-    
-    public function getTrangThaiKiemDuyet(): string
-    {
-        return $this->trangThaiKiemDuyet;
     }
 }

@@ -318,18 +318,113 @@ class SurveyController extends Controller
         if (!$question) {
             return $this->json([
                 'error' => true,
-                'message' => 'Không thể tạo câu hỏi. Kiểm tra dữ liệu hoặc survey có tồn tại.',
+                'message' => 'Không thể tạo câu hỏi. Kiểm tra dữ liệu hoặc survey không tồn tại.',
+            ], 422);
+        }
+
+        // lưu mapping nhiều-nhiều (nếu được truyền maKhaoSat)
+        if (!empty($data['maKhaoSat'])) {
+            $this->attachQuestionToSurvey((int)$data['maKhaoSat'], $question->getId(), (int)($data['thuTu'] ?? 0));
+        }
+
+        return $this->json([
+            'error' => false,
+            'message' => 'C?u h?i ?? ???c th?m th?nh c?ng.',
+            'data' => $question->toArray(),
+        ], 201);
+    }
+
+    /**
+     * G?n c?u h?i c? s?n v?o kh?o s?t (kh?ng t?o c?u h?i m?i)
+     */
+    public function attachQuestion(Request $request)
+    {
+        $surveyId = $request->input('maKhaoSat');
+        $questionId = $request->input('maCauHoi');
+        $thuTu = (int)($request->input('thuTu') ?? 0);
+
+        if (!$surveyId || !is_numeric($surveyId) || !$questionId || !is_numeric($questionId)) {
+            return $this->json([
+                'error' => true,
+                'message' => 'maKhaoSat và maCauHoi là bắt buộc và phải là số.',
+            ], 422);
+        }
+
+        $survey = Survey::find((int)$surveyId);
+        $question = Question::find((int)$questionId);
+
+        if (!$survey || !$question) {
+            return $this->json([
+                'error' => true,
+                'message' => 'Không tồn tại khảo sát hoặc câu hỏi.',
+            ], 404);
+        }
+
+        if (!$this->attachQuestionToSurvey((int)$surveyId, (int)$questionId, $thuTu)) {
+            return $this->json([
+                'error' => true,
+                'message' => 'Không thể gắn câu hỏi vào khảo sát (có thể đã tồn tại).',
             ], 422);
         }
 
         return $this->json([
             'error' => false,
-            'message' => 'Câu hỏi được thêm thành công.',
-            'data' => $question->toArray(),
+            'message' => 'Đã gắn câu hỏi vào khảo sát.',
         ], 201);
     }
 
-    // cập nhật
+    /**
+     * Gỡ câu hỏi khỏi khảo sát (chỉ xóa mapping, không xóa câu hỏi)
+     */
+    public function detachQuestion(Request $request)
+    {
+        $surveyId = $request->input('maKhaoSat');
+        $questionId = $request->input('maCauHoi');
+
+        if (!$surveyId || !is_numeric($surveyId) || !$questionId || !is_numeric($questionId)) {
+            return $this->json([
+                'error' => true,
+                'message' => 'maKhaoSat và maCauHoi là bắt buộc và phải là số.',
+            ], 422);
+        }
+
+        try {
+            /** @var PDO $db */
+            $db = \App\Core\Container::get('db');
+            $stmt = $db->prepare('DELETE FROM survey_question_map WHERE maKhaoSat = :survey AND maCauHoi = :question');
+            $stmt->execute([
+                ':survey' => (int)$surveyId,
+                ':question' => (int)$questionId,
+            ]);
+
+            return $this->json([
+                'error' => false,
+                'message' => 'Đã gỡ câu hỏi khỏi khảo sát.',
+            ]);
+        } catch (\Throwable $e) {
+            return $this->json([
+                'error' => true,
+                'message' => 'Không thể gỡ câu hỏi khỏi khảo sát.',
+            ], 500);
+        }
+    }
+
+    private function attachQuestionToSurvey(int $surveyId, int $questionId, int $thuTu = 0): bool
+    {
+        try {
+            /** @var PDO $db */
+            $db = \App\Core\Container::get('db');
+            $stmt = $db->prepare('INSERT INTO survey_question_map (maKhaoSat, maCauHoi, thuTu) VALUES (:survey, :question, :order) ON DUPLICATE KEY UPDATE thuTu = VALUES(thuTu)');
+            return $stmt->execute([
+                ':survey' => $surveyId,
+                ':question' => $questionId,
+                ':order' => $thuTu,
+            ]);
+        } catch (\Throwable $e) {
+            return false;
+        }
+    }
+
     public function updateQuestion(Request $request)
     {
         $id = $request->query('id') ?? $request->input('id');
@@ -457,8 +552,8 @@ class SurveyController extends Controller
     {
         $errors = [];
 
-        if (empty($data['maKhaoSat']) || !is_numeric($data['maKhaoSat'])) {
-            $errors['maKhaoSat'] = 'Mã khảo sát là bắt buộc và phải là số.';
+        if (isset($data['maKhaoSat']) && $data['maKhaoSat'] !== '' && !is_numeric($data['maKhaoSat'])) {
+            $errors['maKhaoSat'] = 'M? kh?o s?t ph?i l? s? khi cung c?p.';
         }
 
         if (empty($data['loaiCauHoi'])) {
