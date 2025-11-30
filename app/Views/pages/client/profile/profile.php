@@ -173,7 +173,6 @@
         </div>
     </div>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="/public/assets/js/toast-helper.js"></script>
 <script>
     const API_BASE = ''; // use relative paths; set to '' so fetch('/api/...') resolves to current origin

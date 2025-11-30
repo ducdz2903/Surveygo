@@ -36,27 +36,31 @@ body {
 
 /* navbar */
 .navbar {
-  background: linear-gradient(135deg, #10bcd3 0%, #0b99b8 100%) !important;
-  box-shadow: 0 2px 10px rgba(16, 188, 211, 0.2);
+    background: linear-gradient(135deg, #10bcd3 0%, #0b99b8 100%) !important;
+    box-shadow: 0 2px 10px rgba(16, 188, 211, 0.2);
+    z-index: 1100;
+    /* ensure navbar sits above hero content and dropdowns are visible */
 }
+
 .navbar-logo {
-  background: linear-gradient(135deg, #f0e68c 0%, #e5d27a 100%);
-  padding: 6px;
-  border-radius: 50%;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
-  transition: all 0.3s ease;
+    background: linear-gradient(135deg, #f0e68c 0%, #e5d27a 100%);
+    padding: 6px;
+    border-radius: 50%;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+    transition: all 0.3s ease;
 }
+
 .navbar-brand {
-  font-size: 1.8rem;
-  font-weight: 700;
-  background: none;
-  -webkit-background-clip: unset;
-  background-clip: unset;
-  -webkit-text-fill-color: unset;
-  color: var(--accent-color) !important;
-  text-shadow: 0 0 10px rgba(243, 156, 18, 0.4),
-    0 0 20px rgba(243, 156, 18, 0.2);
-  transition: all 0.3s ease;
+    font-size: 1.8rem;
+    font-weight: 700;
+    background: none;
+    -webkit-background-clip: unset;
+    background-clip: unset;
+    -webkit-text-fill-color: unset;
+    color: var(--accent-color) !important;
+    text-shadow: 0 0 10px rgba(243, 156, 18, 0.4),
+        0 0 20px rgba(243, 156, 18, 0.2);
+    transition: all 0.3s ease;
 }
 
 .navbar-brand:hover {
@@ -65,8 +69,8 @@ body {
 }
 
 .navbar-logo:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    transform: scale(1.1);
 }
 
 .nav-link {
