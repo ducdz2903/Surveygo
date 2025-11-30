@@ -3,7 +3,7 @@
         <!-- Header -->
         <div class="row mb-5">
             <div class="col-lg-8">
-                <h1 class="display-6 fw-bold mb-3">Danh sách Khảo sát</h1>
+                <h1 class="display-6 fw-bold mb-3">Danh sách Khảo sát <span id="survey-count">(0)</span></h1>
                 <p class="lead text-muted">Tham gia các khảo sát để kiếm điểm và đổi thưởng</p>
             </div>
         </div>
@@ -39,8 +39,7 @@
             </div>
         </div>
 
-        <!-- Pagination -->
-        <nav aria-label="Page navigation" id="pagination-container"></nav>
+        <!-- Pagination (rendered inline below the list) -->
     </div>
 </main>
 
@@ -67,7 +66,6 @@
                 currentPage = result.meta.page;
                 currentFilters = filters;
                 renderSurveys(result.data, result.meta);
-                renderPagination(result.meta);
             } else {
                 document.getElementById('surveys-container').innerHTML =
                     '<div class="col-12 text-center"><p class="text-muted">Không có khảo sát nào.</p></div>';
@@ -117,54 +115,24 @@
                     </div>
                 `;
         }).join('');
+
+        // Update total count display (like home)
+        const countEl = document.getElementById('survey-count');
+        if (countEl) countEl.textContent = `(${meta.total})`;
+
+        // Add simple prev/next pagination like home
+        if (meta.totalPages > 1) {
+            let pagHtml = `
+                <div class="col-12 d-flex justify-content-center gap-2 mt-4">
+                    ${meta.page > 1 ? `<button class="btn btn-sm btn-outline-primary" onclick="loadSurveys(${meta.page - 1})">← Trước</button>` : ''}
+                    <span class="btn btn-sm btn-light disabled">Trang ${meta.page}/${meta.totalPages}</span>
+                    ${meta.page < meta.totalPages ? `<button class="btn btn-sm btn-outline-primary" onclick="loadSurveys(${meta.page + 1})">Tiếp →</button>` : ''}
+                </div>
+            `;
+            container.innerHTML += pagHtml;
+        }
     }
 
-    // Render pagination
-    function renderPagination(meta) {
-        const container = document.getElementById('pagination-container');
-
-        if (meta.totalPages <= 1) {
-            container.innerHTML = '';
-            return;
-        }
-
-        let html = '<ul class="pagination justify-content-center">';
-
-        // Previous button
-        if (meta.page > 1) {
-            html += `<li class="page-item"><button class="page-link" onclick="loadSurveys(${meta.page - 1}, ${JSON.stringify(currentFilters).replace(/"/g, '&quot;')})">← Trước</button></li>`;
-        }
-
-        // Page numbers
-        const startPage = Math.max(1, meta.page - 2);
-        const endPage = Math.min(meta.totalPages, meta.page + 2);
-
-        if (startPage > 1) {
-            html += `<li class="page-item"><button class="page-link" onclick="loadSurveys(1, ${JSON.stringify(currentFilters).replace(/"/g, '&quot;')})">1</button></li>`;
-            if (startPage > 2) html += '<li class="page-item disabled"><span class="page-link">...</span></li>';
-        }
-
-        for (let i = startPage; i <= endPage; i++) {
-            if (i === meta.page) {
-                html += `<li class="page-item active"><span class="page-link">${i}</span></li>`;
-            } else {
-                html += `<li class="page-item"><button class="page-link" onclick="loadSurveys(${i}, ${JSON.stringify(currentFilters).replace(/"/g, '&quot;')})">${i}</button></li>`;
-            }
-        }
-
-        if (endPage < meta.totalPages) {
-            if (endPage < meta.totalPages - 1) html += '<li class="page-item disabled"><span class="page-link">...</span></li>';
-            html += `<li class="page-item"><button class="page-link" onclick="loadSurveys(${meta.totalPages}, ${JSON.stringify(currentFilters).replace(/"/g, '&quot;')})">${meta.totalPages}</button></li>`;
-        }
-
-        // Next button
-        if (meta.page < meta.totalPages) {
-            html += `<li class="page-item"><button class="page-link" onclick="loadSurveys(${meta.page + 1}, ${JSON.stringify(currentFilters).replace(/"/g, '&quot;')})">Tiếp →</button></li>`;
-        }
-
-        html += '</ul>';
-        container.innerHTML = html;
-    }
 
     // Filter handlers
     document.getElementById('search-input').addEventListener('input', function (e) {

@@ -3,7 +3,7 @@
         <!-- Header -->
         <div class="row mb-5">
             <div class="col-lg-8">
-                <h1 class="display-6 fw-bold mb-3">Quick Poll</h1>
+                <h1 class="display-6 fw-bold mb-3">Quick Poll <span id="survey-count">(0)</span></h1>
                 <p class="lead text-muted">Trả lời 1 câu hỏi nhanh - Nhận điểm ngay!</p>
             </div>
         </div>
@@ -39,12 +39,11 @@
             </div>
         </div>
 
-        <!-- Pagination -->
-        <nav aria-label="Page navigation" id="pagination-container"></nav>
+        <!-- Pagination will be rendered inline under the list -->
     </div>
 </main>
 <script>
-    const baseUrl = window.location.origin;
+    const BASE = (typeof BASE_URL !== 'undefined') ? BASE_URL : '';
     const pageSize = 6;
     let currentPage = 1;
 
@@ -65,7 +64,7 @@
         }
 
         try {
-            const response = await fetch(`${baseUrl}/api/surveys?${params.toString()}`);
+            const response = await fetch(`${BASE}/api/surveys?${params.toString()}`);
             const result = await response.json();
 
             if (result.error) {
@@ -76,8 +75,7 @@
             }
 
             currentPage = result.meta.page;
-            renderQuickPolls(result.data);
-            renderPagination(result.meta);
+            renderQuickPolls(result.data, result.meta);
         } catch (error) {
             console.error('Error:', error);
             document.getElementById('polls-container').innerHTML =
@@ -86,7 +84,7 @@
     }
 
     // Render quick polls grid (same style as surveys)
-    function renderQuickPolls(surveys) {
+    function renderQuickPolls(surveys, meta) {
         const container = document.getElementById('polls-container');
 
         if (!surveys || surveys.length === 0) {
@@ -126,6 +124,22 @@
                     </div>
                 `;
         }).join('');
+
+        // Update total count
+        const countEl = document.getElementById('survey-count');
+        if (countEl && meta) countEl.textContent = `(${meta.total})`;
+
+        // Add simple prev/next pagination like home
+        if (meta && meta.totalPages > 1) {
+            let pagHtml = `
+                <div class="col-12 d-flex justify-content-center gap-2 mt-4">
+                    ${meta.page > 1 ? `<button class="btn btn-sm btn-outline-primary" onclick="loadQuickPolls(${meta.page - 1}, getFilters())">← Trước</button>` : ''}
+                    <span class="btn btn-sm btn-light disabled">Trang ${meta.page}/${meta.totalPages}</span>
+                    ${meta.page < meta.totalPages ? `<button class="btn btn-sm btn-outline-primary" onclick="loadQuickPolls(${meta.page + 1}, getFilters())">Tiếp →</button>` : ''}
+                </div>
+            `;
+            container.innerHTML += pagHtml;
+        }
     }
 
     // Render pagination
