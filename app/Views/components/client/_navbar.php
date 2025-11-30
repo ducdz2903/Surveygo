@@ -30,6 +30,10 @@ $url = static function (array $urls, string $key, string $fallbackPath = '/') us
 ?>
 <nav class="navbar navbar-expand-lg navbar-light fixed-top">
     <div class="container d-flex justify-content-between align-items-center">
+        <div class="me-2 d-flex align-items-center navbar-logo">
+            <img src="<?= htmlspecialchars(rtrim($baseUrl, '/') . '/Asset/favIconSurveyGo_196x196.png', ENT_QUOTES, 'UTF-8') ?>"
+                alt="Surveygo" width="36" height="36">
+        </div>
         <a class="navbar-brand" href="#" id="navbar-brand">Surveygo</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav"
             aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">

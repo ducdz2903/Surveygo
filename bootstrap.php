@@ -37,6 +37,3 @@ App\Core\Container::set('config', $config);
 App\Core\Container::set('db', function () use ($config) {
     return App\Core\Database::make($config['db']);
 });
-
-// Initialize database schema/data from SQL files (no migrator).
-App\Core\SqlInitializer::run(App\Core\Container::get('db'));

@@ -10,12 +10,13 @@ use PDO;
 class User
 {
     private int $id;
+    private string $code;
     private string $name;
+    private ?string $avatar;
     private string $email;
     private ?string $phone;
     private string $password;
     private ?string $gender;
-    private ?string $avatar;
     private string $role;
     private int $points;
     private int $spins;
@@ -25,13 +26,13 @@ class User
     public function __construct(array $attributes)
     {
         $this->id = (int) ($attributes['id'] ?? 0);
+        $this->code = (string) ($attributes['code'] ?? '');
         $this->name = $attributes['name'];
+        $this->avatar = $attributes['avatar'];
         $this->email = $attributes['email'];
-        $this->phone = $attributes['phone'];
-        $this->password = $attributes['password'];
         $this->phone = $attributes['phone'] ?? null;
-        $this->gender = $attributes['gender'] ?? null;
-        $this->avatar = $attributes['avatar'] ?? null;
+        $this->password = $attributes['password'];
+        $this->gender = $attributes['gender'];
         $this->role = $attributes['role'];
         $this->points = (int) ($attributes['points'] ?? 1250);
         $this->spins = (int) ($attributes['spins'] ?? 3);
@@ -39,24 +40,33 @@ class User
         $this->updatedAt = $attributes['updated_at'];
     }
 
-    public static function create(string $name, string $email, string $hashedPassword, string $role = 'user'): self
+    public static function create(array $attributes): self
     {
         /** @var PDO $db */
         $db = Container::get('db');
 
         $now = (new \DateTimeImmutable())->format('Y-m-d H:i:s');
 
-        $statement = $db->prepare('INSERT INTO users (name, email, password, role, created_at, updated_at) VALUES (:name, :email, :password, :role, :created_at, :updated_at)');
+        $statement = $db->prepare('INSERT INTO users (name, avatar, email, phone, password, gender, role, created_at, updated_at) VALUES (:name, :avatar, :email, :phone, :password, :gender, :role, :created_at, :updated_at)');
         $statement->execute([
-            ':name' => $name,
-            ':email' => $email,
-            ':password' => $hashedPassword,
-            ':role' => $role,
+            ':name' => $attributes['name'],
+            ':avatar' => $attributes['avatar'] ?? '',
+            ':email' => $attributes['email'],
+            ':phone' => $attributes['phone'] ?? null,
+            ':password' => $attributes['password'],
+            ':gender' => $attributes['gender'] ?? 'other',
+            ':role' => $attributes['role'] ?? 'user',
             ':created_at' => $now,
             ':updated_at' => $now,
         ]);
 
         $id = (int) $db->lastInsertId();
+
+        if ($id > 0) {
+            $code = 'US' . str_pad((string) $id, 3, '0', STR_PAD_LEFT);
+            $upd = $db->prepare('UPDATE users SET code = :code WHERE id = :id');
+            $upd->execute([':code' => $code, ':id' => $id]);
+        }
 
         return self::findById($id);
     }
@@ -113,18 +123,79 @@ class User
         return $this->name;
     }
 
+    public function getGender(): ?string
+    {
+        return $this->gender;
+    }
+
+    public function getCode(): string
+    {
+        return $this->code;
+    }
+
+    public function setCode(string $code): void
+    {
+        $this->code = $code;
+    }
+
+    public function setName(string $name): void
+    {
+        $this->name = $name;
+    }
+
+    public function getAvatar(): ?string
+    {
+        return $this->avatar;
+    }
+
+    public function setAvatar(?string $avatar): void
+    {
+        $this->avatar = $avatar;
+    }
+
+    public function setEmail(string $email): void
+    {
+        $this->email = $email;
+    }
+
     public function getPhone(): ?string
     {
         return $this->phone;
     }
 
-    public function getGender(): ?string
+    public function setPhone(?string $phone): void
     {
-        return $this->gender;
+        $this->phone = $phone;
     }
-    public function getAvatar(): ?string
+
+    public function getRole(): string
     {
-        return $this->avatar;
+        return $this->role;
+    }
+
+    public function setRole(string $role): void
+    {
+        $this->role = $role;
+    }
+
+    public function getCreatedAt(): string
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(string $createdAt): void
+    {
+        $this->createdAt = $createdAt;
+    }
+
+    public function getUpdatedAt(): string
+    {
+        return $this->updatedAt;
+    }
+
+    public function setUpdatedAt(string $updatedAt): void
+    {
+        $this->updatedAt = $updatedAt;
     }
 
     public function getPoints(): int
@@ -175,11 +246,12 @@ class User
     {
         return [
             'id' => $this->id,
+            'code' => $this->code,
             'name' => $this->name,
+            'avatar' => $this->avatar,
             'email' => $this->email,
             'phone' => $this->phone,
             'gender' => $this->gender,
-            'avatar' => $this->avatar,
             'role' => $this->role,
             'points' => $this->points,
             'spins' => $this->spins,
@@ -203,7 +275,7 @@ class User
         $params = [];
 
         if (!empty($filters['search'])) {
-            $where[] = '(name LIKE :search OR email LIKE :search)';
+            $where[] = '(name LIKE :search OR email LIKE :search OR phone LIKE :search)';
             $params[':search'] = '%' . $filters['search'] . '%';
         }
 
@@ -239,6 +311,15 @@ class User
             'limit' => $limit,
             'totalPages' => $totalPages,
         ];
+    }
+
+    public function updatePassword(string $newHashedPassword): void
+    {
+        /** @var \PDO $db */
+        $db = Container::get('db');
+        $now = (new \DateTimeImmutable())->format('Y-m-d H:i:s');
+        $stmt = $db->prepare('UPDATE users SET password = :password, updated_at = :updated_at WHERE id = :id');
+        $stmt->execute([':password' => $newHashedPassword, ':updated_at' => $now, ':id' => $this->id]);
     }
 }
 

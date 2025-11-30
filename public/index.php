@@ -6,6 +6,7 @@ require_once dirname(__DIR__) . '/bootstrap.php';
 
 use App\Controllers\HomeController;
 use App\Controllers\AdminController;
+use App\Controllers\DailyRewardController;
 use App\Core\Request;
 use App\Core\Response;
 use App\Core\Router;
@@ -15,7 +16,7 @@ $router = new Router();
 // Authentication routes.
 $router->post('/api/register', [App\Controllers\AuthController::class, 'register']);
 $router->post('/api/login', [App\Controllers\AuthController::class, 'login']);
-// Profile update and password change
+// Profile update and password change endpoints
 $router->post('/api/auth/update-profile', [App\Controllers\AuthController::class, 'updateProfile']);
 $router->post('/api/auth/change-password', [App\Controllers\AuthController::class, 'changePassword']);
 
@@ -44,6 +45,8 @@ $router->get('/admin/questions', [AdminController::class, 'questions']);
 $router->get('/admin/reports', [AdminController::class, 'reports']);
 $router->get('/admin/events', [AdminController::class, 'events']);
 $router->get('/admin/settings', [AdminController::class, 'settings']);
+$router->get('/admin/feedbacks', [AdminController::class, 'feedbacks']);
+$router->get('/admin/contact-messages', [AdminController::class, 'contactMessages']);
 
 // Health check route.
 $router->get('/api/health', fn() => Response::json([
@@ -75,9 +78,27 @@ $router->get('/api/events/user-data', [App\Controllers\EventController::class, '
 $router->post('/api/events/spin', [App\Controllers\EventController::class, 'spin']); // Thực hiện quay thưởng
 $router->post('/api/events/daily-checkin', [App\Controllers\EventController::class, 'dailyCheckIn']); // Điểm danh hằng ngày
 
+// Feedbacks API
+$router->get('/api/feedbacks', [App\Controllers\FeedbackController::class, 'index']);
+$router->get('/api/feedbacks/show', [App\Controllers\FeedbackController::class, 'show']);
+$router->post('/api/feedbacks', [App\Controllers\FeedbackController::class, 'create']);
+$router->put('/api/feedbacks', [App\Controllers\FeedbackController::class, 'update']);
+$router->delete('/api/feedbacks', [App\Controllers\FeedbackController::class, 'delete']);
+
+// Contact messages API
+$router->get('/api/contact-messages', [App\Controllers\ContactController::class, 'index']);
+$router->get('/api/contact-messages/show', [App\Controllers\ContactController::class, 'show']);
+$router->post('/api/contact-messages', [App\Controllers\ContactController::class, 'create']);
+$router->put('/api/contact-messages', [App\Controllers\ContactController::class, 'update']);
+$router->delete('/api/contact-messages', [App\Controllers\ContactController::class, 'delete']);
+
 $router->post('/api/questions', [App\Controllers\QuestionController::class, 'create']); // Tạo câu hỏi mới
 $router->put('/api/questions', [App\Controllers\QuestionController::class, 'update']); // Cập nhật câu hỏi
 $router->delete('/api/questions', [App\Controllers\QuestionController::class, 'delete']); // Xóa câu hỏi
+
+// Daily rewards API
+$router->get('/api/daily-rewards/status', [DailyRewardController::class, 'status']);
+$router->post('/api/daily-rewards/claim', [DailyRewardController::class, 'claim']);
 
 // Users API
 $router->get('/api/users', [App\Controllers\UserController::class, 'index']); // Lấy danh sách users (phân trang + tìm kiếm)

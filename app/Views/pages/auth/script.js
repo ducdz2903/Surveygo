@@ -6,8 +6,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const submitBtn = loginForm.querySelector('button[type="submit"]');
 
     const showMsg = (msg, type = 'danger') => {
-      if (!feedback) return;
-      feedback.innerHTML = `<div class="alert alert-${type}" role="alert">${msg}</div>`;
+      // Map bootstrap alert types to toast statuses
+      const mapTypeToStatus = (t) => {
+        switch ((t || '').toLowerCase()) {
+          case 'success': return 'success';
+          case 'info': return 'info';
+          case 'warning': return 'warning';
+          case 'danger': return 'error';
+          default: return 'info';
+        }
+      };
+
+      // Prefer toasts; do not write inline feedback under the form
+      try {
+        if (typeof window.showToast === 'function') {
+          showToast(mapTypeToStatus(type), msg);
+        }
+      } catch (e) {
+        // ignore
+      }
     };
 
     loginForm.addEventListener('submit', async (e) => {
@@ -17,7 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       try {
         submitBtn && (submitBtn.disabled = true);
-        showMsg('Đang đăng nhập...', 'info');
+        showToast('info', 'Đang đăng nhập...');
 
         const formData = new FormData(loginForm);
         const payload = new URLSearchParams();
@@ -33,7 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (!res.ok || data.error) {
           const msg = data.message || 'Đăng nhập thất bại.';
-          showMsg(msg, 'danger');
+          showToast('error', msg);
           return;
         }
 
@@ -44,13 +61,13 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         } catch (_) { }
 
-        showMsg('Đăng nhập thành công. Đang chuyển hướng...', 'success');
+        showToast('success', 'Đăng nhập thành công. Đang chuyển hướng...');
         // Redirect to /home
         setTimeout(() => {
           window.location.href = '/home';
-        }, 800);
+        }, 1000);
       } catch (err) {
-        showMsg('Có lỗi xảy ra. Vui lòng thử lại.', 'danger');
+        showToast('error', 'Có lỗi xảy ra. Vui lòng thử lại.');
       } finally {
         submitBtn && (submitBtn.disabled = false);
       }
@@ -64,8 +81,24 @@ document.addEventListener('DOMContentLoaded', () => {
     const submitBtn = registerForm.querySelector('button[type="submit"]');
 
     const showMsg = (msg, type = 'danger') => {
-      if (!feedback) return;
-      feedback.innerHTML = `<div class="alert alert-${type}" role="alert">${msg}</div>`;
+      // Use toast if available; do not write inline feedback under the form
+      try {
+        if (typeof window.showToast === 'function') {
+          // map register alert types to toast statuses
+          const mapTypeToStatus = (t) => {
+            switch ((t || '').toLowerCase()) {
+              case 'success': return 'success';
+              case 'info': return 'info';
+              case 'warning': return 'warning';
+              case 'danger': return 'error';
+              default: return 'info';
+            }
+          };
+          showToast(mapTypeToStatus(type), msg);
+        }
+      } catch (e) {
+        // ignore
+      }
     };
 
     registerForm.addEventListener('submit', async (e) => {
@@ -75,7 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       try {
         submitBtn && (submitBtn.disabled = true);
-        showMsg('Đang đăng ký...', 'info');
+        showToast('info', 'Đang đăng ký...');
 
         const formData = new FormData(registerForm);
 
@@ -84,7 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const confirmPassword = document.getElementById('confirm-password').value;
 
         if (password !== confirmPassword) {
-          showMsg('Mật khẩu không khớp.', 'danger');
+          showToast('error', 'Mật khẩu không khớp.');
           return;
         }
 
@@ -105,24 +138,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (!res.ok || data.error) {
           const msg = data.message || 'Đăng ký thất bại.';
-          showMsg(msg, 'danger');
+          showToast('error', msg);
           return;
         }
-
-        // Persist lightweight user info for personalization
         try {
-          if (data && data.data && data.data.user) {
-            localStorage.setItem('app.user', JSON.stringify(data.data.user));
-          }
+          localStorage.removeItem('app.user');
         } catch (_) { }
 
-        showMsg('Đăng ký thành công. Đang chuyển hướng...', 'success');
-        // Redirect to /home
         setTimeout(() => {
-          window.location.href = '/home';
-        }, 800);
+          window.location.href = '/login';
+        }, 300);
       } catch (err) {
-        showMsg('Có lỗi xảy ra. Vui lòng thử lại.', 'danger');
+        showToast('error', 'Có lỗi xảy ra. Vui lòng thử lại.');
       } finally {
         submitBtn && (submitBtn.disabled = false);
       }

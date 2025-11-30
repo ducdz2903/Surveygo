@@ -76,10 +76,13 @@ jobs:
             **/tests/**
             **/README.md
             **/.env
-
+            **/.git/**
+            **/.githooks/**
             # Giữ NGUYÊN config TRÊN SERVER
             config/**
             **/config/**
+            # Giữ nguyên reset_db.php
+            scripts/reset_db.php
 
       - name: Trigger DB reset on server
         if: steps.sql_change.outputs.changed == 'true'
@@ -99,4 +102,3 @@ jobs:
 
           # Nếu không chứa "status":"ok" thì fail pipeline
           echo "$RESPONSE" | grep '"status":"ok"' >/dev/null 2>&1
-

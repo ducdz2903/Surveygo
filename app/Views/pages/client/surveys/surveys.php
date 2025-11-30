@@ -1,90 +1,51 @@
-e<?php
-/** @var string $appName */
-/** @var array $urls */
-/** @var string $baseUrl */
+e<main class="page-content pt-5 mt-5 pb-5">
+    <div class="container">
+        <!-- Header -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <h1 class="display-6 fw-bold mb-3">Danh sách Khảo sát <span id="survey-count">(0)</span></h1>
+                <p class="lead text-muted">Tham gia các khảo sát để kiếm điểm và đổi thưởng</p>
+            </div>
+        </div>
 
-$appName = $appName ?? 'Surveygo';
-$urls = $urls ?? [];
-$baseUrl = $baseUrl ?? '';
-
-$__base = rtrim((string) $baseUrl, '/');
-$__mk = static function (string $base, string $path): string {
-    $p = '/' . ltrim($path, '/');
-    return $base === '' ? $p : ($base . $p);
-};
-$urls['home'] = $urls['home'] ?? $__mk($__base, '/');
-$urls['login'] = $urls['login'] ?? $__mk($__base, '/login');
-$urls['register'] = $urls['register'] ?? $__mk($__base, '/register');
-?>
-<!DOCTYPE html>
-<html lang="vi">
-
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Khảo sát - <?= htmlspecialchars($appName, ENT_QUOTES, 'UTF-8') ?></title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-
-    <link rel="stylesheet" href="public/assets/css/app.css">
-    <link rel="stylesheet" href="public/assets/css/components/navbar.css">
-    <link rel="stylesheet" href="public/assets/css/client/home.css">
-    <link rel="stylesheet" href="public/assets/css/components/footer.css">
-</head>
-
-<body class="page page--surveys">
-    <?php include BASE_PATH . '/app/Views/components/client/_navbar.php'; ?>
-
-    <main class="page-content pt-5 mt-5 pb-5">
-        <div class="container">
-            <!-- Header -->
-            <div class="row mb-5">
-                <div class="col-12">
-                    <h1 class="display-6 fw-bold mb-3">Danh sách Khảo sát</h1>
-                    <p class="lead text-muted">Tham gia các khảo sát để kiếm điểm và đổi thưởng</p>
+        <!-- Filter Section -->
+        <div class="row mb-4">
+            <div class="col-md-5">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                    <input type="text" class="form-control" id="search-input" placeholder="Tìm kiếm khảo sát...">
                 </div>
             </div>
-
-            <!-- Filter Section -->
-            <div class="row mb-4">
-                <div class="col-md-5">
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fas fa-search"></i></span>
-                        <input type="text" class="form-control" id="search-input" placeholder="Tìm kiếm khảo sát...">
-                    </div>
-                </div>
-                <div class="col-md-2">
-                    <select class="form-select" id="status-filter">
-                        <option value="">Tất cả trạng thái</option>
-                        <option value="hoạtĐộng">Hot 🔥</option>
-                        <option value="chờDuyệt">Mới ⭐</option>
-                    </select>
-                </div>
-                <div class="col-md-5 d-flex gap-2">
+            <div class="col-md-2">
+                <select class="form-select" id="status-filter">
+                    <option value="">Tất cả trạng thái</option>
+                    <option value="hoạtĐộng">Hot 🔥</option>
+                    <option value="chờDuyệt">Mới ⭐</option>
+                </select>
+            </div>
+            <div class="col-md-5 d-flex gap-2">
                     <button class="btn btn-primary-gradient flex-fill" id="add-survey-btn">
                         <i class="fas fa-plus-circle me-2"></i>Thêm khảo sát
                     </button>
-                    <button class="btn btn-outline-primary flex-fill" id="btn-reset-filters">
-                        <i class="fas fa-redo me-2"></i>Xóa bộ lọc
-                    </button>
-                </div>
+                <button class="btn btn-outline-primary flex-fill" id="btn-reset-filters">
+                    <i class="fas fa-redo me-2"></i>Xóa bộ lọc
+                </button>
             </div>
-
-            <!-- Surveys List -->
-            <div class="row g-4 mb-4" id="surveys-container">
-                <div class="col-12 text-center py-5">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Đang tải...</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Pagination -->
-            <nav aria-label="Page navigation" id="pagination-container"></nav>
         </div>
-    </main>
 
-    <?php include BASE_PATH . '/app/Views/components/client/_footer.php'; ?>
+        <!-- Surveys List -->
+        <div class="row g-4 mb-4" id="surveys-container">
+            <div class="col-12 text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Đang tải...</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pagination (rendered inline below the list) -->
+    </div>
+</main>
+
 
     <!-- Add Survey Modal -->
     <div class="modal fade" id="addSurveyModal" tabindex="-1" aria-labelledby="addSurveyModalLabel" aria-hidden="true">
@@ -202,59 +163,57 @@ $urls['register'] = $urls['register'] ?? $__mk($__base, '/register');
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        let currentPage = 1;
-        const pageSize = 6;
-        let currentFilters = {};
+<script>
+    let currentPage = 1;
+    const pageSize = 6;
+    let currentFilters = {};
 
-        // Load surveys
-        async function loadSurveys(page = 1, filters = {}) {
-            try {
-                const queryParams = new URLSearchParams({
-                    page: page,
-                    limit: pageSize,
-                    isQuickPoll : false ,
-                    ...filters,
-                });
+    // Load surveys
+    async function loadSurveys(page = 1, filters = {}) {
+        try {
+            const queryParams = new URLSearchParams({
+                page: page,
+                limit: pageSize,
+                isQuickPoll: false,
+                ...filters,
+            });
 
-                const response = await fetch(`/api/surveys?${queryParams}`);
-                const result = await response.json();
+            const response = await fetch(`/api/surveys?${queryParams}`);
+            const result = await response.json();
 
-                if (!result.error && result.data && result.meta) {
-                    currentPage = result.meta.page;
-                    currentFilters = filters;
-                    renderSurveys(result.data, result.meta);
-                    renderPagination(result.meta);
-                } else {
-                    document.getElementById('surveys-container').innerHTML =
-                        '<div class="col-12 text-center"><p class="text-muted">Không có khảo sát nào.</p></div>';
-                }
-            } catch (error) {
-                console.error('Lỗi khi tải khảo sát:', error);
+            if (!result.error && result.data && result.meta) {
+                currentPage = result.meta.page;
+                currentFilters = filters;
+                renderSurveys(result.data, result.meta);
+            } else {
                 document.getElementById('surveys-container').innerHTML =
-                    '<div class="col-12 text-center"><p class="text-danger">Lỗi khi tải khảo sát.</p></div>';
+                    '<div class="col-12 text-center"><p class="text-muted">Không có khảo sát nào.</p></div>';
             }
+        } catch (error) {
+            console.error('Lỗi khi tải khảo sát:', error);
+            document.getElementById('surveys-container').innerHTML =
+                '<div class="col-12 text-center"><p class="text-danger">Lỗi khi tải khảo sát.</p></div>';
+        }
+    }
+
+    // Render surveys
+    function renderSurveys(surveys, meta) {
+        const container = document.getElementById('surveys-container');
+
+        if (surveys.length === 0) {
+            container.innerHTML = '<div class="col-12 text-center py-5"><p class="text-muted fs-5">Không có khảo sát nào phù hợp.</p></div>';
+            return;
         }
 
-        // Render surveys
-        function renderSurveys(surveys, meta) {
-            const container = document.getElementById('surveys-container');
+        const badgeMap = {
+            'hoạtĐộng': { class: 'badge-hot', icon: 'fas fa-fire', text: 'Hot' },
+            'chờDuyệt': { class: '', icon: 'fas fa-star', text: 'Mới' },
+        };
 
-            if (surveys.length === 0) {
-                container.innerHTML = '<div class="col-12 text-center py-5"><p class="text-muted fs-5">Không có khảo sát nào phù hợp.</p></div>';
-                return;
-            }
+        container.innerHTML = surveys.map((survey) => {
+            const badge = badgeMap[survey.trangThai] || { class: '', icon: 'fas fa-star', text: 'Mới' };
 
-            const badgeMap = {
-                'hoạtĐộng': { class: 'badge-hot', icon: 'fas fa-fire', text: 'Hot' },
-                'chờDuyệt': { class: '', icon: 'fas fa-star', text: 'Mới' },
-            };
-
-            container.innerHTML = surveys.map((survey) => {
-                const badge = badgeMap[survey.trangThai] || { class: '', icon: 'fas fa-star', text: 'Mới' };
-
-                return `
+            return `
                     <div class="col-lg-4 col-md-6">
                         <div class="survey-card">
                             <div class="survey-badge ${badge.class}">
@@ -274,87 +233,57 @@ $urls['register'] = $urls['register'] ?? $__mk($__base, '/register');
                         </div>
                     </div>
                 `;
-            }).join('');
+        }).join('');
+
+        // Update total count display (like home)
+        const countEl = document.getElementById('survey-count');
+        if (countEl) countEl.textContent = `(${meta.total})`;
+
+        // Add simple prev/next pagination like home
+        if (meta.totalPages > 1) {
+            let pagHtml = `
+                <div class="col-12 d-flex justify-content-center gap-2 mt-4">
+                    ${meta.page > 1 ? `<button class="btn btn-sm btn-outline-primary" onclick="loadSurveys(${meta.page - 1})">← Trước</button>` : ''}
+                    <span class="btn btn-sm btn-light disabled">Trang ${meta.page}/${meta.totalPages}</span>
+                    ${meta.page < meta.totalPages ? `<button class="btn btn-sm btn-outline-primary" onclick="loadSurveys(${meta.page + 1})">Tiếp →</button>` : ''}
+                </div>
+            `;
+            container.innerHTML += pagHtml;
         }
+    }
 
-        // Render pagination
-        function renderPagination(meta) {
-            const container = document.getElementById('pagination-container');
 
-            if (meta.totalPages <= 1) {
-                container.innerHTML = '';
-                return;
-            }
-
-            let html = '<ul class="pagination justify-content-center">';
-
-            // Previous button
-            if (meta.page > 1) {
-                html += `<li class="page-item"><button class="page-link" onclick="loadSurveys(${meta.page - 1}, ${JSON.stringify(currentFilters).replace(/"/g, '&quot;')})">← Trước</button></li>`;
-            }
-
-            // Page numbers
-            const startPage = Math.max(1, meta.page - 2);
-            const endPage = Math.min(meta.totalPages, meta.page + 2);
-
-            if (startPage > 1) {
-                html += `<li class="page-item"><button class="page-link" onclick="loadSurveys(1, ${JSON.stringify(currentFilters).replace(/"/g, '&quot;')})">1</button></li>`;
-                if (startPage > 2) html += '<li class="page-item disabled"><span class="page-link">...</span></li>';
-            }
-
-            for (let i = startPage; i <= endPage; i++) {
-                if (i === meta.page) {
-                    html += `<li class="page-item active"><span class="page-link">${i}</span></li>`;
-                } else {
-                    html += `<li class="page-item"><button class="page-link" onclick="loadSurveys(${i}, ${JSON.stringify(currentFilters).replace(/"/g, '&quot;')})">${i}</button></li>`;
-                }
-            }
-
-            if (endPage < meta.totalPages) {
-                if (endPage < meta.totalPages - 1) html += '<li class="page-item disabled"><span class="page-link">...</span></li>';
-                html += `<li class="page-item"><button class="page-link" onclick="loadSurveys(${meta.totalPages}, ${JSON.stringify(currentFilters).replace(/"/g, '&quot;')})">${meta.totalPages}</button></li>`;
-            }
-
-            // Next button
-            if (meta.page < meta.totalPages) {
-                html += `<li class="page-item"><button class="page-link" onclick="loadSurveys(${meta.page + 1}, ${JSON.stringify(currentFilters).replace(/"/g, '&quot;')})">Tiếp →</button></li>`;
-            }
-
-            html += '</ul>';
-            container.innerHTML = html;
+    // Filter handlers
+    document.getElementById('search-input').addEventListener('input', function (e) {
+        const filters = { ...currentFilters };
+        if (e.target.value.trim()) {
+            filters.search = e.target.value.trim();
+        } else {
+            delete filters.search;
         }
+        loadSurveys(1, filters);
+    });
 
-        // Filter handlers
-        document.getElementById('search-input').addEventListener('input', function (e) {
-            const filters = { ...currentFilters };
-            if (e.target.value.trim()) {
-                filters.search = e.target.value.trim();
-            } else {
-                delete filters.search;
-            }
-            loadSurveys(1, filters);
-        });
+    document.getElementById('status-filter').addEventListener('change', function (e) {
+        const filters = { ...currentFilters };
+        if (e.target.value) {
+            filters.trangThai = e.target.value;
+        } else {
+            delete filters.trangThai;
+        }
+        loadSurveys(1, filters);
+    });
 
-        document.getElementById('status-filter').addEventListener('change', function (e) {
-            const filters = { ...currentFilters };
-            if (e.target.value) {
-                filters.trangThai = e.target.value;
-            } else {
-                delete filters.trangThai;
-            }
-            loadSurveys(1, filters);
-        });
+    document.getElementById('btn-reset-filters').addEventListener('click', function () {
+        document.getElementById('search-input').value = '';
+        document.getElementById('status-filter').value = '';
+        loadSurveys(1, {});
+    });
 
-        document.getElementById('btn-reset-filters').addEventListener('click', function () {
-            document.getElementById('search-input').value = '';
-            document.getElementById('status-filter').value = '';
-            loadSurveys(1, {});
-        });
-
-        // Load initial data
-        document.addEventListener('DOMContentLoaded', function () {
-            loadSurveys(1, {});
-        });
+    // Load initial data
+    document.addEventListener('DOMContentLoaded', function () {
+        loadSurveys(1, {});
+    });
 
         // Add survey button handler
         document.getElementById('add-survey-btn').addEventListener('click', function () {
@@ -473,7 +402,4 @@ $urls['register'] = $urls['register'] ?? $__mk($__base, '/register');
                 typeSelect.addEventListener('change', () => updateAnswers(firstQuestion));
             }
         });
-    </script>
-</body>
-
-</html>
+</script>

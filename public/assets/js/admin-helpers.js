@@ -12,18 +12,19 @@ class AdminHelpers {
     }
 
     static getStatusBadge(status) {
+        // Return full Bootstrap badge classes to ensure consistent styling
         const badges = {
-            'approved': 'badge-success',
-            'pending': 'badge-warning',
-            'draft': 'badge-secondary',
-            'rejected': 'badge-danger',
-            'active': 'badge-success',
-            'inactive': 'badge-secondary',
-            'completed': 'badge-info',
-            'ongoing': 'badge-success',
-            'upcoming': 'badge-primary'
+            'approved': 'badge-success rounded-pill',
+            'pending': 'badge-warning rounded-pill',
+            'draft': 'badge-secondary rounded-pill',
+            'rejected': 'badge-danger rounded-pill',
+            'active': 'badge-success rounded-pill',
+            'inactive': 'badge-secondary rounded-pill',
+            'completed': 'badge-info rounded-pill',
+            'ongoing': 'badge-success rounded-pill',
+            'upcoming': 'badge-primary rounded-pill'
         };
-        return badges[status] || 'badge-secondary';
+        return badges[status] || 'badge-secondary rounded-pill';
     }
 
     static getStatusText(status) {
@@ -39,15 +40,6 @@ class AdminHelpers {
             'upcoming': 'Sắp diễn ra'
         };
         return texts[status] || status;
-    }
-
-    static getRoleBadge(role) {
-        const badges = {
-            'admin': 'badge-danger',
-            'moderator': 'badge-warning',
-            'user': 'badge-primary'
-        };
-        return badges[role] || 'badge-secondary';
     }
 
     static getRoleText(role) {

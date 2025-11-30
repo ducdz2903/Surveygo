@@ -18,23 +18,37 @@ $baseUrl = $baseUrl ?? '';
 ?>
 <!doctype html>
 <html lang="vi">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title><?= htmlspecialchars((string)$title, ENT_QUOTES, 'UTF-8') ?></title>
+    <title><?= htmlspecialchars((string) $title, ENT_QUOTES, 'UTF-8') ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="<?= htmlspecialchars(rtrim((string)$baseUrl, '/'), ENT_QUOTES, 'UTF-8') ?>/assets/css/app.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="<?= htmlspecialchars($baseUrl, ENT_QUOTES, 'UTF-8') ?>/public/assets/css/app.css">
+    <link rel="stylesheet"
+        href="<?= htmlspecialchars(rtrim((string) $baseUrl, '/'), ENT_QUOTES, 'UTF-8') ?>/public/assets/css/components/navbar.css">
+    <link rel="stylesheet"
+        href="<?= htmlspecialchars(rtrim((string) $baseUrl, '/'), ENT_QUOTES, 'UTF-8') ?>/public/assets/css/components/footer.css">
+    <script>
+        const BASE_URL = '<?= htmlspecialchars(rtrim((string) ($baseUrl ?? ''), '/'), ENT_QUOTES, 'UTF-8') ?>';
+    </script>
+    <?= $headExtra ?? '' ?>
 </head>
+
 <body class="app-layout">
-    <?php include BASE_PATH . '/app/Views/partials/_navbar.php'; ?>
+    <?php include BASE_PATH . '/app/Views/components/client/_navbar.php'; ?>
 
     <main class="page-content">
         <?= $content ?>
     </main>
 
-    <?php include BASE_PATH . '/app/Views/partials/_footer.php'; ?>
+    <?php include BASE_PATH . '/app/Views/components/client/_footer.php'; ?>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="<?= htmlspecialchars(rtrim((string)$baseUrl, '/'), ENT_QUOTES, 'UTF-8') ?>/assets/js/app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="<?= htmlspecialchars(rtrim((string) $baseUrl, '/'), ENT_QUOTES, 'UTF-8') ?>/assets/js/app.js"></script>
+    <?= $scriptsExtra ?? '' ?>
 </body>
+
 </html>

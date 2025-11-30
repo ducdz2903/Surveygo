@@ -12,72 +12,148 @@ class HomeController extends Controller
 {
     public function home(Request $request)
     {
-        return $this->view('pages/client/home/landing', $this->pageData($request));
+        $view = new \App\Core\View();
+        $data = $this->pageData($request);
+        $base = rtrim((string) ($data['baseUrl'] ?? ''), '/');
+        $data['headExtra'] = '<link rel="stylesheet" href="' . $base . '/public/assets/css/client/landing-page.css">';
+        $content = $view->render("pages/client/home/landing", $data);
+        return \App\Core\Response::html($view->render('layouts/main', array_merge($data, ['content' => $content])));
     }
 
     public function homeAfterLogin(Request $request)
     {
-        return $this->view('pages/client/home/home', $this->pageData($request));
+        $view = new \App\Core\View();
+        $data = $this->pageData($request);
+        $base = rtrim((string) ($data['baseUrl'] ?? ''), '/');
+        $data['headExtra'] = '<link rel="stylesheet" href="' . $base . '/public/assets/css/client/home.css">';
+        $content = $view->render("pages/client/home/home", $data);
+        return \App\Core\Response::html($view->render('layouts/main', array_merge($data, ['content' => $content])));
     }
 
     public function login(Request $request)
     {
-        return $this->view('pages/auth/login', $this->pageData($request), 200, []);
+        $view = new \App\Core\View();
+        $data = $this->pageData($request);
+        $base = rtrim((string) ($data['baseUrl'] ?? ''), '/');
+        $data['headExtra'] = '<link rel="stylesheet" href="' . $base . '/public/assets/css/auth/login.css">';
+        $viewScriptPath = BASE_PATH . '/app/Views/pages/auth/script.js';
+        $scriptContent = (string) @file_get_contents($viewScriptPath);
+        $data['scriptsExtra'] = "<script>\n" . $scriptContent . "\n</script>";
+        $content = $view->render("pages/auth/login", $data);
+        return \App\Core\Response::html($view->render('layouts/main', array_merge($data, ['content' => $content])));
     }
 
     public function register(Request $request)
     {
-        return $this->view('pages/auth/register', $this->pageData($request), 200, []);
+        $view = new \App\Core\View();
+        $data = $this->pageData($request);
+        $base = rtrim((string) ($data['baseUrl'] ?? ''), '/');
+        $data['headExtra'] = '<link rel="stylesheet" href="' . $base . '/public/assets/css/auth/register.css">';
+        $viewScriptPath = BASE_PATH . '/app/Views/pages/auth/script.js';
+        $scriptContent = (string) @file_get_contents($viewScriptPath);
+        $data['scriptsExtra'] = "<script>\n" . $scriptContent . "\n</script>";
+        $content = $view->render("pages/auth/register", $data);
+        return \App\Core\Response::html($view->render('layouts/main', array_merge($data, ['content' => $content])));
     }
 
     public function profile(Request $request)
     {
-        return $this->view('pages/client/profile/profile', $this->pageData($request));
+        $view = new \App\Core\View();
+        $data = $this->pageData($request);
+        $base = rtrim((string) ($data['baseUrl'] ?? ''), '/');
+        $data['headExtra'] = '<link rel="stylesheet" href="' . $base . '/public/assets/css/client/profile.css">';
+        $content = $view->render("pages/client/profile/profile", $data);
+        return \App\Core\Response::html($view->render('layouts/main', array_merge($data, ['content' => $content])));
     }
 
     public function dailyRewards(Request $request)
     {
-        return $this->view('pages/client/daily-rewards/daily-rewards', $this->pageData($request));
+        $view = new \App\Core\View();
+        $data = $this->pageData($request);
+        $base = rtrim((string) ($data['baseUrl'] ?? ''), '/');
+        $data['headExtra'] = '<link rel="stylesheet" href="' . $base . '/public/assets/css/client/daily-rewards.css">';
+        $content = $view->render("pages/client/daily-rewards/daily-rewards", $data);
+        return \App\Core\Response::html($view->render('layouts/main', array_merge($data, ['content' => $content])));
     }
 
     public function events(Request $request)
     {
-        return $this->view('pages/client/events/events', $this->pageData($request));
+        $view = new \App\Core\View();
+        $data = $this->pageData($request);
+        $base = rtrim((string) ($data['baseUrl'] ?? ''), '/');
+        $data['headExtra'] = '<link rel="stylesheet" href="' . $base . '/public/assets/css/client/events.css">';
+        $content = $view->render('pages/client/events/events', $data);
+        return \App\Core\Response::html($view->render('layouts/main', array_merge($data, ['content' => $content])));
     }
 
     public function rewards(Request $request)
     {
-        return $this->view('pages/client/rewards/rewards', $this->pageData($request));
+        $view = new \App\Core\View();
+        $data = $this->pageData($request);
+        $base = rtrim((string) ($data['baseUrl'] ?? ''), '/');
+        $data['headExtra'] = '<link rel="stylesheet" href="' . $base . '/public/assets/css/client/rewards.css">';
+        $content = $view->render('pages/client/rewards/rewards', $data);
+        return \App\Core\Response::html($view->render('layouts/main', array_merge($data, ['content' => $content])));
     }
 
     public function terms(Request $request)
     {
-        return $this->view('pages/client/terms/terms-of-use', $this->pageData($request));
+        $view = new \App\Core\View();
+        $data = $this->pageData($request);
+        $base = rtrim((string) ($data['baseUrl'] ?? ''), '/');
+        $data['headExtra'] = '<link rel="stylesheet" href="' . $base . '/public/assets/css/client/term-of-use.css">';
+        $content = $view->render('pages/client/terms/terms-of-use', $data);
+        return \App\Core\Response::html($view->render('layouts/main', array_merge($data, ['content' => $content])));
     }
 
     public function contact(Request $request)
     {
-        return $this->view('pages/client/contact/contact', $this->pageData($request));
+        $view = new \App\Core\View();
+        $data = $this->pageData($request);
+        $base = rtrim((string) ($data['baseUrl'] ?? ''), '/');
+        $data['headExtra'] = '<link rel="stylesheet" href="' . $base . '/public/assets/css/client/contact.css">';
+        $content = $view->render('pages/client/contact/contact', $data);
+        return \App\Core\Response::html($view->render('layouts/main', array_merge($data, ['content' => $content])));
     }
 
     public function surveys(Request $request)
     {
-        return $this->view('pages/client/surveys/surveys', $this->pageData($request));
+        $view = new \App\Core\View();
+        $data = $this->pageData($request);
+        $base = rtrim((string) ($data['baseUrl'] ?? ''), '/');
+        $data['headExtra'] = '<link rel="stylesheet" href="' . $base . '/public/assets/css/client/home.css">';
+        $content = $view->render('pages/client/surveys/surveys', $data);
+        return \App\Core\Response::html($view->render('layouts/main', array_merge($data, ['content' => $content])));
     }
 
     public function quickPoll(Request $request)
     {
-        return $this->view('pages/client/surveys/quick-poll', $this->pageData($request));
+        $view = new \App\Core\View();
+        $data = $this->pageData($request);
+        $base = rtrim((string) ($data['baseUrl'] ?? ''), '/');
+        $data['headExtra'] = '<link rel="stylesheet" href="' . $base . '/public/assets/css/client/home.css">';
+        $content = $view->render('pages/client/surveys/quick-poll', $data);
+        return \App\Core\Response::html($view->render('layouts/main', array_merge($data, ['content' => $content])));
     }
 
     public function surveyGuide(Request $request)
     {
-        return $this->view('pages/client/surveys/guide', $this->pageData($request));
+        $view = new \App\Core\View();
+        $data = $this->pageData($request);
+        $base = rtrim((string) ($data['baseUrl'] ?? ''), '/');
+        $data['headExtra'] = '<link rel="stylesheet" href="' . $base . '/public/assets/css/client/survey-guide.css">';
+        $content = $view->render('pages/client/surveys/guide', $data);
+        return \App\Core\Response::html($view->render('layouts/main', array_merge($data, ['content' => $content])));
     }
 
     public function surveyQuestions(Request $request)
     {
-        return $this->view('pages/client/surveys/questions', $this->pageData($request));
+        $view = new \App\Core\View();
+        $data = $this->pageData($request);
+        $base = rtrim((string) ($data['baseUrl'] ?? ''), '/');
+        $data['headExtra'] = '<link rel="stylesheet" href="' . $base . '/public/assets/css/client/survey-questions.css">';
+        $content = $view->render('pages/client/surveys/questions', $data);
+        return \App\Core\Response::html($view->render('layouts/main', array_merge($data, ['content' => $content])));
     }
 
     private function pageData(Request $request): array
