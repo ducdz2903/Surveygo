@@ -288,8 +288,6 @@
     </div>
 </section>
 
-<?php include BASE_PATH . '/app/Views/components/client/_footer.php'; ?>
-
 <!-- Confirmation Modal -->
 <div class="modal fade" id="confirmModal" tabindex="-1">
     <div class="modal-dialog">
