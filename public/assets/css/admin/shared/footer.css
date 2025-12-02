@@ -1,0 +1,18 @@
+/* Admin - Shared Footer */
+.admin-footer {
+    margin-left: var(--admin-sidebar-width);
+    padding: 0.75rem 2rem;
+    height: var(--admin-footer-height);
+    background: white;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: var(--text-secondary);
+    z-index: 900;
+}
+
+.admin-footer p {
+    margin: 0;
+    font-size: 0.9rem;
+}

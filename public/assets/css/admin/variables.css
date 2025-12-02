@@ -1,0 +1,39 @@
+:root {
+    /* Màu sắc chính từ app.css */
+    --admin-primary: #10BCD3;
+    --admin-primary-dark: #0B99B8;
+    --admin-success: #06D6A0;
+    --admin-warning: #F39C12;
+    --admin-danger: #E74C3C;
+    --admin-info: #5DADE2;
+    --admin-dark: #1e293b;
+    --admin-light: #f8fafc;
+
+    /* Gradients */
+    --admin-primary-gradient: linear-gradient(135deg, #10BCD3 0%, #0B99B8 100%);
+    --admin-success-gradient: linear-gradient(45deg, #06D6A0 0%, #00BF96 100%);
+    --admin-warning-gradient: linear-gradient(45deg, #F39C12 0%, #E67E22 100%);
+
+    /* Layout */
+    --admin-sidebar-width: 260px;
+    --admin-header-height: 70px;
+    --admin-footer-height: 56px;
+
+    /* Text colors */
+    --text-primary: #1e293b;
+    --text-secondary: #64748b;
+    --border-color: #e2e8f0;
+    --background-light: #f8fafc;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: var(--background-light);
+    color: var(--text-primary);
+}

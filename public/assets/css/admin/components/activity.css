@@ -1,0 +1,36 @@
+.activity-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.activity-item {
+    padding: 1rem;
+    border-left: 3px solid var(--border-color);
+    margin-bottom: 1rem;
+    position: relative;
+    transition: all 0.3s;
+}
+
+.activity-item:hover {
+    border-left-color: var(--admin-primary);
+    background: var(--background-light);
+}
+
+.activity-item::before {
+    content: '';
+    position: absolute;
+    left: -7px;
+    top: 1.25rem;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: white;
+    border: 3px solid var(--admin-primary);
+}
+
+.activity-time {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-top: 0.25rem;
+}

@@ -1,0 +1,166 @@
+/* Admin - Shared Header */
+.admin-header {
+    position: fixed;
+    top: 0;
+    left: var(--admin-sidebar-width);
+    right: 0;
+    height: var(--admin-header-height);
+    background: white;
+    border-bottom: 1px solid var(--border-color);
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    padding: 0 2rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.admin-header h5 {
+    /* Match homepage navbar brand sizing */
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: var(--admin-dark);
+    margin: 0;
+}
+
+.admin-header .header-actions {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 0.95rem; /* same as client nav links */
+}
+
+.admin-header .search-box {
+    position: relative;
+}
+
+.admin-header .search-box input {
+    padding: 0.5rem 1rem 0.5rem 2.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    width: 250px;
+    transition: all 0.3s;
+    font-size: 0.95rem; /* match client */
+}
+
+.admin-header .search-box input:focus {
+    outline: none;
+    border-color: var(--admin-primary);
+    width: 300px;
+}
+
+.admin-header .search-box i {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-secondary);
+}
+
+.admin-header .notification-icon {
+    position: relative;
+    font-size: 1.2rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.admin-header .notification-icon:hover {
+    color: var(--admin-primary);
+}
+
+.admin-header .notification-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: var(--admin-danger);
+    color: white;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    font-size: 0.65rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.admin-header .user-menu {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+    padding: 0.5rem 1rem;
+    border-radius: 25px;
+    transition: background 0.3s;
+    font-size: 0.95rem; /* match client */
+}
+
+.admin-header .user-menu:hover {
+    background: var(--background-light);
+}
+
+.admin-header .user-avatar {
+    /* use same avatar sizing as client navbar */
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background: var(--admin-primary-gradient);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+}
+
+.admin-header .btn-link,
+.admin-header .btn-link:hover,
+.admin-header .btn-link:focus {
+    text-decoration: none;
+    color: inherit;
+}
+
+.admin-header .dropdown-menu {
+    border: none;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    padding: 0.5rem;
+    min-width: 220px;
+    margin-top: 0.5rem;
+    border-radius: 12px;
+}
+
+.admin-header .dropdown-item {
+    font-size: 0.9rem;
+    border-radius: 10px;
+    color: var(--text-primary);
+    padding: 0.5rem 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.admin-header .dropdown-item:hover {
+    color: var(--admin-primary-dark);
+    background: rgba(16, 188, 211, 0.06);
+}
+
+.admin-header .dropdown-item i {
+    width: 20px;
+    text-align: center;
+}
+
+.admin-header .dropdown-divider {
+    margin: 0.5rem 0;
+}
+
+.user-avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    color: #fff;
+    text-transform: uppercase;
+    line-height: 1;
+    font-size: 0.95rem;
+    user-select: none;
+    border-radius: 7px;
+}

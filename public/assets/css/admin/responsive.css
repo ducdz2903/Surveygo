@@ -1,0 +1,27 @@
+@media (max-width: 768px) {
+    .admin-sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.3s;
+    }
+
+    .admin-sidebar.show {
+        transform: translateX(0);
+    }
+
+    .admin-header {
+        left: 0;
+    }
+
+    .admin-content {
+        margin-left: 0;
+    }
+
+    .admin-footer {
+        margin-left: 0;
+        text-align: center;
+        height: auto;
+        padding: 1rem;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+}

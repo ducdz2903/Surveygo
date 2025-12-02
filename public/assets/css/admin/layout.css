@@ -1,0 +1,7 @@
+/* ==================== MAIN CONTENT ==================== */
+.admin-content {
+    margin-left: var(--admin-sidebar-width);
+    margin-top: var(--admin-header-height);
+    padding: 2rem;
+    min-height: calc(100vh - var(--admin-header-height) - var(--admin-footer-height));
+}
