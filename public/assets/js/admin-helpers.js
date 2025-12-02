@@ -12,7 +12,6 @@ class AdminHelpers {
     }
 
     static getStatusBadge(status) {
-        // Return full Bootstrap badge classes to ensure consistent styling
         const badges = {
             'approved': 'badge-success rounded-pill',
             'pending': 'badge-warning rounded-pill',
