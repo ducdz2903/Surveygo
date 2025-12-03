@@ -8,6 +8,7 @@ use App\Core\Controller;
 use App\Core\Request;
 use App\Models\Survey;
 use App\Models\Question;
+use App\Models\SurveyQuestionMap;
 use App\Models\User;
 use App\Models\SurveySubmission;
 use App\Models\UserResponse;
@@ -79,8 +80,9 @@ class SurveyController extends Controller
             ], 404);
         }
 
-        $questions = Question::findBySurvey($survey->getId());
-        $questionCount = Question::countBySurvey($survey->getId());
+        // Load questions via mapping table to ensure we respect survey_question_map ordering
+        $questions = SurveyQuestionMap::findQuestionsBySurvey($survey->getId());
+        $questionCount = SurveyQuestionMap::countBySurvey($survey->getId());
         $surveyData = $survey->toArray();
         $surveyData['questionCount'] = $questionCount;
         $surveyData['questions'] = array_map(fn($q) => $q->toArray(), $questions);
@@ -335,13 +337,12 @@ class SurveyController extends Controller
     }
 
     /**
-     * G?n c?u h?i c? s?n v?o kh?o s?t (kh?ng t?o c?u h?i m?i)
+     * Gắn câu hỏi vào khảo sát (chỉ tạo mapping, không tạo câu hỏi mới)
      */
     public function attachQuestion(Request $request)
     {
         $surveyId = $request->input('maKhaoSat');
         $questionId = $request->input('maCauHoi');
-        $thuTu = (int)($request->input('thuTu') ?? 0);
 
         if (!$surveyId || !is_numeric($surveyId) || !$questionId || !is_numeric($questionId)) {
             return $this->json([
@@ -360,7 +361,7 @@ class SurveyController extends Controller
             ], 404);
         }
 
-        if (!$this->attachQuestionToSurvey((int)$surveyId, (int)$questionId, $thuTu)) {
+        if (!$this->attachQuestionToSurvey((int)$surveyId, (int)$questionId)) {
             return $this->json([
                 'error' => true,
                 'message' => 'Không thể gắn câu hỏi vào khảo sát (có thể đã tồn tại).',
@@ -391,7 +392,7 @@ class SurveyController extends Controller
         try {
             /** @var PDO $db */
             $db = \App\Core\Container::get('db');
-            $stmt = $db->prepare('DELETE FROM survey_question_map WHERE maKhaoSat = :survey AND maCauHoi = :question');
+            $stmt = $db->prepare('DELETE FROM survey_question_map WHERE idKhaoSat = :survey AND idCauHoi = :question');
             $stmt->execute([
                 ':survey' => (int)$surveyId,
                 ':question' => (int)$questionId,
@@ -409,16 +410,15 @@ class SurveyController extends Controller
         }
     }
 
-    private function attachQuestionToSurvey(int $surveyId, int $questionId, int $thuTu = 0): bool
+    private function attachQuestionToSurvey(int $surveyId, int $questionId): bool
     {
         try {
             /** @var PDO $db */
             $db = \App\Core\Container::get('db');
-            $stmt = $db->prepare('INSERT INTO survey_question_map (maKhaoSat, maCauHoi, thuTu) VALUES (:survey, :question, :order) ON DUPLICATE KEY UPDATE thuTu = VALUES(thuTu)');
+            $stmt = $db->prepare('INSERT INTO survey_question_map (idKhaoSat, idCauHoi) VALUES (:survey, :question) ON DUPLICATE KEY UPDATE idKhaoSat = VALUES(idKhaoSat)');
             return $stmt->execute([
                 ':survey' => $surveyId,
                 ':question' => $questionId,
-                ':order' => $thuTu,
             ]);
         } catch (\Throwable $e) {
             return false;

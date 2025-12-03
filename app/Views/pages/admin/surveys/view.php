@@ -26,10 +26,13 @@ $__mk = static function (string $base, string $path): string {
             </div>
         </div>
         <div class="d-flex gap-2">
-            <button class="btn btn-outline-secondary" id="btn-cancel-page">
+            <button type="button" class="btn btn-outline-secondary" id="btn-edit-page">
+                <i class="fas fa-edit me-1"></i>Chỉnh sửa
+            </button>
+            <button type="button" class="btn btn-outline-secondary d-none" id="btn-cancel-page">
                 <i class="fas fa-times me-1"></i>Hủy
             </button>
-            <button class="btn btn-success" type="button" id="btn-save-page">
+            <button type="button" class="btn btn-success d-none" id="btn-save-page">
                 <i class="fas fa-save me-1"></i>Lưu thay đổi
             </button>
         </div>
@@ -67,7 +70,7 @@ $__mk = static function (string $base, string $path): string {
                             <h5 class="mb-1">Danh sách câu hỏi</h5>
                             <p class="text-muted small mb-0">Quản lý câu hỏi thuộc khảo sát này</p>
                         </div>
-                        <button class="btn btn-primary" type="button" id="btn-open-library-2">
+                        <button class="btn btn-primary d-none" type="button" id="btn-open-library-2">
                             <i class="fas fa-plus me-1"></i>Thêm câu hỏi
                         </button>
                     </div>
@@ -131,6 +134,10 @@ $__mk = static function (string $base, string $path): string {
                         <input class="form-check-input" type="checkbox" role="switch" id="question-required">
                         <label class="form-check-label" for="question-required">Bắt buộc trả lời</label>
                     </div>
+                    <div class="form-check form-switch mb-2">
+                        <input class="form-check-input" type="checkbox" role="switch" id="question-quickpoll">
+                        <label class="form-check-label" for="question-quickpoll">Quick Poll</label>
+                    </div>
                     <p class="text-muted small mb-0">Popup theo mẫu trang quản lý câu hỏi. Dữ liệu lưu khi bấm "Lưu".</p>
                 </form>
             </div>
@@ -192,6 +199,7 @@ $__mk = static function (string $base, string $path): string {
 </div>
 
 <script src="<?= $__mk($__base, 'public/assets/js/toast-helper.js') ?>"></script>
+<script src="<?= $__mk($__base, 'public/assets/js/modal-helper.js') ?>"></script>
 <script>
     const surveyId = <?= json_encode($surveyId) ?>;
     const baseUrl = <?= json_encode($__base) ?>;
@@ -213,9 +221,41 @@ $__mk = static function (string $base, string $path): string {
     const questionTypeSelect = document.getElementById('question-type');
     const questionOrderInput = document.getElementById('question-order');
     const questionRequiredInput = document.getElementById('question-required');
+    const questionQuickPollInput = document.getElementById('question-quickpoll');
 
     const libraryBody = document.getElementById('library-body');
     const librarySearch = document.getElementById('library-search');
+
+    // Edit mode flag and helper are global so other handlers can check state
+    let isEditMode = false;
+    function setEditMode(enabled) {
+        isEditMode = !!enabled;
+        const editBtn = document.getElementById('btn-edit-page');
+        const cancelBtn = document.getElementById('btn-cancel-page');
+        const saveBtn = document.getElementById('btn-save-page');
+
+        // open-library buttons (may be one or two ids)
+        const openBtns = Array.from(document.querySelectorAll('#btn-open-library, #btn-open-library-2'));
+
+        if (editBtn && cancelBtn && saveBtn) {
+            if (isEditMode) {
+                editBtn.classList.add('d-none');
+                cancelBtn.classList.remove('d-none');
+                saveBtn.classList.remove('d-none');
+            } else {
+                editBtn.classList.remove('d-none');
+                cancelBtn.classList.add('d-none');
+                saveBtn.classList.add('d-none');
+            }
+        }
+
+        // toggle add-question visibility
+        openBtns.forEach(b => {
+            if (!b) return;
+            if (isEditMode) b.classList.remove('d-none');
+            else b.classList.add('d-none');
+        });
+    }
 
     window.addEventListener('load', () => {
         window.showToast = typeof showToast === 'function' ? showToast : function (_, text) { alert(text); };
@@ -225,9 +265,38 @@ $__mk = static function (string $base, string $path): string {
             libraryModal = new bootstrap.Modal(libraryEl);
         }
 
+
         document.getElementById('btn-back')?.addEventListener('click', () => window.location.href = apiUrl('/admin/surveys'));
-        document.getElementById('btn-cancel-page')?.addEventListener('click', () => window.location.href = apiUrl('/admin/surveys'));
-        document.getElementById('btn-save-page')?.addEventListener('click', () => showToast('success', 'Đã lưu thay đổi.'));
+        document.getElementById('btn-edit-page')?.addEventListener('click', () => {
+            setEditMode(true);
+            showToast('info', 'Chế độ chỉnh sửa đã bật. Bây giờ bạn có thể thêm/sửa/xóa câu hỏi.');
+        });
+        document.getElementById('btn-cancel-page')?.addEventListener('click', (ev) => {
+            // Exit edit mode then redirect to list reliably
+            try {
+                ev?.preventDefault?.();
+                ev?.stopPropagation?.();
+            } catch (e) {
+                // ignore
+            }
+            try {
+                setEditMode(false);
+            } catch (e) {
+                // ignore
+            }
+            // small delay to allow UI updates; try multiple navigation methods for reliability
+            const url = apiUrl('/admin/surveys');
+            setTimeout(() => {
+                try { window.location.href = url; } catch (e) {}
+                try { window.location.assign(url); } catch (e) {}
+                try { top.location.href = url; } catch (e) {}
+            }, 50);
+        });
+        document.getElementById('btn-save-page')?.addEventListener('click', () => {
+            // Save changes (UI-driven). After save, redirect to list.
+            showToast('success', 'Đã lưu thay đổi.');
+            setTimeout(() => window.location.href = apiUrl('/admin/surveys'), 600);
+        });
 
         document.getElementById('btn-open-library')?.addEventListener('click', () => openLibrary());
         document.getElementById('btn-open-library-2')?.addEventListener('click', () => openLibrary());
@@ -268,7 +337,10 @@ $__mk = static function (string $base, string $path): string {
         try {
             const res = await fetch(apiUrl(`/api/questions?${params.toString()}`));
             const json = await res.json();
-            const data = Array.isArray(json.data) ? json.data : [];
+            const allData = Array.isArray(json.data) ? json.data : [];
+            const attachedIds = new Set(questionsCache.map(q => Number(q.id)));
+            const data = allData.filter(q => !attachedIds.has(Number(q.id)));
+
             if (!data.length) {
                 libraryBody.innerHTML = `<tr><td colspan="4" class="text-center text-muted py-4">Không có câu hỏi phù hợp</td></tr>`;
                 return;
@@ -292,11 +364,61 @@ $__mk = static function (string $base, string $path): string {
     }
 
     function openLibrary() {
-        if (libraryModal) libraryModal.show();
+        if (!isEditMode) {
+            showToast('warning', 'Bật chế độ chỉnh sửa để thêm câu hỏi từ thư viện.');
+            return;
+        }
+
+        console.debug('openLibrary', { isEditMode, hasBootstrap: !!libraryModal, hasEl: !!libraryEl });
+
+        try {
+            // Try using Bootstrap modal if available
+            if (libraryModal) {
+                libraryModal.show();
+            } else if (libraryEl) {
+                // remove existing manual backdrop if any
+                const existing = document.getElementById('library-backdrop');
+                if (existing) existing.remove();
+
+                // show modal element manually
+                libraryEl.classList.add('show');
+                libraryEl.style.display = 'block';
+                libraryEl.setAttribute('aria-modal', 'true');
+                libraryEl.removeAttribute('aria-hidden');
+                libraryEl.dataset.manualShown = '1';
+
+                const backdrop = document.createElement('div');
+                backdrop.className = 'modal-backdrop fade show';
+                backdrop.id = 'library-backdrop';
+                document.body.appendChild(backdrop);
+
+                // ensure manual close cleans up backdrop
+                const closeButtons = libraryEl.querySelectorAll('[data-bs-dismiss="modal"], .btn-close');
+                closeButtons.forEach(btn => {
+                    btn.addEventListener('click', function handler() {
+                        libraryEl.classList.remove('show');
+                        libraryEl.style.display = 'none';
+                        libraryEl.setAttribute('aria-hidden', 'true');
+                        const b = document.getElementById('library-backdrop');
+                        if (b) b.remove();
+                        btn.removeEventListener('click', handler);
+                    });
+                });
+            } else {
+                console.debug('openLibrary: library element not found');
+            }
+        } catch (err) {
+            console.error('openLibrary error', err);
+        }
+
         loadLibrary();
     }
 
     async function addQuestionFromLibrary(id) {
+        if (!isEditMode) {
+            showToast('warning', 'Bật chế độ chỉnh sửa để thêm câu hỏi.');
+            return;
+        }
         try {
             const payload = {
                 maKhaoSat: surveyId,
@@ -308,13 +430,23 @@ $__mk = static function (string $base, string $path): string {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload),
             });
-            const json = await res.json();
+            console.debug('attach-question status', res.status, 'ct', res.headers.get('content-type'));
+            let json = null;
+            try {
+                json = await safeParseResponse(res);
+            } catch (parseErr) {
+                console.error('attach-question parse error', parseErr);
+                showToast('error', 'Lỗi phản hồi máy chủ khi thêm câu hỏi');
+                return;
+            }
             if (!res.ok || json.error) {
-                showToast('error', json.message || 'Không thể gắn câu hỏi');
+                showToast('error', json?.message || 'Không thể gắn câu hỏi');
                 return;
             }
             showToast('success', 'Đã thêm câu hỏi vào khảo sát');
-            loadQuestions();
+            if (typeof loadQuestions === 'function') loadQuestions();
+            else if (typeof loadSurvey === 'function') loadSurvey();
+            else location.reload();
         } catch (e) {
             console.error(e);
             showToast('error', 'Lỗi khi thêm câu hỏi');
@@ -378,10 +510,30 @@ $__mk = static function (string $base, string $path): string {
     }
 
     function openQuestionModal(id = null) {
+        if (!isEditMode) {
+            showToast('warning', 'Bật chế độ chỉnh sửa để thêm hoặc chỉnh sửa câu hỏi.');
+            return;
+        }
+
         document.getElementById('question-form').reset();
         questionIdInput.value = id ? id : '';
+
+        // Show modal (bootstrap preferred). Fallback to manual display.
         if (questionModal) {
             questionModal.show();
+        } else if (modalEl) {
+            const existing = document.getElementById('question-backdrop');
+            if (existing) existing.remove();
+
+            modalEl.classList.add('show');
+            modalEl.style.display = 'block';
+            modalEl.setAttribute('aria-modal', 'true');
+            modalEl.removeAttribute('aria-hidden');
+
+            const backdrop = document.createElement('div');
+            backdrop.className = 'modal-backdrop fade show';
+            backdrop.id = 'question-backdrop';
+            document.body.appendChild(backdrop);
         }
 
         if (id) {
@@ -420,6 +572,27 @@ $__mk = static function (string $base, string $path): string {
         questionTypeSelect.value = question.loaiCauHoi || 'single_choice';
         questionOrderInput.value = question.thuTu ?? 0;
         questionRequiredInput.checked = Boolean(question.batBuocTraLoi);
+        if (typeof questionQuickPollInput !== 'undefined' && questionQuickPollInput !== null) {
+            questionQuickPollInput.checked = Boolean(question.isQuickPoll || question.quick_poll);
+        }
+    }
+
+    async function safeParseResponse(res) {
+        const contentType = (res.headers.get('content-type') || '').toLowerCase();
+        if (contentType.includes('application/json')) {
+            try {
+                return await res.json();
+            } catch (err) {
+                const txt = await res.text().catch(() => '');
+                console.error('Failed to parse JSON response:', err, 'response text:', txt);
+                throw new Error('Invalid JSON response from server');
+            }
+        }
+        const txt = await res.text().catch(() => '');
+        if (res.ok) {
+            return { error: false, message: txt || '' };
+        }
+        throw new Error('Server error: ' + txt);
     }
 
     async function saveQuestion() {
@@ -434,6 +607,7 @@ $__mk = static function (string $base, string $path): string {
             noiDungCauHoi: content,
             loaiCauHoi: questionTypeSelect.value,
             batBuocTraLoi: questionRequiredInput.checked ? 1 : 0,
+            isQuickPoll: (typeof questionQuickPollInput !== 'undefined' && questionQuickPollInput !== null) ? (questionQuickPollInput.checked ? 1 : 0) : 0,
             thuTu: Number(questionOrderInput.value || 0),
         };
 
@@ -447,10 +621,18 @@ $__mk = static function (string $base, string $path): string {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload),
             });
-            const json = await res.json();
+            console.debug('saveQuestion status', res.status, 'ct', res.headers.get('content-type'));
+            let json = null;
+            try {
+                json = await safeParseResponse(res);
+            } catch (parseErr) {
+                console.error('saveQuestion parse error', parseErr);
+                showToast('error', 'Lỗi phản hồi máy chủ khi lưu câu hỏi');
+                return;
+            }
 
             if (!res.ok || json.error) {
-                showToast('error', json.message || 'Không thể lưu câu hỏi');
+                showToast('error', json?.message || 'Không thể lưu câu hỏi');
                 return;
             }
 
@@ -458,32 +640,58 @@ $__mk = static function (string $base, string $path): string {
                 questionModal.hide();
             }
             showToast('success', id ? 'Đã cập nhật câu hỏi' : 'Đã thêm câu hỏi');
-            loadQuestions();
+
+            if (typeof loadQuestions === 'function') loadQuestions();
+            else if (typeof loadSurvey === 'function') loadSurvey();
+            else location.reload();
         } catch (e) {
             console.error(e);
             showToast('error', 'Lỗi khi lưu câu hỏi');
         }
     }
 
-    async function deleteQuestion(id) {
-        if (!confirm('Bạn chắc muốn gỡ câu hỏi này khỏi khảo sát?')) return;
-        try {
-            const res = await fetch(apiUrl('/api/surveys/detach-question'), {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ maKhaoSat: surveyId, maCauHoi: id }),
-            });
-            const json = await res.json();
-            if (!res.ok || json.error) {
-                showToast('error', json.message || 'Không thể gỡ câu hỏi');
-                return;
-            }
-            showToast('success', 'Đã gỡ câu hỏi khỏi khảo sát');
-            loadQuestions();
-        } catch (e) {
-            console.error(e);
-            showToast('error', 'Lỗi khi gỡ câu hỏi');
+    function deleteQuestion(id) {
+        if (!isEditMode) {
+            showToast('warning', 'Bật chế độ chỉnh sửa để gỡ câu hỏi.');
+            return;
         }
+        ModalHelper.confirm({
+            title: 'Xác nhận gỡ câu hỏi',
+            message: 'Bạn chắc chắn muốn gỡ câu hỏi này khỏi khảo sát?',
+            type: 'warning',
+            confirmText: 'Gỡ',
+            cancelText: 'Hủy',
+            isDangerous: true,
+            onConfirm: async function () {
+                try {
+                    const res = await fetch(apiUrl('/api/surveys/detach-question'), {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ maKhaoSat: surveyId, maCauHoi: id }),
+                    });
+                    console.debug('detach-question status', res.status, 'ct', res.headers.get('content-type'));
+                    let json = null;
+                    try {
+                        json = await safeParseResponse(res);
+                    } catch (parseErr) {
+                        console.error('detach-question parse error', parseErr);
+                        showToast('error', 'Lỗi phản hồi máy chủ khi gỡ câu hỏi');
+                        return;
+                    }
+                    if (!res.ok || json.error) {
+                        showToast('error', json?.message || 'Không thể gỡ câu hỏi');
+                        return;
+                    }
+                    showToast('success', 'Đã gỡ câu hỏi khỏi khảo sát');
+                    if (typeof loadQuestions === 'function') loadQuestions();
+                    else if (typeof loadSurvey === 'function') loadSurvey();
+                    else location.reload();
+                } catch (e) {
+                    console.error(e);
+                    showToast('error', 'Lỗi khi gỡ câu hỏi');
+                }
+            }
+        });
     }
 
     function statusBadge(status) {

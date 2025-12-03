@@ -146,6 +146,7 @@
     </div>
 </div>
 
+<script src="/public/assets/js/modal-helper.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         let currentPage = 1;
@@ -320,9 +321,17 @@
             showToast('info', 'Tính năng đang phát triển: Gọi API tạo mới tại đây');
         };
         window.deleteSurvey = function(id) {
-            if(confirm('Bạn có chắc chắn muốn xóa khảo sát #' + id + '?')) {
-                showToast('info', 'Đã gửi yêu cầu xóa ' + id);
-            }
+            ModalHelper.confirm({
+                title: 'Xóa khảo sát',
+                message: 'Bạn có chắc chắn muốn xóa khảo sát #' + id + '?',
+                type: 'danger',
+                confirmText: 'Xóa',
+                cancelText: 'Hủy',
+                isDangerous: true,
+                onConfirm: function () {
+                    showToast('info', 'Đã gửi yêu cầu xóa ' + id);
+                }
+            });
         };
 
         // Init load

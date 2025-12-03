@@ -43,9 +43,6 @@ $urls = $urls ?? [];
                         <form id="login-form"
                             action="<?= htmlspecialchars(rtrim((string) ($baseUrl ?? ''), '/') . '/api/login', ENT_QUOTES, 'UTF-8') ?>"
                             method="post">
-                            <?php if (function_exists('csrf_field')) {
-                                echo csrf_field();
-                            } ?>
 
                             <!-- Tài khoản -->
                             <div class="form-group mb-3">

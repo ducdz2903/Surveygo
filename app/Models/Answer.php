@@ -10,9 +10,8 @@ use PDO;
 class Answer
 {
     private int $id;
-    private int $maCauHoi;
+    private int $idCauHoi;
     private string $noiDungCauTraLoi;
-    private bool $laDung;
     private string $createdAt;
     private string $updatedAt;
     private int $creatorId;
@@ -20,9 +19,9 @@ class Answer
     public function __construct(array $attributes)
     {
         $this->id = (int) ($attributes['id'] ?? 0);
-        $this->maCauHoi = (int) ($attributes['maCauHoi'] ?? 0);
+        // DB uses idCauHoi; accept legacy maCauHoi as fallback
+        $this->idCauHoi = isset($attributes['idCauHoi']) ? (int)$attributes['idCauHoi'] : (int)($attributes['maCauHoi'] ?? 0);
         $this->noiDungCauTraLoi = $attributes['noiDungCauTraLoi'] ?? '';
-        $this->laDung = (bool) ($attributes['laDung'] ?? false);
         $this->createdAt = $attributes['created_at'] ?? '';
         $this->updatedAt = $attributes['updated_at'] ?? '';
         $this->creatorId = (int) ($attributes['creator_id'] ?? 0);
@@ -50,7 +49,7 @@ class Answer
         /** @var PDO $db */
         $db = Container::get('db');
 
-        $statement = $db->prepare('SELECT * FROM answers WHERE maCauHoi = :questionId ORDER BY id ASC');
+        $statement = $db->prepare('SELECT * FROM answers WHERE idCauHoi = :questionId ORDER BY id ASC');
         $statement->execute([':questionId' => $questionId]);
         $rows = $statement->fetchAll();
 
@@ -80,25 +79,23 @@ class Answer
         /** @var PDO $db */
         $db = Container::get('db');
 
-        $maCauHoi = (int) ($data['maCauHoi'] ?? 0);
+        $idCauHoi = (int) ($data['idCauHoi'] ?? $data['maCauHoi'] ?? 0);
         $noiDungCauTraLoi = (string) ($data['noiDungCauTraLoi'] ?? '');
-        $laDung = (bool) ($data['laDung'] ?? false);
         $creatorId = (int) ($data['creator_id'] ?? 0);
 
-        if (!$maCauHoi || !$noiDungCauTraLoi) {
+        if (!$idCauHoi || !$noiDungCauTraLoi) {
             return null;
         }
 
         try {
             $statement = $db->prepare(
-                'INSERT INTO answers (maCauHoi, noiDungCauTraLoi, laDung, creator_id, created_at, updated_at) 
-                 VALUES (:maCauHoi, :noiDungCauTraLoi, :laDung, :creator_id, NOW(), NOW())'
+                'INSERT INTO answers (idCauHoi, noiDungCauTraLoi, creator_id, created_at, updated_at) 
+                 VALUES (:idCauHoi, :noiDungCauTraLoi, :creator_id, NOW(), NOW())'
             );
 
             $statement->execute([
-                ':maCauHoi' => $maCauHoi,
+                ':idCauHoi' => $idCauHoi,
                 ':noiDungCauTraLoi' => $noiDungCauTraLoi,
-                ':laDung' => $laDung ? 1 : 0,
                 ':creator_id' => $creatorId,
             ]);
 
@@ -125,9 +122,9 @@ class Answer
             $params[':noiDungCauTraLoi'] = $data['noiDungCauTraLoi'];
         }
 
-        if (isset($data['laDung'])) {
-            $updateFields[] = 'laDung = :laDung';
-            $params[':laDung'] = $data['laDung'] ? 1 : 0;
+        // no 'laDung' column in DB schema; only allow updating content or creator if needed
+        if (isset($data['noiDungCauTraLoi'])) {
+            // handled above
         }
 
         if (empty($updateFields)) {
@@ -166,17 +163,13 @@ class Answer
     {
         return $this->id;
     }
-    public function getMaCauHoi(): int
+    public function getIdCauHoi(): int
     {
-        return $this->maCauHoi;
+        return $this->idCauHoi;
     }
     public function getNoiDungCauTraLoi(): string
     {
         return $this->noiDungCauTraLoi;
-    }
-    public function isLaDung(): bool
-    {
-        return $this->laDung;
     }
     public function getCreatedAt(): string
     {
@@ -198,9 +191,8 @@ class Answer
     {
         return [
             'id' => $this->id,
-            'maCauHoi' => $this->maCauHoi,
+            'idCauHoi' => $this->idCauHoi,
             'noiDungCauTraLoi' => $this->noiDungCauTraLoi,
-            'laDung' => $this->laDung,
             'created_at' => $this->createdAt,
             'updated_at' => $this->updatedAt,
             'creator_id' => $this->creatorId,
