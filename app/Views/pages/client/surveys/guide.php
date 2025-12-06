@@ -132,7 +132,7 @@
                         </div>
                         <div class="info-item">
                             <div class="info-label">Số câu hỏi</div>
-                            <div class="info-value">${survey.soLuongCauHoi || 0}</div>
+                            <div class="info-value">${survey.questionCount || 0}</div>
                             <div class="text-muted">câu</div>
                         </div>
                         <div class="info-item">

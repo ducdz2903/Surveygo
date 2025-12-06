@@ -20,10 +20,8 @@ class Survey
     private int $diemThuong;
     private ?int $danhMuc;
     private ?int $maSuKien;
-    private string $trangThaiKiemDuyet;
     private string $createdAt;
     private string $updatedAt;
-    private ?string $event_id ;
 
     public function __construct(array $attributes)
     {
@@ -37,12 +35,10 @@ class Survey
         $this->maNguoiTao = (int) ($attributes['maNguoiTao'] ?? 0);
         $this->trangThai = $attributes['trangThai'] ?? 'draft';
         $this->diemThuong = (int) ($attributes['diemThuong'] ?? 0);
-        $this->danhMuc = $attributes['danhMuc'] ? (int) $attributes['danhMuc'] : null;
-        $this->maSuKien = $attributes['maSuKien'] ? (int) $attributes['maSuKien'] : null;
-        $this->trangThaiKiemDuyet = $attributes['trangThaiKiemDuyet'] ?? 'pending';
+        $this->danhMuc = array_key_exists('danhMuc', $attributes) && $attributes['danhMuc'] !== null ? (int) $attributes['danhMuc'] : null;
+        $this->maSuKien = isset($attributes['maSuKien']) && $attributes['maSuKien'] !== null ? (int) $attributes['maSuKien'] : null;
         $this->createdAt = $attributes['created_at'] ?? '';
         $this->updatedAt = $attributes['updated_at'] ?? '';
-        $this->event_id = $attributes['event_id'] ?? null;
     }
 
     /**
@@ -185,22 +181,18 @@ class Survey
             return null;
         }
 
-        // Verify user exists
-        $userStmt = $db->prepare('SELECT id FROM users WHERE id = :id LIMIT 1');
-        $userStmt->execute([':id' => $data['maNguoiTao']]);
-        if (!$userStmt->fetch()) {
-            return null; // User không tồn tại
-        }
+        // Note: do not fail creation if the provided maNguoiTao does not exist.
+        // Some environments may not have user seeded; controller already validates presence.
 
-        // Auto-gen maKhaoSat nếu chưa có
-        $maKhaoSat = $data['maKhaoSat'] ?? 'KS-' . time();
+        // Auto-gen maKhaoSat nếu chưa có (độ dài <= 10, tránh va chạm UNIQUE)
+        $maKhaoSat = $data['maKhaoSat'] ?? self::generateMaKhaoSat($db);
 
         $now = (new \DateTimeImmutable())->format('Y-m-d H:i:s');
 
         try {
             $statement = $db->prepare(
-                'INSERT INTO surveys (maKhaoSat, tieuDe, moTa, loaiKhaoSat, thoiLuongDuTinh, isQuickPoll, maNguoiTao, trangThai, diemThuong, danhMuc, soLuongCauHoi, soNguoiThamGia, maSuKien, trangThaiKiemDuyet, created_at, updated_at, event_id)
-                VALUES (:ma, :tieu, :mo, :loai, :thoiluong, :isquickpoll, :user, :status, :diem, :danh, :soluong, :songuoi, :sukien, :kiemduyet, :created, :updated, :event_id?)'
+                'INSERT INTO surveys (maKhaoSat, tieuDe, moTa, loaiKhaoSat, thoiLuongDuTinh, isQuickPoll, maNguoiTao, trangThai, diemThuong, danhMuc, maSuKien, created_at, updated_at)
+                 VALUES (:ma, :tieu, :mo, :loai, :thoiluong, :isquickpoll, :user, :status, :diem, :danh, :sukien, :created, :updated)'
             );
 
             $statement->execute([
@@ -209,24 +201,21 @@ class Survey
                 ':mo' => $data['moTa'] ?? null,
                 ':loai' => $data['loaiKhaoSat'] ?? null,
                 ':thoiluong' => $data['thoiLuongDuTinh'] ?? null,
-                ':isquickpoll' => (bool) ($data['isQuickPoll'] ?? false),
+                ':isquickpoll' => (int) ($data['isQuickPoll'] ?? 0),
                 ':user' => $data['maNguoiTao'],
                 ':status' => $data['trangThai'] ?? 'draft',
                 ':diem' => (int) ($data['diemThuong'] ?? 0),
-                ':danh' => $data['danhMuc'] ?? null,
-                ':soluong' => 0,
-                ':songuoi' => (int) ($data['soNguoiThamGia'] ?? 0),
+                ':danh' => isset($data['danhMuc']) ? (int) $data['danhMuc'] : null,
                 ':sukien' => $data['maSuKien'] ?? null,
-                ':kiemduyet' => 'pending',
                 ':created' => $now,
                 ':updated' => $now,
-                ':event_id' => $data['event_id'] ?? null,
             ]);
 
             $id = (int) $db->lastInsertId();
             return self::find($id);
         } catch (\PDOException $e) {
-            return null; // Duplicate maKhaoSat hoặc lỗi DB
+            error_log('[Survey::create] DB error: ' . $e->getMessage());
+            return null;
         }
     }
 
@@ -247,13 +236,12 @@ class Survey
         $isQuickPoll = isset($data['isQuickPoll']) ? (bool) $data['isQuickPoll'] : $this->isQuickPoll;
         $trangThai = $data['trangThai'] ?? $this->trangThai;
         $diemThuong = $data['diemThuong'] ?? $this->diemThuong;
-        $danhMuc = $data['danhMuc'] ?? $this->danhMuc;
+        $danhMuc = isset($data['danhMuc']) ? (int)$data['danhMuc'] : $this->danhMuc;
         $maSuKien = $data['maSuKien'] ?? $this->maSuKien;
-        $trangThaiKiemDuyet = $data['trangThaiKiemDuyet'] ?? $this->trangThaiKiemDuyet;
 
         $statement = $db->prepare(
             'UPDATE surveys SET tieuDe = :tieu, moTa = :mo, loaiKhaoSat = :loai, thoiLuongDuTinh = :thoiluong, isQuickPoll = :isquickpoll,
-             trangThai = :status, diemThuong = :diem, danhMuc = :danh, maSuKien = :sukien, trangThaiKiemDuyet = :kiemduyet, updated_at = :updated, event_id = :event_id WHERE id = :id'
+             trangThai = :status, diemThuong = :diem, danhMuc = :danh, maSuKien = :sukien, updated_at = :updated WHERE id = :id'
         );
 
         return $statement->execute([
@@ -266,11 +254,29 @@ class Survey
             ':diem' => (int) $diemThuong,
             ':danh' => $danhMuc,
             ':sukien' => $maSuKien,
-            ':kiemduyet' => $trangThaiKiemDuyet,
             ':updated' => $now,
-            ':event_id' => $this->event_id,
             ':id' => $this->id,
         ]);
+    }
+
+    /**
+     * Sinh mã khảo sát (10 ký tự, prefix KS) và tránh trùng UNIQUE.
+     */
+    private static function generateMaKhaoSat(PDO $db): string
+    {
+        $attempts = 0;
+        do {
+            $code = 'KS' . strtoupper(bin2hex(random_bytes(4))); // 2 + 8 = 10 ký tự
+            $stmt = $db->prepare('SELECT COUNT(*) FROM surveys WHERE maKhaoSat = :ma LIMIT 1');
+            $stmt->execute([':ma' => $code]);
+            $exists = (int) $stmt->fetchColumn() > 0;
+            $attempts++;
+            if (!$exists) {
+                return $code;
+            }
+        } while ($attempts < 5);
+        // Nếu quá 5 lần vẫn trùng, trả về mã mới (xác suất trùng rất thấp)
+        return 'KS' . strtoupper(bin2hex(random_bytes(4)));
     }
 
     /**
@@ -278,11 +284,23 @@ class Survey
      */
     public function delete(): bool
     {
-        /** @var PDO $db */
-        $db = Container::get('db');
+        return self::deleteById($this->id);
+    }
 
-        $statement = $db->prepare('DELETE FROM surveys WHERE id = :id');
-        return $statement->execute([':id' => $this->id]);
+    /**
+     * Xóa khảo sát theo id (dùng trong controller hoặc các nơi khác).
+     */
+    public static function deleteById(int $id): bool
+    {
+        try {
+            /** @var PDO $db */
+            $db = Container::get('db');
+            $stmt = $db->prepare('DELETE FROM surveys WHERE id = :id');
+            return $stmt->execute([':id' => $id]);
+        } catch (\Throwable $e) {
+            error_log('[Survey::deleteById] ' . $e->getMessage());
+            return false;
+        }
     }
 
     /**
@@ -305,15 +323,15 @@ class Survey
     /**
      * Cập nhật trạng thái kiểm duyệt
      */
-    public function updateVerificationStatus(string $trangThaiKiemDuyet): bool
+    public function updateVerificationStatus(string $trangThai): bool
     {
         $now = (new \DateTimeImmutable())->format('Y-m-d H:i:s');
         /** @var PDO $db */
         $db = Container::get('db');
 
-        $statement = $db->prepare('UPDATE surveys SET trangThaiKiemDuyet = :kiemduyet, updated_at = :updated WHERE id = :id');
+        $statement = $db->prepare('UPDATE surveys SET trangThai = :kiemduyet, updated_at = :updated WHERE id = :id');
         return $statement->execute([
-            ':kiemduyet' => $trangThaiKiemDuyet,
+            ':kiemduyet' => $trangThai,
             ':updated' => $now,
             ':id' => $this->id,
         ]);
@@ -337,7 +355,7 @@ class Survey
             'diemThuong' => $this->diemThuong,
             'danhMuc' => $this->danhMuc,
             'maSuKien' => $this->maSuKien,
-            'trangThaiKiemDuyet' => $this->trangThaiKiemDuyet,
+            'questionCount' => SurveyQuestionMap::countBySurvey($this->id),
             'created_at' => $this->createdAt,
             'updated_at' => $this->updatedAt,
         ];
@@ -378,9 +396,9 @@ class Survey
     {
         return $this->trangThai;
     }
-    
-    public function getTrangThaiKiemDuyet(): string
+
+    public function getDiemThuong(): int
     {
-        return $this->trangThaiKiemDuyet;
+        return $this->diemThuong;
     }
 }

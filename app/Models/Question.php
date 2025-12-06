@@ -16,6 +16,7 @@ class Question
     private string $noiDungCauHoi;
     private bool $batBuocTraLoi;
     private int $thuTu;
+    private bool $isQuickPoll;
     private string $createdAt;
     private string $updatedAt;
 
@@ -23,26 +24,16 @@ class Question
     {
         $this->id = (int)($attributes['id'] ?? 0);
         $this->maCauHoi = $attributes['maCauHoi'] ?? '';
-        $this->maKhaoSat = (int)($attributes['maKhaoSat'] ?? 0);
+        // legacy support: maKhaoSat may be provided by older code, but questions table no longer stores survey id
+        $this->maKhaoSat = isset($attributes['maKhaoSat']) ? (int)$attributes['maKhaoSat'] : 0;
         $this->loaiCauHoi = $attributes['loaiCauHoi'] ?? '';
         $this->noiDungCauHoi = $attributes['noiDungCauHoi'] ?? '';
         $this->batBuocTraLoi = (bool)($attributes['batBuocTraLoi'] ?? false);
-        $this->thuTu = (int)($attributes['thuTu'] ?? 0);
+        $this->thuTu = isset($attributes['thuTu']) ? (int)$attributes['thuTu'] : 0;
+        // quick_poll in DB (snake_case) or isQuickPoll in code may appear from different layers
+        $this->isQuickPoll = (bool)($attributes['quick_poll'] ?? $attributes['isQuickPoll'] ?? false);
         $this->createdAt = $attributes['created_at'] ?? '';
         $this->updatedAt = $attributes['updated_at'] ?? '';
-    }
-    /** 
-     * Lấy tất cả câu hỏi
-     */
-    public static function all(): array
-    {
-        /** @var PDO $db */
-        $db = Container::get('db');
-
-        $statement = $db->query('SELECT * FROM questions ORDER BY thuTu ASC');
-        $rows = $statement->fetchAll();
-
-        return array_map(fn($row) => new self($row), $rows);
     }
 
     public static function paginate(int $page = 1, int $perPage = 10, array $filters = []): array
@@ -52,45 +43,62 @@ class Question
 
         $offset = max(0, ($page - 1)) * $perPage;
 
-        $wheres = [];
         $params = [];
 
-        if (!empty($filters['search'])) {
-            $wheres[] = 'noiDungCauHoi LIKE :search';
-            $params[':search'] = '%' . $filters['search'] . '%';
-        }
-
-        if (!empty($filters['loaiCauHoi'])) {
-            $wheres[] = 'loaiCauHoi = :loai';
-            $params[':loai'] = $filters['loaiCauHoi'];
-        }
-
+        // If filtering by survey, use the map table join (survey_question_map uses idKhaoSat/idCauHoi)
         if (!empty($filters['maKhaoSat'])) {
-            $wheres[] = 'maKhaoSat = :surveyId';
-            $params[':surveyId'] = (int)$filters['maKhaoSat'];
-        }
+            $surveyId = (int)$filters['maKhaoSat'];
 
-        $whereSql = '';
-        if (!empty($wheres)) {
-            $whereSql = 'WHERE ' . implode(' AND ', $wheres);
-        }
+            // total count via map
+            $countSql = "SELECT COUNT(*) as cnt FROM survey_question_map sqm WHERE sqm.idKhaoSat = :surveyId";
+            $countStmt = $db->prepare($countSql);
+            $countStmt->execute([':surveyId' => $surveyId]);
+            $total = (int)$countStmt->fetchColumn();
 
-        // total count
-        $countSql = "SELECT COUNT(*) as cnt FROM questions $whereSql";
-        $countStmt = $db->prepare($countSql);
-        $countStmt->execute($params);
-        $total = (int)$countStmt->fetchColumn();
+            $sql = "SELECT q.* FROM survey_question_map sqm JOIN questions q ON q.id = sqm.idCauHoi
+                    WHERE sqm.idKhaoSat = :surveyId
+                    ORDER BY q.id ASC
+                    LIMIT :limit OFFSET :offset";
+            $stmt = $db->prepare($sql);
+            $stmt->bindValue(':surveyId', $surveyId, PDO::PARAM_INT);
+            $stmt->bindValue(':limit', (int)$perPage, PDO::PARAM_INT);
+            $stmt->bindValue(':offset', (int)$offset, PDO::PARAM_INT);
+            $stmt->execute();
+            $rows = $stmt->fetchAll();
+        } else {
+            $wheres = [];
+            if (!empty($filters['search'])) {
+                $wheres[] = 'noiDungCauHoi LIKE :search';
+                $params[':search'] = '%' . $filters['search'] . '%';
+            }
 
-        // fetch paginated rows
-        $sql = "SELECT * FROM questions $whereSql ORDER BY thuTu ASC LIMIT :limit OFFSET :offset";
-        $stmt = $db->prepare($sql);
-        foreach ($params as $k => $v) {
-            $stmt->bindValue($k, $v);
+            if (!empty($filters['loaiCauHoi'])) {
+                $wheres[] = 'loaiCauHoi = :loai';
+                $params[':loai'] = $filters['loaiCauHoi'];
+            }
+
+            $whereSql = '';
+            if (!empty($wheres)) {
+                $whereSql = 'WHERE ' . implode(' AND ', $wheres);
+            }
+
+            // total count
+            $countSql = "SELECT COUNT(*) as cnt FROM questions $whereSql";
+            $countStmt = $db->prepare($countSql);
+            $countStmt->execute($params);
+            $total = (int)$countStmt->fetchColumn();
+
+            // fetch paginated rows
+            $sql = "SELECT * FROM questions $whereSql ORDER BY id ASC LIMIT :limit OFFSET :offset";
+            $stmt = $db->prepare($sql);
+            foreach ($params as $k => $v) {
+                $stmt->bindValue($k, $v);
+            }
+            $stmt->bindValue(':limit', (int)$perPage, PDO::PARAM_INT);
+            $stmt->bindValue(':offset', (int)$offset, PDO::PARAM_INT);
+            $stmt->execute();
+            $rows = $stmt->fetchAll();
         }
-        $stmt->bindValue(':limit', (int)$perPage, PDO::PARAM_INT);
-        $stmt->bindValue(':offset', (int)$offset, PDO::PARAM_INT);
-        $stmt->execute();
-        $rows = $stmt->fetchAll();
 
         $data = array_map(fn($row) => new self($row), $rows);
 
@@ -108,21 +116,6 @@ class Question
     }
 
     /**
-     * Lấy tất cả câu hỏi của một khảo sát (sắp xếp theo thuTu)
-     */
-    public static function findBySurvey(int $surveyId): array
-    {
-        /** @var PDO $db */
-        $db = Container::get('db');
-
-        $statement = $db->prepare('SELECT * FROM questions WHERE maKhaoSat = :surveyId ORDER BY thuTu ASC');
-        $statement->execute([':surveyId' => $surveyId]);
-        $rows = $statement->fetchAll();
-
-        return array_map(fn($row) => new self($row), $rows);
-    }
-
-    /**
      * Lấy câu hỏi theo ID
      */
     public static function find(int $id): ?self
@@ -136,22 +129,6 @@ class Question
 
         return $row ? new self($row) : null;
     } 
-
-    /**
-     * Lấy câu hỏi theo maCauHoi
-     */
-    public static function findByMa(string $maCauHoi): ?self
-    {
-        /** @var PDO $db */
-        $db = Container::get('db');
-
-        $statement = $db->prepare('SELECT * FROM questions WHERE maCauHoi = :ma LIMIT 1');
-        $statement->execute([':ma' => $maCauHoi]);
-        $row = $statement->fetch();
-
-        return $row ? new self($row) : null;
-    }
-
     /**
      * Tạo câu hỏi mới
      * - Auto-gen maCauHoi nếu không cung cấp
@@ -164,15 +141,17 @@ class Question
         $db = Container::get('db');
 
         // Check required 
-        if (empty($data['noiDungCauHoi']) || empty($data['maKhaoSat']) || empty($data['loaiCauHoi'])) {
+        if (empty($data['noiDungCauHoi']) || empty($data['loaiCauHoi'])) {
             return null;
         }
 
-        // Kiểm tra khóa ngoại maKhaoSat
-        $surveyStmt = $db->prepare('SELECT id FROM surveys WHERE id = :id LIMIT 1');
-        $surveyStmt->execute([':id' => $data['maKhaoSat']]);
-        if (!$surveyStmt->fetch()) {
-            return null; // Survey không tồn tại
+        // Kiểm tra khóa ngoại maKhaoSat nếu cung cấp (chỉ để đảm bảo survey tồn tại khi frontend gửi mapping)
+        if (!empty($data['maKhaoSat'])) {
+            $surveyStmt = $db->prepare('SELECT id FROM surveys WHERE id = :id LIMIT 1');
+            $surveyStmt->execute([':id' => $data['maKhaoSat']]);
+            if (!$surveyStmt->fetch()) {
+                return null; // Survey không tồn tại
+            }
         }
 
         // Auto-gen maCauHoi nếu chưa có
@@ -181,18 +160,18 @@ class Question
         $now = (new \DateTimeImmutable())->format('Y-m-d H:i:s');
 
         try {
+            // questions table in schema stores quick_poll and does not contain survey id or thuTu
             $statement = $db->prepare(
-                'INSERT INTO questions (maCauHoi, maKhaoSat, loaiCauHoi, noiDungCauHoi, batBuocTraLoi, thuTu, created_at, updated_at)
-                VALUES (:ma, :surveyId, :loai, :noidung, :batbuoc, :thutu, :created, :updated)'
+                'INSERT INTO questions (maCauHoi, loaiCauHoi, noiDungCauHoi, batBuocTraLoi, quick_poll, created_at, updated_at)
+                VALUES (:ma, :loai, :noidung, :batbuoc, :quickpoll, :created, :updated)'
             );
 
             $statement->execute([
                 ':ma' => $maCauHoi,
-                ':surveyId' => $data['maKhaoSat'],
                 ':loai' => $data['loaiCauHoi'],
                 ':noidung' => $data['noiDungCauHoi'],
                 ':batbuoc' => (int)($data['batBuocTraLoi'] ?? false),
-                ':thutu' => (int)($data['thuTu'] ?? 0),
+                ':quickpoll' => (int)($data['isQuickPoll'] ?? $data['quick_poll'] ?? false),
                 ':created' => $now,
                 ':updated' => $now,
             ]);
@@ -217,17 +196,18 @@ class Question
         $loaiCauHoi = $data['loaiCauHoi'] ?? $this->loaiCauHoi;
         $noiDungCauHoi = $data['noiDungCauHoi'] ?? $this->noiDungCauHoi;
         $batBuocTraLoi = $data['batBuocTraLoi'] ?? $this->batBuocTraLoi;
+        $isQuickPoll = isset($data['isQuickPoll']) ? (bool)$data['isQuickPoll'] : (isset($data['quick_poll']) ? (bool)$data['quick_poll'] : $this->isQuickPoll);
         $thuTu = $data['thuTu'] ?? $this->thuTu;
 
         $statement = $db->prepare(
-            'UPDATE questions SET loaiCauHoi = :loai, noiDungCauHoi = :noidung, batBuocTraLoi = :batbuoc, thuTu = :thutu, updated_at = :updated WHERE id = :id'
+            'UPDATE questions SET loaiCauHoi = :loai, noiDungCauHoi = :noidung, batBuocTraLoi = :batbuoc, quick_poll = :quickpoll, updated_at = :updated WHERE id = :id'
         );
 
         return $statement->execute([
             ':loai' => $loaiCauHoi,
             ':noidung' => $noiDungCauHoi,
             ':batbuoc' => (int)$batBuocTraLoi,
-            ':thutu' => (int)$thuTu,
+            ':quickpoll' => $isQuickPoll ? 1 : 0,
             ':updated' => $now,
             ':id' => $this->id,
         ]);
@@ -255,28 +235,19 @@ class Question
         /** @var PDO $db */
         $db = Container::get('db');
 
-        $statement = $db->prepare('SELECT * FROM answers WHERE maCauHoi = :questionId ORDER BY id ASC');
+        // answers table uses idCauHoi as FK to questions.id
+        $statement = $db->prepare('SELECT * FROM answers WHERE idCauHoi = :questionId ORDER BY id ASC');
         $statement->execute([':questionId' => $this->id]);
         $rows = $statement->fetchAll();
 
         return array_map(fn($row) => [
             'id' => (int)$row['id'],
-            'maCauHoi' => (int)$row['maCauHoi'],
+            'idCauHoi' => (int)$row['idCauHoi'],
             'noiDungCauTraLoi' => $row['noiDungCauTraLoi'],
-            'laDung' => (bool)$row['laDung'],
+            'creator_id' => isset($row['creator_id']) ? (int)$row['creator_id'] : 0,
             'created_at' => $row['created_at'],
             'updated_at' => $row['updated_at'],
         ], $rows);
-    }
-    public static function countBySurvey(int $surveyId): int
-    {
-        /** @var PDO $db */
-        $db = Container::get('db');
-
-        $statement = $db->prepare('SELECT COUNT(*) as count FROM questions WHERE maKhaoSat = :surveyId');
-        $statement->execute([':surveyId' => $surveyId]);
-        $row = $statement->fetch();
-        return (int)$row['count'];
     }
 
     /**
@@ -292,6 +263,8 @@ class Question
             'noiDungCauHoi' => $this->noiDungCauHoi,
             'batBuocTraLoi' => $this->batBuocTraLoi,
             'thuTu' => $this->thuTu,
+            'isQuickPoll' => $this->isQuickPoll,
+            'quick_poll' => $this->isQuickPoll,
             'created_at' => $this->createdAt,
             'updated_at' => $this->updatedAt,
         ];
@@ -305,4 +278,5 @@ class Question
     public function getNoiDungCauHoi(): string { return $this->noiDungCauHoi; }
     public function isBatBuocTraLoi(): bool { return $this->batBuocTraLoi; }
     public function getThuTu(): int { return $this->thuTu; }
+    public function isQuickPoll(): bool { return $this->isQuickPoll; }
 }

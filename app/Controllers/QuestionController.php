@@ -8,6 +8,7 @@ use App\Core\Controller;
 use App\Core\Request;
 use App\Core\Container;
 use App\Models\Question;
+use App\Models\SurveyQuestionMap;
 use PDO;
 
 class QuestionController extends Controller
@@ -49,7 +50,7 @@ class QuestionController extends Controller
             ], 422);
         }
 
-        $questions = Question::findBySurvey((int)$surveyId);
+        $questions = SurveyQuestionMap::findQuestionsBySurvey($surveyId);
 
         return $this->json([
             'error' => false,
@@ -227,8 +228,8 @@ class QuestionController extends Controller
     {
         $errors = [];
 
-        if (empty($data['maKhaoSat']) || !is_numeric($data['maKhaoSat'])) {
-            $errors['maKhaoSat'] = 'Mã khảo sát là bắt buộc và phải là số.';
+        if (isset($data['maKhaoSat']) && $data['maKhaoSat'] !== '' && !is_numeric($data['maKhaoSat'])) {
+            $errors['maKhaoSat'] = 'M? kh?o s?t ph?i l? s? khi cung c?p.';
         }
 
         if (empty($data['loaiCauHoi'])) {

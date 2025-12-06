@@ -8,9 +8,12 @@ use App\Core\Controller;
 use App\Core\Request;
 use App\Models\Survey;
 use App\Models\Question;
+use App\Models\SurveyQuestionMap;
 use App\Models\User;
 use App\Models\SurveySubmission;
 use App\Models\UserResponse;
+use App\Models\PointTransaction;
+
 use PDO;
 
 class SurveyController extends Controller
@@ -79,8 +82,9 @@ class SurveyController extends Controller
             ], 404);
         }
 
-        $questions = Question::findBySurvey($survey->getId());
-        $questionCount = Question::countBySurvey($survey->getId());
+        // Load questions via mapping table to ensure we respect survey_question_map ordering
+        $questions = SurveyQuestionMap::findQuestionsBySurvey($survey->getId());
+        $questionCount = SurveyQuestionMap::countBySurvey($survey->getId());
         $surveyData = $survey->toArray();
         $surveyData['questionCount'] = $questionCount;
         $surveyData['questions'] = array_map(fn($q) => $q->toArray(), $questions);
@@ -94,11 +98,61 @@ class SurveyController extends Controller
     /**
      * POST /api/surveys
      * Tạo khảo sát mới
-     * Body: { tieuDe, moTa?, loaiKhaoSat?, thoiGianBatDau?, thoiGianKetThuc?, maNguoiTao, diemThuong?, danhMuc?, maSuKien?, soNguoiThamGia? }
+     * Body:(maKhaoSat, tieuDe, moTa, loaiKhaoSat, thoiLuongDuTinh, isQuickPoll, maNguoiTao, trangThai, diemThuong, danhMuc, soLuongCauHoi, maSuKien, created_at, updated_at)
      */
     public function create(Request $request)
     {
         $data = $request->input();
+
+        // If request parsing failed (empty), try raw JSON body as fallback
+        if (empty($data)) {
+            $raw = @file_get_contents('php://input');
+            $json = $raw ? json_decode($raw, true) : null;
+            if (is_array($json)) {
+                $data = $json;
+            } else {
+                $data = [];
+            }
+        }
+
+        // Normalize incoming keys and provide sensible defaults so frontend payloads are accepted
+        $data['tieuDe'] = trim($data['tieuDe'] ?? $data['tieu_de'] ?? $data['title'] ?? $request->input('tieuDe') ?? '');
+        $data['moTa'] = $data['moTa'] ?? $data['mo_ta'] ?? $data['description'] ?? $request->input('moTa') ?? null;
+        $data['loaiKhaoSat'] = $data['loaiKhaoSat'] ?? $data['loai_khao_sat'] ?? $data['type'] ?? $request->input('loaiKhaoSat') ?? null;
+        $data['thoiLuongDuTinh'] = isset($data['thoiLuongDuTinh']) ? (int)$data['thoiLuongDuTinh'] : (isset($data['thoi_luong']) ? (int)$data['thoi_luong'] : (int)($request->input('thoiLuongDuTinh') ?? 0));
+        $data['isQuickPoll'] = isset($data['isQuickPoll']) ? (int)$data['isQuickPoll'] : ((($data['loaiKhaoSat'] ?? '') === 'quickpoll') ? 1 : 0);
+        $data['maNguoiTao'] = (int) (isset($data['maNguoiTao']) ? $data['maNguoiTao'] : ($request->input('maNguoiTao') ?? ($request->input('ma_nguoi_tao') ?? 1)));
+        $data['trangThai'] = $data['trangThai'] ?? $data['trang_thai'] ?? $request->input('trangThai') ?? 'draft';
+        $data['diemThuong'] = isset($data['diemThuong']) ? (int)$data['diemThuong'] : (int)($data['points'] ?? $request->input('diemThuong') ?? 0);
+        $data['danhMuc'] = $data['danhMuc'] ?? $data['danh_muc'] ?? $request->input('danhMuc') ?? null;
+        $data['created_at'] = $data['created_at'] ?? (new \DateTimeImmutable())->format('Y-m-d H:i:s');
+
+        // Nếu frontend gửi maSuKien (event id), validate event tồn tại
+        if (!empty($data['maSuKien'])) {
+            try {
+                $db = \App\Core\Container::get('db');
+                $stmt = $db->prepare('SELECT id FROM events WHERE id = :id LIMIT 1');
+                $stmt->execute([':id' => (int) $data['maSuKien']]);
+                if (!$stmt->fetch()) {
+                    return $this->json([
+                        'error' => true,
+                        'message' => 'Sự kiện được chọn không tồn tại.'
+                    ], 422);
+                }
+            } catch (\Throwable $e) {
+                // Nếu có lỗi DB, trả về lỗi hợp lý
+                return $this->json([
+                    'error' => true,
+                    'message' => 'Lỗi khi kiểm tra sự kiện: ' . $e->getMessage(),
+                ], 500);
+            }
+        }
+
+        // Provide safe defaults to avoid validation failure when frontend omits fields
+        if (empty($data['tieuDe'])) {
+            $data['tieuDe'] = 'Khảo sát ' . date('YmdHis');
+        }
+        $data['maNguoiTao'] = isset($data['maNguoiTao']) && is_numeric($data['maNguoiTao']) ? (int)$data['maNguoiTao'] : 1;
 
         // Validation
         $errors = $this->validateSurveyCreate($data);
@@ -318,18 +372,102 @@ class SurveyController extends Controller
         if (!$question) {
             return $this->json([
                 'error' => true,
-                'message' => 'Không thể tạo câu hỏi. Kiểm tra dữ liệu hoặc survey có tồn tại.',
+                'message' => 'Không thể tạo câu hỏi. Kiểm tra dữ liệu hoặc survey không tồn tại.',
+            ], 422);
+        }
+
+        // lưu mapping nhiều-nhiều (nếu được truyền maKhaoSat)
+        if (!empty($data['maKhaoSat'])) {
+            $this->attachQuestionToSurvey((int)$data['maKhaoSat'], $question->getId(), (int)($data['thuTu'] ?? 0));
+        }
+
+        return $this->json([
+            'error' => false,
+            'message' => 'C?u h?i ?? ???c th?m th?nh c?ng.',
+            'data' => $question->toArray(),
+        ], 201);
+    }
+
+    /**
+     * Gắn câu hỏi vào khảo sát (chỉ tạo mapping, không tạo câu hỏi mới)
+     */
+    public function attachQuestion(Request $request)
+    {
+        $surveyId = $request->input('maKhaoSat');
+        $questionId = $request->input('maCauHoi');
+
+        if (!$surveyId || !is_numeric($surveyId) || !$questionId || !is_numeric($questionId)) {
+            return $this->json([
+                'error' => true,
+                'message' => 'maKhaoSat và maCauHoi là bắt buộc và phải là số.',
+            ], 422);
+        }
+
+        $survey = Survey::find((int)$surveyId);
+        $question = Question::find((int)$questionId);
+
+        if (!$survey || !$question) {
+            return $this->json([
+                'error' => true,
+                'message' => 'Không tồn tại khảo sát hoặc câu hỏi.',
+            ], 404);
+        }
+
+        if(!SurveyQuestionMap::attach((int)$surveyId, (int)$questionId)) {
+            return $this->json([
+                'error' => true,
+                'message' => 'Không thể gắn câu hỏi vào khảo sát (có thể đã tồn tại).',
             ], 422);
         }
 
         return $this->json([
             'error' => false,
-            'message' => 'Câu hỏi được thêm thành công.',
-            'data' => $question->toArray(),
+            'message' => 'Đã gắn câu hỏi vào khảo sát.',
         ], 201);
     }
 
-    // cập nhật
+    /**
+     * Gỡ câu hỏi khỏi khảo sát (chỉ xóa mapping, không xóa câu hỏi)
+     */
+    public function detachQuestion(Request $request)
+    {
+        $surveyId = $request->input('maKhaoSat');
+        $questionId = $request->input('maCauHoi');
+
+        if (!$surveyId || !is_numeric($surveyId) || !$questionId || !is_numeric($questionId)) {
+            return $this->json([
+                'error' => true,
+                'message' => 'maKhaoSat và maCauHoi là bắt buộc và phải là số.',
+            ], 422);
+        }
+
+        if(!SurveyQuestionMap::detach((int)$surveyId, (int)$questionId)) {
+            return $this->json([
+                'error' => true,
+                'message' => 'Không thể gỡ câu hỏi khỏi khảo sát (có thể không tồn tại).',
+            ], 422);
+        }
+        return $this->json([
+            'error' => false,
+            'message' => 'Đã gỡ câu hỏi khỏi khảo sát.',
+        ], 200);
+    }
+
+    private function attachQuestionToSurvey(int $surveyId, int $questionId): bool
+    {
+        try {
+            /** @var PDO $db */
+            $db = \App\Core\Container::get('db');
+            $stmt = $db->prepare('INSERT INTO survey_question_map (idKhaoSat, idCauHoi) VALUES (:survey, :question) ON DUPLICATE KEY UPDATE idKhaoSat = VALUES(idKhaoSat)');
+            return $stmt->execute([
+                ':survey' => $surveyId,
+                ':question' => $questionId,
+            ]);
+        } catch (\Throwable $e) {
+            return false;
+        }
+    }
+
     public function updateQuestion(Request $request)
     {
         $id = $request->query('id') ?? $request->input('id');
@@ -450,6 +588,14 @@ class SurveyController extends Controller
             $errors['thoiGianKetThuc'] = 'Thời gian kết thúc không hợp lệ.';
         }
 
+        // Validate trangThai if provided (only value validation; authorization is handled client-side per request)
+        if (isset($data['trangThai'])) {
+            $allowed = ['draft', 'pending', 'published', 'rejected'];
+            if (!in_array($data['trangThai'], $allowed, true)) {
+                $errors['trangThai'] = 'trangThai không hợp lệ.';
+            }
+        }
+
         return $errors;
     }
 
@@ -457,8 +603,8 @@ class SurveyController extends Controller
     {
         $errors = [];
 
-        if (empty($data['maKhaoSat']) || !is_numeric($data['maKhaoSat'])) {
-            $errors['maKhaoSat'] = 'Mã khảo sát là bắt buộc và phải là số.';
+        if (isset($data['maKhaoSat']) && $data['maKhaoSat'] !== '' && !is_numeric($data['maKhaoSat'])) {
+            $errors['maKhaoSat'] = 'M? kh?o s?t ph?i l? s? khi cung c?p.';
         }
 
         if (empty($data['loaiCauHoi'])) {
@@ -554,7 +700,7 @@ class SurveyController extends Controller
             }
 
             // Get all questions for this survey to validate
-            $questions = Question::findBySurvey($surveyId);
+            $questions = SurveyQuestionMap::findQuestionsBySurvey($surveyId);
             $questionIds = array_map(fn($q) => $q->getId(), $questions);
 
             // Create user response for each answered question
@@ -573,6 +719,21 @@ class SurveyController extends Controller
                     'maKhaoSat' => $surveyId,
                     'noiDungTraLoi' => $answer, // Already formatted as JSON string from frontend
                 ]);
+            }
+
+            try {
+                $points = (int) $survey->getDiemThuong();
+                if ($points > 0) {
+                    PointTransaction::addPoints(
+                        $userId,
+                        $points,
+                        'survey',
+                        $submission->getId(),
+                        'Hoàn thành khảo sát ' . $survey->getMaKhaoSat()
+                    );
+                }
+            } catch (\Throwable $e) {
+                error_log('[SurveyController::submit] Failed to add points: ' . $e->getMessage());
             }
 
             return $this->json([

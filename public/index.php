@@ -40,6 +40,7 @@ $router->get('/profile', [HomeController::class, 'profile']);
 $router->get('/admin', [AdminController::class, 'dashboard']);
 $router->get('/admin/dashboard', [AdminController::class, 'dashboard']);
 $router->get('/admin/surveys', [AdminController::class, 'surveys']);
+$router->get('/admin/surveys/view', [AdminController::class, 'surveyView']);
 $router->get('/admin/users', [AdminController::class, 'users']);
 $router->get('/admin/questions', [AdminController::class, 'questions']);
 $router->get('/admin/reports', [AdminController::class, 'reports']);
@@ -63,6 +64,8 @@ $router->put('/api/surveys', [App\Controllers\SurveyController::class, 'update']
 $router->delete('/api/surveys', [App\Controllers\SurveyController::class, 'delete']);
 $router->post('/api/surveys/publish', [App\Controllers\SurveyController::class, 'publish']);
 $router->post('/api/surveys/approve', [App\Controllers\SurveyController::class, 'approve']);
+$router->post('/api/surveys/attach-question', [App\Controllers\SurveyController::class, 'attachQuestion']);
+$router->post('/api/surveys/detach-question', [App\Controllers\SurveyController::class, 'detachQuestion']);
 $router->post('/api/surveys/{id}/submit', [App\Controllers\SurveyController::class, 'submit']); // Submit khảo sát
 $router->get('/api/surveys/{id}/check-submission', [App\Controllers\SurveyController::class, 'checkSubmission']); // Kiểm tra đã submit chưa
 

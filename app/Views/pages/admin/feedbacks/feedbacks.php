@@ -4,9 +4,6 @@
             <h4 class="mb-1">Quản lý Phản hồi</h4>
             <p class="text-muted mb-0">Xem và quản lý ý kiến đóng góp từ người dùng</p>
         </div>
-        <button class="btn btn-primary" onclick="openFeedbackModal()">
-            <i class="fas fa-plus me-2"></i>Thêm phản hồi
-        </button>
     </div>
 
     <div class="card mb-4 fade-in">
