@@ -451,6 +451,81 @@ $__mk = static function (string $base, string $path): string {
         const badge = statusBadge(status);
         statusEl.className = `badge ${badge.class}`;
         statusEl.textContent = badge.text;
+
+        // Admin-only status control (trust client-side per requirement)
+        try {
+            const raw = localStorage.getItem('app.user');
+            const user = raw ? JSON.parse(raw) : null;
+            if (user && user.role === 'admin') {
+                let sel = document.getElementById('survey-status-select');
+                if (!sel) {
+                    sel = document.createElement('select');
+                    sel.id = 'survey-status-select';
+                    sel.className = 'form-select form-select-sm ms-2 d-inline-block';
+                    sel.style.minWidth = '150px';
+                    const options = [
+                        ['draft', 'Nháp'],
+                        ['pending', 'Chờ duyệt'],
+                        ['published', 'Công bố'],
+                        ['rejected', 'Từ chối'],
+                    ];
+                    options.forEach(([val, label]) => {
+                        const opt = document.createElement('option');
+                        opt.value = val;
+                        opt.text = label;
+                        sel.appendChild(opt);
+                    });
+                    // append after status element
+                    statusEl.parentElement.appendChild(sel);
+
+                    sel.addEventListener('change', function () {
+                        const prev = status;
+                        const nv = sel.value;
+                        ModalHelper.confirm({
+                            title: 'Xác nhận đổi trạng thái',
+                            message: 'Xác nhận đổi trạng thái sang "' + sel.options[sel.selectedIndex].text + '"?',
+                            type: 'question',
+                            confirmText: 'Xác nhận',
+                            cancelText: 'Hủy',
+                            isDangerous: false,
+                            onConfirm: async function () {
+                                sel.disabled = true;
+                                try {
+                                    const res = await fetch(apiUrl(`/api/surveys?id=${surveyId}`), {
+                                        method: 'PUT',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({ trangThai: nv }),
+                                    });
+                                    const json = await safeParseResponse(res);
+                                    if (!res.ok || json.error) {
+                                        showToast('error', json?.message || 'Không thể cập nhật trạng thái');
+                                        sel.value = prev;
+                                    } else {
+                                        const newBadge = statusBadge((json.data?.trangThai || nv).toLowerCase());
+                                        statusEl.className = `badge ${newBadge.class}`;
+                                        statusEl.textContent = newBadge.text;
+                                        showToast('success', 'Đã cập nhật trạng thái');
+                                    }
+                                } catch (e) {
+                                    console.error(e);
+                                    showToast('error', 'Lỗi khi cập nhật trạng thái');
+                                    sel.value = prev;
+                                } finally {
+                                    sel.disabled = false;
+                                }
+                            },
+                            onCancel: function () {
+                                sel.value = prev;
+                            }
+                        });
+                    });
+                }
+                sel.value = status;
+            } else {
+                const existing = document.getElementById('survey-status-select');
+                if (existing) existing.remove();
+            }
+        } catch (e) { console.error(e); }
     }
 
     function renderQuestions(list) {

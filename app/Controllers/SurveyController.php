@@ -588,6 +588,14 @@ class SurveyController extends Controller
             $errors['thoiGianKetThuc'] = 'Thời gian kết thúc không hợp lệ.';
         }
 
+        // Validate trangThai if provided (only value validation; authorization is handled client-side per request)
+        if (isset($data['trangThai'])) {
+            $allowed = ['draft', 'pending', 'published', 'rejected'];
+            if (!in_array($data['trangThai'], $allowed, true)) {
+                $errors['trangThai'] = 'trangThai không hợp lệ.';
+            }
+        }
+
         return $errors;
     }
 
