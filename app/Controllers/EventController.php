@@ -63,4 +63,71 @@ class EventController extends Controller
             ],
         ]);
     }
+    public function spinLuckyWheel(Request $request)
+    {
+        $userId = (int) ($request->input('userId') ?? 0);
+
+        if ($userId <= 0) {
+            return $this->json([
+                'error' => true,
+                'message' => 'User ID is required.',
+            ], 422);
+        }
+
+        $user = User::findById($userId);
+        if (!$user) {
+            return $this->json([
+                'error' => true,
+                'message' => 'User not found.',
+            ], 404);
+        }
+
+        // Logic quay thưởng ngẫu nhiên
+        // Tỷ lệ: 10 điểm (40%), 20 điểm (30%), 50 điểm (20%), 100 điểm (5%), 200 điểm (3%), 500 điểm (2%)
+        $prizes = [
+            10 => 40,
+            20 => 30,
+            50 => 20,
+            100 => 5,
+            200 => 3,
+            500 => 2
+        ];
+
+        $rand = mt_rand(1, 100);
+        $points = 10; // Default
+        $cumulative = 0;
+
+        foreach ($prizes as $prize => $percent) {
+            $cumulative += $percent;
+            if ($rand <= $cumulative) {
+                $points = $prize;
+                break;
+            }
+        }
+
+        try {
+            $tx = \App\Models\PointTransaction::addPoints(
+                $userId,
+                $points,
+                'lucky_wheel',
+                null,
+                'Quay thưởng Lucky Wheel (' . date('Y-m-d H:i:s') . ')'
+            );
+
+            return $this->json([
+                'error' => false,
+                'message' => "Chúc mừng! Bạn nhận được {$points} điểm.",
+                'data' => [
+                    'points_added' => $points,
+                    'new_balance' => $tx->getBalanceAfter(),
+                ]
+            ]);
+
+        } catch (\Throwable $e) {
+            return $this->json([
+                'error' => true,
+                'message' => 'Lỗi hệ thống: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
 }

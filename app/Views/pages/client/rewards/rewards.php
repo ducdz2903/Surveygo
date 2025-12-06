@@ -318,13 +318,34 @@
             const raw = localStorage.getItem('app.user');
             if (raw) {
                 const user = JSON.parse(raw);
-                const points = user.points || 1250;
-                const money = (points / 1000).toLocaleString('vi-VN');
+                if (user && user.id) {
+                     // Fetch điểm thực tế từ API
+                    fetch(`/api/users/points?userId=${user.id}`)
+                        .then(res => res.json())
+                        .then(data => {
+                            if (!data.error) {
+                                const points = data.data.balance || 0;
+                                const money = (points / 1000).toLocaleString('vi-VN');
 
-                // Cập nhật tất cả các element hiển thị điểm
-                document.getElementById('total-points').textContent = points.toLocaleString('vi-VN');
-                document.getElementById('total-points-stat').textContent = points.toLocaleString('vi-VN');
-                document.getElementById('equivalent-money-stat').textContent = money;
+                                // Cập nhật tất cả các element hiển thị điểm
+                                if(document.getElementById('total-points')) 
+                                    document.getElementById('total-points').textContent = points.toLocaleString('vi-VN');
+                                if(document.getElementById('total-points-stat'))
+                                    document.getElementById('total-points-stat').textContent = points.toLocaleString('vi-VN');
+                                if(document.getElementById('equivalent-money-stat'))
+                                    document.getElementById('equivalent-money-stat').textContent = money;
+                            }
+                        })
+                        .catch(e => console.error('Error fetching points:', e));
+                } else if(user.points) {
+                    // Fallback to old data
+                    const points = user.points || 0;
+                     // Cập nhật tất cả các element hiển thị điểm
+                    if(document.getElementById('total-points')) 
+                        document.getElementById('total-points').textContent = points.toLocaleString('vi-VN');
+                    if(document.getElementById('total-points-stat'))
+                        document.getElementById('total-points-stat').textContent = points.toLocaleString('vi-VN');
+                }
             }
         } catch (e) {
             console.error('Error reading user data:', e);

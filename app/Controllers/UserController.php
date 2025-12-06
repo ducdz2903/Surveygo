@@ -69,4 +69,26 @@ class UserController extends Controller
             ],
         ]);
     }
+    public function getPoints(Request $request)
+    {
+        $userId = (int) ($request->query('userId') ?? $request->input('userId'));
+
+        if ($userId <= 0) {
+            return $this->json([
+                'error' => true,
+                'message' => 'User ID is required.',
+            ], 422);
+        }
+
+        $userPoints = \App\Models\UserPoint::findByUserId($userId);
+        $balance = $userPoints ? $userPoints->getBalance() : 0;
+
+        return $this->json([
+            'error' => false,
+            'data' => [
+                'userId' => $userId,
+                'balance' => $balance
+            ]
+        ]);
+    }
 }

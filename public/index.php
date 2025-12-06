@@ -77,6 +77,7 @@ $router->get('/api/questions/show', [App\Controllers\QuestionController::class, 
 
 // Events API
 $router->get('/api/events', [App\Controllers\EventController::class, 'index']); // Lấy danh sách sự kiện (phân trang + tìm kiếm)
+$router->post('/api/events/lucky-wheel/spin', [App\Controllers\EventController::class, 'spinLuckyWheel']); // Quay thưởng
 
 // Feedbacks API
 $router->get('/api/feedbacks', [App\Controllers\FeedbackController::class, 'index']);
@@ -102,6 +103,7 @@ $router->post('/api/daily-rewards/claim', [DailyRewardController::class, 'claim'
 
 // Users API
 $router->get('/api/users', [App\Controllers\UserController::class, 'index']); // Lấy danh sách users (phân trang + tìm kiếm)
+$router->get('/api/users/points', [App\Controllers\UserController::class, 'getPoints']); // Lấy điểm user
 
 
 $request = Request::capture();
