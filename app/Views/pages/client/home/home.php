@@ -12,7 +12,7 @@
                         <div class="points-label">Điểm hiện có</div>
                         <div class="points-value" id="user-points">1,250</div>
                     </div>
-                    <a href="/rewards" class="btn btn-outline-accent flex-shrink-0"> <i class="fas fa-gift me-2"></i>Đổi
+                    <a href="<?= rtrim($baseUrl, '/') ?>/rewards" class="btn btn-outline-accent flex-shrink-0"> <i class="fas fa-gift me-2"></i>Đổi
                         thưởng ngay
                     </a>
                 </div>
@@ -26,7 +26,7 @@
         <h2 class="section-title mb-4">Hành động nhanh</h2>
         <div class="row g-3 g-lg-4">
             <div class="col-md-4">
-                <a href="#" class="action-card">
+                <a href="<?= rtrim($baseUrl, '/') ?>/profile" class="action-card">
                     <div class="action-icon"
                         style="--icon-bg: var(--primary-color-soft); --icon-color: var(--primary-color);">
                         <i class="fas fa-user-edit"></i>
@@ -39,7 +39,7 @@
                 </a>
             </div>
             <div class="col-md-4">
-                <a href="#" class="action-card">
+                <a href="<?= rtrim($baseUrl, '/') ?>/daily-rewards" class="action-card">
                     <div class="action-icon"
                         style="--icon-bg: var(--success-color-soft); --icon-color: var(--success-color);">
                         <i class="fas fa-calendar-check"></i>
@@ -52,7 +52,7 @@
                 </a>
             </div>
             <div class="col-md-4">
-                <a href="#" class="action-card">
+                <a href="<?= rtrim($baseUrl, '/') ?>/events" class="action-card">
                     <div class="action-icon"
                         style="--icon-bg: var(--accent-color-soft); --icon-color: var(--accent-color);">
                         <i class="fas fa-users"></i>
