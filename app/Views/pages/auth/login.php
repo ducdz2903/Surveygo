@@ -26,58 +26,46 @@
                             <input type="email" class="form-control" id="email" name="email"
                                 placeholder="Nhập email hoặc số điện thoại của bạn" required autocomplete="email">
                         </div>
-
-                        <form id="login-form"
-                            action="<?= htmlspecialchars(rtrim((string) ($baseUrl ?? ''), '/') . '/api/login', ENT_QUOTES, 'UTF-8') ?>"
-                            method="post">
-
-                            <!-- Tài khoản -->
-                            <div class="form-group mb-3">
-                                <label for="email" class="form-label">
-                                    <i class="fas fa-envelope me-2"></i>Tài khoản
-                                </label>
-                                <input type="email" class="form-control" id="email" name="email"
-                                    placeholder="Nhập email hoặc số điện thoại của bạn" required autocomplete="email">
-                                <!-- Mật khẩu -->
-                                <div class="form-group mb-3">
-                                    <label for="password" class="form-label">
-                                        <i class="fas fa-lock me-2"></i>Mật khẩu
-                                    </label>
-                                    <div class="password-wrapper">
-                                        <input type="password" class="form-control" id="password" name="password"
-                                            placeholder="Nhập mật khẩu" required autocomplete="current-password">
-                                        <button type="button" class="password-toggle" onclick="togglePassword()">
-                                            <i class="fas fa-eye" id="toggleIcon"></i>
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <!-- Ghi nhớ & Quên mật khẩu -->
-                                <div class="d-flex justify-content-between align-items-center mb-4">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" id="remember" name="remember">
-                                        <label class="form-check-label" for="remember">
-                                            Ghi nhớ đăng nhập
-                                        </label>
-                                    </div>
-                                    <a href="#" class="forgot-link">Quên mật khẩu?</a>
-                                </div>
-
-                                <!-- Nút đăng nhập -->
-                                <button type="submit" class="btn btn-gradient w-100 mb-3">
-                                    <i class="fas fa-sign-in-alt me-2"></i>Đăng nhập
+                        <!-- Mật khẩu -->
+                        <div class="form-group mb-3">
+                            <label for="password" class="form-label">
+                                <i class="fas fa-lock me-2"></i>Mật khẩu
+                            </label>
+                            <div class="password-wrapper">
+                                <input type="password" class="form-control" id="password" name="password"
+                                    placeholder="Nhập mật khẩu" required autocomplete="current-password">
+                                <button type="button" class="password-toggle" onclick="togglePassword()">
+                                    <i class="fas fa-eye" id="toggleIcon"></i>
                                 </button>
-
-                                <!-- Form feedback -->
-                                <div class="form-feedback mt-3" id="login-feedback"></div>
-                        </form>
-
-                        <!-- Liên kết đăng ký -->
-                        <div class="text-center mt-4">
-                            <p class="mb-0 small">Chưa có tài khoản? <a
-                                    href="<?= htmlspecialchars($urls['register'] ?? '/register', ENT_QUOTES, 'UTF-8') ?>"
-                                    class="signup-link">Đăng ký ngay</a></p>
+                            </div>
                         </div>
+
+                        <!-- Ghi nhớ & Quên mật khẩu -->
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="remember" name="remember">
+                                <label class="form-check-label" for="remember">
+                                    Ghi nhớ đăng nhập
+                                </label>
+                            </div>
+                            <a href="#" class="forgot-link">Quên mật khẩu?</a>
+                        </div>
+
+                        <!-- Nút đăng nhập -->
+                        <button type="submit" class="btn btn-gradient w-100 mb-3">
+                            <i class="fas fa-sign-in-alt me-2"></i>Đăng nhập
+                        </button>
+
+                        <!-- Form feedback -->
+                        <div class="form-feedback mt-3" id="login-feedback"></div>
+                    </form>
+
+                    <!-- Liên kết đăng ký -->
+                    <div class="text-center mt-4">
+                        <p class="mb-0 small">Chưa có tài khoản? <a
+                                href="<?= htmlspecialchars($urls['register'] ?? '/register', ENT_QUOTES, 'UTF-8') ?>"
+                                class="signup-link">Đăng ký ngay</a></p>
+                    </div>
                 </div>
             </div>
         </div>
