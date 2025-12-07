@@ -126,14 +126,15 @@ $userData = [
                             <i class="fas fa-ticket"></i>
                         </div>
                         <h4 class="card-title">Rút Thăm May Mắn</h4>
-                        <p class="card-desc">Bạn có <strong>3</strong> lượt quay miễn phí. Thử vận may ngay!</p>
-                        <a href="#" class="btn btn-secondary-accent w-100" id="btn-lucky-draw-spin">Quay Ngay</a>
+                        <p class="card-desc">Bạn có <strong id="remaining-spins">3</strong> lượt quay miễn phí. Thử vận may ngay!</p>
+                        <button type="button" class="btn btn-secondary-accent w-100" id="quay-ngay-btn">Quay Ngay</button>
                     </div>
 
                     <script>
                         document.addEventListener('DOMContentLoaded', function() {
-                            const spinBtn = document.getElementById('btn-lucky-draw-spin');
+                            const spinBtn = document.getElementById('quay-ngay-btn');
                             const pointsDisplay = document.getElementById('user-points-display');
+                            const remainingSpinsDisplay = document.getElementById('remaining-spins');
                             
                             // Lấy user từ localStorage
                             let user = null;
@@ -144,7 +145,7 @@ $userData = [
                                 console.error("Lỗi đọc user từ localStorage", e);
                             }
 
-                            // function fetch points
+                            // Fetch points từ API
                             function fetchPoints() {
                                 if (user && user.id && pointsDisplay) {
                                     fetch(`/api/users/points?userId=${user.id}`)
@@ -158,23 +159,47 @@ $userData = [
                                 }
                             }
 
+                            // Fetch số lượt quay còn lại từ backend
+                            function fetchRemainingSpins() {
+                                if (user && user.id && remainingSpinsDisplay) {
+                                    // TODO: Tạo API endpoint để lấy số lượt còn lại
+                                    // Tạm thời hardcode là 3 lượt
+                                    remainingSpinsDisplay.textContent = '3';
+                                }
+                            }
+
                             // Fetch ngay khi load
                             fetchPoints();
+                            fetchRemainingSpins();
 
+                            // Xử lý click nút "Quay Ngay" - Hiển thị modal xác suất
                             if (spinBtn) {
-                                spinBtn.addEventListener('click', function(e) {
-                                    e.preventDefault();
-
+                                spinBtn.addEventListener('click', function() {
                                     if (!user || !user.id) {
                                         alert("Bạn cần đăng nhập để quay thưởng!");
                                         window.location.href = '/login';
                                         return;
                                     }
+                                    
+                                    // Hiển thị modal xác suất
+                                    var modal = new bootstrap.Modal(document.getElementById('probabilitiesModal'));
+                                    modal.show();
+                                });
+                            }
 
+                            // Xử lý click "Xác nhận quay" trong modal
+                            const confirmSpinBtn = document.getElementById('confirmSpin');
+                            if (confirmSpinBtn) {
+                                confirmSpinBtn.addEventListener('click', function() {
                                     // Disable nút để tránh spam
-                                    spinBtn.classList.add('disabled');
-                                    spinBtn.textContent = 'Đang quay...';
+                                    confirmSpinBtn.disabled = true;
+                                    confirmSpinBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Đang quay...';
 
+                                    // Đóng modal xác suất
+                                    var probModal = bootstrap.Modal.getInstance(document.getElementById('probabilitiesModal'));
+                                    probModal.hide();
+
+                                    // Gọi API backend để quay thưởng
                                     fetch('/api/events/lucky-wheel/spin', {
                                             method: 'POST',
                                             headers: {
@@ -187,24 +212,47 @@ $userData = [
                                         .then(response => response.json())
                                         .then(data => {
                                             if (data.error) {
-                                                alert(data.message);
+                                                // Hiển thị lỗi trong modal result
+                                                document.getElementById('resultMessage').innerHTML = 
+                                                    '<i class="fas fa-exclamation-circle text-danger me-2"></i>' + data.message;
                                             } else {
-                                                alert(data.message);
+                                                // Hiển thị kết quả thành công
+                                                const pointsAdded = data.data.points_added || 0;
+                                                document.getElementById('resultMessage').innerHTML = 
+                                                    '<i class="fas fa-gift text-success me-2" style="font-size: 2rem;"></i><br>' +
+                                                    '<strong style="font-size: 1.5rem; color: var(--primary-color);">' + pointsAdded + ' điểm!</strong><br>' +
+                                                    '<span class="text-muted">Số dư mới: ' + (data.data.new_balance || '---') + ' điểm</span>';
+                                                
                                                 // Cập nhật điểm hiển thị
                                                 if(data.data && data.data.new_balance !== undefined) {
                                                     if(pointsDisplay) pointsDisplay.textContent = data.data.new_balance;
                                                 } else {
                                                     fetchPoints(); // Fallback
                                                 }
+
+                                                // Cập nhật số lượt còn lại
+                                                if (remainingSpinsDisplay) {
+                                                    const current = parseInt(remainingSpinsDisplay.textContent) || 0;
+                                                    remainingSpinsDisplay.textContent = Math.max(0, current - 1);
+                                                }
                                             }
+
+                                            // Hiển thị modal kết quả
+                                            var resultModal = new bootstrap.Modal(document.getElementById('resultModal'));
+                                            resultModal.show();
                                         })
                                         .catch(err => {
                                             console.error(err);
-                                            alert("Có lỗi xảy ra, vui lòng thử lại sau.");
+                                            document.getElementById('resultMessage').innerHTML = 
+                                                '<i class="fas fa-times-circle text-danger me-2"></i>Có lỗi xảy ra, vui lòng thử lại sau.';
+                                            
+                                            var resultModal = new bootstrap.Modal(document.getElementById('resultModal'));
+                                            resultModal.show();
                                         })
                                         .finally(() => {
-                                            spinBtn.classList.remove('disabled');
-                                            spinBtn.textContent = 'Quay Ngay';
+                                            // Enable lại nút
+                                            confirmSpinBtn.disabled = false;
+                                            confirmSpinBtn.innerHTML = 'Xác nhận quay';
                                         });
                                 });
                             }
@@ -222,6 +270,136 @@ $userData = [
                 </div>
             </div>
 
+        </div>
+    </div>
+
+    <!-- Custom Modal Styles -->
+    <style>
+        .custom-modal .modal-dialog {
+            display: flex;
+            align-items: center;
+            min-height: calc(100vh - 1rem);
+        }
+        .custom-modal .modal-content {
+            background: var(--hub-card-bg, white);
+            border: 1px solid var(--hub-card-border, #e2e8f0);
+            border-radius: 16px;
+            box-shadow: var(--hub-card-shadow, 0 4px 20px rgba(0, 0, 0, 0.08));
+            color: var(--hub-text-primary, #1e293b);
+        }
+        .custom-modal .modal-header {
+            border-bottom: 1px solid var(--hub-card-border, #e2e8f0);
+            padding: 1.5rem;
+        }
+        .custom-modal .modal-body {
+            padding: 1.5rem;
+        }
+        .custom-modal .modal-body ul {
+            list-style: none;
+            padding: 0;
+        }
+        .custom-modal .modal-body li {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--hub-card-border, #e2e8f0);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .custom-modal .modal-body li:last-child {
+            border-bottom: none;
+        }
+        .custom-modal .modal-footer {
+            border-top: 1px solid var(--hub-card-border, #e2e8f0);
+            padding: 1.5rem;
+        }
+        .custom-modal .btn {
+            border-radius: 8px;
+            font-weight: 600;
+        }
+        .custom-modal .prize-badge {
+            background: var(--primary-color);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+    </style>
+
+    <!-- Modal hiển thị xác suất nhận thưởng -->
+    <div class="modal fade custom-modal" id="probabilitiesModal" tabindex="-1" aria-labelledby="probabilitiesModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="probabilitiesModalLabel">
+                        <i class="fas fa-gift me-2"></i>Xác suất nhận thưởng
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted mb-3">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Tỷ lệ trúng thưởng cho mỗi giải:
+                    </p>
+                    <ul>
+                        <li>
+                            <span><strong>10 điểm:</strong></span>
+                            <span class="prize-badge">40%</span>
+                        </li>
+                        <li>
+                            <span><strong>20 điểm:</strong></span>
+                            <span class="prize-badge">30%</span>
+                        </li>
+                        <li>
+                            <span><strong>50 điểm:</strong></span>
+                            <span class="prize-badge">20%</span>
+                        </li>
+                        <li>
+                            <span><strong>100 điểm:</strong></span>
+                            <span class="prize-badge">5%</span>
+                        </li>
+                        <li>
+                            <span><strong>200 điểm:</strong></span>
+                            <span class="prize-badge">3%</span>
+                        </li>
+                        <li>
+                            <span><strong>500 điểm:</strong></span>
+                            <span class="prize-badge">2%</span>
+                        </li>
+                    </ul>
+                    <p class="text-muted mt-3 mb-0" style="font-size: 0.875rem;">
+                        💡 Điểm trung bình mỗi lần quay: <strong>~41 điểm</strong>
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-primary-gradient" id="confirmSpin">
+                        <i class="fas fa-play-circle me-1"></i>Xác nhận quay
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal hiển thị kết quả -->
+    <div class="modal fade custom-modal" id="resultModal" tabindex="-1" aria-labelledby="resultModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="resultModalLabel">
+                        <i class="fas fa-trophy me-2"></i>Kết quả quay thưởng
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center py-4">
+                    <p id="resultMessage" class="mb-0 fs-5"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary-gradient w-100" data-bs-dismiss="modal">
+                        <i class="fas fa-check-circle me-1"></i>Nhận điểm
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 </main>
