@@ -5,6 +5,8 @@
         
         container = document.createElement('div');
         container.id = 'global-toast-container';
+        container.className = 'position-fixed top-0 end-0 p-3 mt-3';
+        container.style.zIndex = 1080;
         container.setAttribute('aria-live', 'polite');
         container.setAttribute('aria-atomic', 'true');
         

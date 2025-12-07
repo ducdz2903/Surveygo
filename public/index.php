@@ -85,6 +85,7 @@ $router->get('/api/events', [App\Controllers\EventController::class, 'index']); 
 $router->get('/api/feedbacks', [App\Controllers\FeedbackController::class, 'index']);
 $router->get('/api/feedbacks/show', [App\Controllers\FeedbackController::class, 'show']);
 $router->post('/api/feedbacks', [App\Controllers\FeedbackController::class, 'create']);
+$router->post('/api/feedbacks/submit', [App\Controllers\FeedbackController::class, 'submit']);
 $router->put('/api/feedbacks', [App\Controllers\FeedbackController::class, 'update']);
 $router->delete('/api/feedbacks', [App\Controllers\FeedbackController::class, 'delete']);
 

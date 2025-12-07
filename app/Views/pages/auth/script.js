@@ -2,11 +2,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // Handle Login Form
   const loginForm = document.getElementById('login-form');
   if (loginForm) {
-    const feedback = document.getElementById('login-feedback');
     const submitBtn = loginForm.querySelector('button[type="submit"]');
 
     const showMsg = (msg, type = 'danger') => {
-      // Map bootstrap alert types to toast statuses
       const mapTypeToStatus = (t) => {
         switch ((t || '').toLowerCase()) {
           case 'success': return 'success';
@@ -17,25 +15,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       };
 
-      // Prefer toasts; do not write inline feedback under the form
-      try {
-        if (typeof window.showToast === 'function') {
-          showToast(mapTypeToStatus(type), msg);
-        }
-      } catch (e) {
-        // ignore
-      }
+      window.ToastHelper?.show(mapTypeToStatus(type), msg);
     };
 
     loginForm.addEventListener('submit', async (e) => {
-      // If no fetch available, let the default form POST happen
       if (typeof window.fetch !== 'function') return;
       e.preventDefault();
 
       try {
         submitBtn && (submitBtn.disabled = true);
-        showToast('info', 'Đang đăng nhập...');
-
         const formData = new FormData(loginForm);
         const payload = new URLSearchParams();
         formData.forEach((v, k) => payload.append(k, v));
@@ -50,24 +38,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (!res.ok || data.error) {
           const msg = data.message || 'Đăng nhập thất bại.';
-          showToast('error', msg);
+          window.ToastHelper?.show('error', msg);
           return;
         }
 
-        // Persist lightweight user info for personalization
         try {
-          if (data && data.data && data.data.user) {
+          if (data?.data?.user) {
             localStorage.setItem('app.user', JSON.stringify(data.data.user));
           }
-        } catch (_) { }
+        } catch (_) {}
 
-        showToast('success', 'Đăng nhập thành công. Đang chuyển hướng...');
-        // Redirect to /home
+        window.ToastHelper?.show('success', 'Đăng nhập thành công. Đang chuyển hướng...');
         setTimeout(() => {
           window.location.href = '/home';
         }, 1000);
       } catch (err) {
-        showToast('error', 'Có lỗi xảy ra. Vui lòng thử lại.');
+        window.ToastHelper?.show('error', 'Có lỗi xảy ra. Vui lòng thử lại.');
       } finally {
         submitBtn && (submitBtn.disabled = false);
       }
@@ -77,47 +63,36 @@ document.addEventListener('DOMContentLoaded', () => {
   // Handle Register Form
   const registerForm = document.getElementById('register-form');
   if (registerForm) {
-    const feedback = document.getElementById('register-feedback');
     const submitBtn = registerForm.querySelector('button[type="submit"]');
 
     const showMsg = (msg, type = 'danger') => {
-      // Use toast if available; do not write inline feedback under the form
-      try {
-        if (typeof window.showToast === 'function') {
-          // map register alert types to toast statuses
-          const mapTypeToStatus = (t) => {
-            switch ((t || '').toLowerCase()) {
-              case 'success': return 'success';
-              case 'info': return 'info';
-              case 'warning': return 'warning';
-              case 'danger': return 'error';
-              default: return 'info';
-            }
-          };
-          showToast(mapTypeToStatus(type), msg);
+      const mapTypeToStatus = (t) => {
+        switch ((t || '').toLowerCase()) {
+          case 'success': return 'success';
+          case 'info': return 'info';
+          case 'warning': return 'warning';
+          case 'danger': return 'error';
+          default: return 'info';
         }
-      } catch (e) {
-        // ignore
-      }
+      };
+
+      window.ToastHelper?.show(mapTypeToStatus(type), msg);
     };
 
     registerForm.addEventListener('submit', async (e) => {
-      // If no fetch available, let the default form POST happen
       if (typeof window.fetch !== 'function') return;
       e.preventDefault();
 
       try {
         submitBtn && (submitBtn.disabled = true);
-        showToast('info', 'Đang đăng ký...');
+        window.ToastHelper?.show('info', 'Đang đăng ký...');
 
         const formData = new FormData(registerForm);
-
-        // Validate password match
         const password = formData.get('password');
         const confirmPassword = document.getElementById('confirm-password').value;
 
         if (password !== confirmPassword) {
-          showToast('error', 'Mật khẩu không khớp.');
+          window.ToastHelper?.show('error', 'Mật khẩu không khớp.');
           return;
         }
 
@@ -138,18 +113,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (!res.ok || data.error) {
           const msg = data.message || 'Đăng ký thất bại.';
-          showToast('error', msg);
+          window.ToastHelper?.show('error', msg);
           return;
         }
+
         try {
           localStorage.removeItem('app.user');
-        } catch (_) { }
+        } catch (_) {}
+
+        window.ToastHelper?.show('success', 'Đăng ký thành công! Đang chuyển hướng...');
 
         setTimeout(() => {
           window.location.href = '/login';
         }, 300);
       } catch (err) {
-        showToast('error', 'Có lỗi xảy ra. Vui lòng thử lại.');
+        window.ToastHelper?.show('error', 'Có lỗi xảy ra. Vui lòng thử lại.');
       } finally {
         submitBtn && (submitBtn.disabled = false);
       }
