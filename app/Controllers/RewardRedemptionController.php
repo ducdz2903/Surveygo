@@ -24,6 +24,15 @@ class RewardRedemptionController extends Controller
     }
 
     /**
+     * Hiển thị trang quản lý redemptions (admin)
+     */
+    public function adminIndex(Request $request)
+    {
+        $admin = new AdminController();
+        return $admin->redemptions($request);
+    }
+
+    /**
      * Lấy danh sách redemption của user (client)
      */
     public function myRedemptions(Request $request)
@@ -167,12 +176,11 @@ class RewardRedemptionController extends Controller
     /**
      * Cập nhật status redemption (admin)
      */
-    public function updateStatus()
+    public function updateStatus(Request $request)
     {
-        $request = new Request();
-        $id = (int)($request->post('id') ?? 0);
-        $status = $request->post('status');
-        $note = $request->post('note');
+        $id = (int)($request->input('id') ?? 0);
+        $status = $request->input('status');
+        $note = $request->input('note');
 
         if (!$id || !$status) {
             return Response::json(['success' => false, 'message' => 'Invalid request'], 400);
@@ -271,13 +279,12 @@ class RewardRedemptionController extends Controller
     /**
      * Danh sách redemption (admin)
      */
-    public function apiList()
+    public function apiList(Request $request)
     {
-        $request = new Request();
-        $page = (int)($request->get('page') ?? 1);
-        $status = $request->get('status');
-        $userId = $request->get('user_id');
-        $limit = 20;
+        $page = (int)($request->query('page') ?? 1);
+        $status = $request->query('status');
+        $userId = $request->query('user_id');
+        $limit = 10;
         $offset = ($page - 1) * $limit;
 
         $filters = [];
@@ -291,8 +298,8 @@ class RewardRedemptionController extends Controller
             'success' => true,
             'data' => $redemptions,
             'pagination' => [
-                'page' => $page,
-                'limit' => $limit,
+                'current_page' => $page,
+                'per_page' => $limit,
                 'total' => $total,
                 'pages' => ceil($total / $limit)
             ]
@@ -342,5 +349,44 @@ class RewardRedemptionController extends Controller
         }
 
         return null;
+    }
+
+    /**
+     * Kiểm tra quyền admin
+     */
+    private function requireAdmin()
+    {
+        $user = $_SESSION['user'] ?? null;
+        if (!$user || $user['role'] !== 'admin') {
+            http_response_code(403);
+            die('Bạn không có quyền truy cập');
+        }
+    }
+
+    private function pageData(Request $request): array
+    {
+        $config = \App\Core\Container::get('config');
+        $appName = (string) ($config['app']['name'] ?? 'Surveygo Admin');
+
+        $baseUrl = '';
+        $scheme = $request->server('REQUEST_SCHEME') ?: ($request->server('HTTPS') === 'on' ? 'https' : 'http');
+        $host = $request->server('HTTP_HOST');
+        if ($host) {
+            $baseUrl = $scheme . '://' . $host;
+        }
+
+        $currentPath = $request->server('REQUEST_URI') ?: '/';
+
+        return [
+            'appName' => $appName,
+            'baseUrl' => $baseUrl,
+            'currentPath' => $currentPath,
+            'urls' => [
+                'home' => $baseUrl . '/',
+                'admin' => $baseUrl . '/admin',
+                'dashboard' => $baseUrl . '/admin/dashboard',
+                'login' => $baseUrl . '/login',
+            ],
+        ];
     }
 }

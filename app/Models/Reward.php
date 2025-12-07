@@ -372,4 +372,16 @@ class Reward
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
         return $result ?: null;
     }
+
+    /**
+     * Đếm tổng số phần thưởng
+     */
+    public function countActive()
+    {
+        $query = "SELECT COUNT(*) as total FROM {$this->table}";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute();
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return (int)($result['total'] ?? 0);
+    }
 }

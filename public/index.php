@@ -121,10 +121,15 @@ $router->get('/admin/rewards/create', [RewardController::class, 'adminCreate']);
 $router->post('/admin/rewards/create', [RewardController::class, 'adminCreate']); // Lưu quà
 $router->get('/admin/rewards/{id}/edit', [RewardController::class, 'adminEdit']); // Form sửa
 $router->post('/admin/rewards/{id}/edit', [RewardController::class, 'adminEdit']); // Lưu sửa
+$router->post('/api/admin/rewards', [RewardController::class, 'apiCreateReward']); // Tạo quà (API JSON)
+$router->put('/api/admin/rewards/{id}', [RewardController::class, 'apiUpdateReward']); // Cập nhật quà (API JSON)
 $router->post('/api/admin/rewards/{id}/delete', [RewardController::class, 'adminDelete']); // Xóa quà
 $router->post('/api/admin/rewards/{id}/toggle', [RewardController::class, 'adminToggle']); // Kích hoạt/vô hiệu
 $router->post('/api/admin/rewards/{id}/stock', [RewardController::class, 'adminUpdateStock']); // Cập nhật stock
-$router->get('/admin/rewards/redemptions', [RewardController::class, 'adminRedemptions']); // Danh sách redemption
+$router->get('/api/admin/rewards', [RewardController::class, 'listRewards']); // Lấy danh sách quà (API)
+
+// Admin Redemptions
+$router->get('/admin/redemptions', [RewardRedemptionController::class, 'adminIndex']); // Danh sách redemptions (admin)
 $router->post('/api/admin/rewards/redemptions/{id}/status', [RewardController::class, 'adminUpdateRedemptionStatus']); // Cập nhật trạng thái
 $router->get('/admin/rewards/stats', [RewardController::class, 'adminStats']); // Thống kê
 

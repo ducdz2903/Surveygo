@@ -72,6 +72,138 @@ class RewardController extends Controller
     }
 
     /**
+     * API endpoint - Lấy danh sách phần thưởng (JSON)
+     */
+    public function listRewards()
+    {
+        $page = (int)($_GET['page'] ?? 1);
+        $limit = (int)($_GET['limit'] ?? 10);
+        $offset = ($page - 1) * $limit;
+
+        try {
+            $rewards = $this->reward->getAllActive($limit, $offset);
+            $total = $this->reward->countActive();
+
+            return Response::json([
+                'data' => $rewards,
+                'pagination' => [
+                    'current_page' => $page,
+                    'per_page' => $limit,
+                    'total' => $total,
+                    'pages' => (int)ceil($total / $limit)
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return Response::json([
+                'error' => true,
+                'message' => $e->getMessage()
+            ], 400);
+        }
+    }
+
+    /**
+     * API: Tạo phần thưởng mới
+     */
+    public function apiCreateReward(Request $request)
+    {
+        $this->checkAjax();
+        $data = $request->input();
+
+        // Validation
+        $errors = [];
+        if (empty($data['code'])) $errors[] = 'Vui lòng nhập mã phần thưởng';
+        if (empty($data['name'])) $errors[] = 'Vui lòng nhập tên phần thưởng';
+        if (empty($data['type'])) $errors[] = 'Vui lòng chọn loại phần thưởng';
+        if (!in_array($data['type'], ['cash', 'e_wallet', 'giftcard', 'physical'])) {
+            $errors[] = 'Loại phần thưởng không hợp lệ';
+        }
+        if (empty($data['point_cost']) || $data['point_cost'] <= 0) {
+            $errors[] = 'Chi phí điểm phải lớn hơn 0';
+        }
+        if ($data['type'] !== 'physical' && (empty($data['value']) || $data['value'] <= 0)) {
+            $errors[] = 'Giá trị phải lớn hơn 0';
+        }
+        if ($data['type'] === 'physical' && (empty($data['stock']) || $data['stock'] <= 0)) {
+            $errors[] = 'Stock phải lớn hơn 0';
+        }
+
+        if (!empty($errors)) {
+            return Response::json(['success' => false, 'errors' => $errors], 422);
+        }
+
+        $rewardData = [
+            'code' => trim($data['code']),
+            'name' => trim($data['name']),
+            'type' => $data['type'],
+            'provider' => !empty($data['provider']) ? trim($data['provider']) : null,
+            'point_cost' => (int)$data['point_cost'],
+            'value' => ($data['type'] === 'physical') ? null : (int)$data['value'],
+            'stock' => ($data['type'] === 'physical') ? (int)$data['stock'] : null,
+            'description' => !empty($data['description']) ? trim($data['description']) : null
+        ];
+
+        try {
+            $id = $this->reward->create($rewardData);
+            return Response::json(['success' => true, 'id' => $id]);
+        } catch (\Exception $e) {
+            return Response::json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * API: Cập nhật phần thưởng
+     */
+    public function apiUpdateReward(Request $request)
+    {
+        $this->checkAjax();
+        $id = $request->getAttribute('id');
+        if (!$id) {
+            return Response::json(['success' => false, 'message' => 'ID phần thưởng không hợp lệ'], 400);
+        }
+
+        $data = $request->input();
+
+        $reward = $this->reward->getById($id);
+        if (!$reward) {
+            return Response::json(['success' => false, 'message' => 'Phần thưởng không tồn tại'], 404);
+        }
+
+        // Validation
+        $errors = [];
+        if (empty($data['code'])) $errors[] = 'Vui lòng nhập mã phần thưởng';
+        if (empty($data['name'])) $errors[] = 'Vui lòng nhập tên phần thưởng';
+        if (empty($data['type'])) $errors[] = 'Vui lòng chọn loại phần thưởng';
+        if (!in_array($data['type'], ['cash', 'e_wallet', 'giftcard', 'physical'])) {
+            $errors[] = 'Loại phần thưởng không hợp lệ';
+        }
+        if (empty($data['point_cost']) || $data['point_cost'] <= 0) {
+            $errors[] = 'Chi phí điểm phải lớn hơn 0';
+        }
+
+        if (!empty($errors)) {
+            return Response::json(['success' => false, 'errors' => $errors], 422);
+        }
+
+        $rewardData = [
+            'code' => trim($data['code']),
+            'name' => trim($data['name']),
+            'type' => $data['type'],
+            'provider' => !empty($data['provider']) ? trim($data['provider']) : null,
+            'point_cost' => (int)$data['point_cost'],
+            'value' => ($data['type'] === 'physical') ? null : (int)$data['value'],
+            'stock' => ($data['type'] === 'physical') ? (int)$data['stock'] : null,
+            'description' => !empty($data['description']) ? trim($data['description']) : null
+        ];
+
+        try {
+            $this->reward->update($id, $rewardData);
+            return Response::json(['success' => true, 'id' => $id]);
+        } catch (\Exception $e) {
+            return Response::json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    /**
      * Hiển thị chi tiết phần thưởng
      */
     public function detail($id)
@@ -186,28 +318,10 @@ class RewardController extends Controller
     /**
      * Admin: Hiển thị danh sách phần thưởng
      */
-    public function adminIndex()
+    public function adminIndex(Request $request)
     {
-        $this->requireAdmin();
-
-        $page = $_GET['page'] ?? 1;
-        $limit = 20;
-        $offset = ($page - 1) * $limit;
-
-        $rewards = $this->reward->getAllActive($limit, $offset);
-        $total = $this->reward->count();
-        $totalPages = ceil($total / $limit);
-
-        $data = [
-            'rewards' => $rewards,
-            'pagination' => [
-                'currentPage' => $page,
-                'totalPages' => $totalPages,
-                'total' => $total
-            ]
-        ];
-
-        return $this->view('pages/admin/rewards/rewards', $data, 'admin');
+        $admin = new AdminController();
+        return $admin->rewards($request);
     }
 
     /**
@@ -378,10 +492,15 @@ class RewardController extends Controller
     /**
      * Admin: Xóa phần thưởng
      */
-    public function adminDelete($id)
+    public function adminDelete(Request $request)
     {
         $this->requireAdmin();
         $this->checkAjax();
+
+        $id = $request->getAttribute('id');
+        if (!$id) {
+            return Response::json(['success' => false, 'message' => 'ID phần thưởng không hợp lệ'], 400);
+        }
 
         $reward = $this->reward->getById($id);
         if (!$reward) {
@@ -674,5 +793,32 @@ class RewardController extends Controller
     {
         header('HTTP/1.1 404 Not Found');
         return $this->view('pages/404', [], 'main');
+    }
+
+    private function pageData(Request $request): array
+    {
+        $config = \App\Core\Container::get('config');
+        $appName = (string) ($config['app']['name'] ?? 'Surveygo Admin');
+
+        $baseUrl = '';
+        $scheme = $request->server('REQUEST_SCHEME') ?: ($request->server('HTTPS') === 'on' ? 'https' : 'http');
+        $host = $request->server('HTTP_HOST');
+        if ($host) {
+            $baseUrl = $scheme . '://' . $host;
+        }
+
+        $currentPath = $request->server('REQUEST_URI') ?: '/';
+
+        return [
+            'appName' => $appName,
+            'baseUrl' => $baseUrl,
+            'currentPath' => $currentPath,
+            'urls' => [
+                'home' => $baseUrl . '/',
+                'admin' => $baseUrl . '/admin',
+                'dashboard' => $baseUrl . '/admin/dashboard',
+                'login' => $baseUrl . '/login',
+            ],
+        ];
     }
 }

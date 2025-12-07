@@ -65,21 +65,41 @@ class RewardRedemption
      */
     public function getAll($limit = null, $offset = 0, $filters = [])
     {
-        $query = "SELECT * FROM {$this->table} WHERE 1=1";
+        $query = "SELECT 
+                    rr.id, 
+                    rr.user_id, 
+                    rr.reward_id, 
+                    rr.status, 
+                    rr.note, 
+                    rr.receiver_info, 
+                    rr.bank_name, 
+                    rr.account_number, 
+                    rr.created_at, 
+                    rr.updated_at,
+                    u.name as user_name,
+                    u.email as user_email,
+                    r.name as reward_name,
+                    r.type,
+                    r.point_cost,
+                    r.value
+                  FROM {$this->table} rr
+                  LEFT JOIN users u ON rr.user_id = u.id
+                  LEFT JOIN rewards r ON rr.reward_id = r.id
+                  WHERE 1=1";
 
         if (isset($filters['status'])) {
-            $query .= " AND status = ?";
+            $query .= " AND rr.status = ?";
         }
 
         if (isset($filters['user_id'])) {
-            $query .= " AND user_id = ?";
+            $query .= " AND rr.user_id = ?";
         }
 
         if (isset($filters['reward_id'])) {
-            $query .= " AND reward_id = ?";
+            $query .= " AND rr.reward_id = ?";
         }
 
-        $query .= " ORDER BY created_at DESC";
+        $query .= " ORDER BY rr.created_at DESC";
 
         if ($limit) {
             $query .= " LIMIT {$limit} OFFSET {$offset}";

@@ -124,4 +124,20 @@ class AdminController extends Controller
             ],
         ];
     }
+
+    public function rewards(Request $request)
+    {
+        $view = new \App\Core\View();
+        $data = $this->pageData($request);
+        $content = $view->render('pages/admin/rewards/rewards', $data);
+        return \App\Core\Response::html($view->render('layouts/admin', array_merge($data, ['content' => $content])));
+    }
+
+    public function redemptions(Request $request)
+    {
+        $view = new \App\Core\View();
+        $data = $this->pageData($request);
+        $content = $view->render('pages/admin/redemptions/reward_redemptions', $data);
+        return \App\Core\Response::html($view->render('layouts/admin', array_merge($data, ['content' => $content])));
+    }
 }
