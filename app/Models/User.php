@@ -26,7 +26,7 @@ class User
         $this->id = (int) ($attributes['id'] ?? 0);
         $this->code = (string) ($attributes['code'] ?? '');
         $this->name = $attributes['name'];
-        $this->avatar = $attributes['avatar'];
+        $this->avatar = $attributes['avatar'] ?? null;
         $this->email = $attributes['email'];
         $this->phone = $attributes['phone'] ?? null;
         $this->password = $attributes['password'];

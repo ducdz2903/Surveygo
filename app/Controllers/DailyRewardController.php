@@ -7,6 +7,7 @@ namespace App\Controllers;
 use App\Core\Controller;
 use App\Core\Request;
 use App\Models\DailyReward;
+use App\Models\PointTransaction;
 use App\Models\User;
 
 class DailyRewardController extends Controller
@@ -106,6 +107,21 @@ class DailyRewardController extends Controller
             $record->updateStreak($currentStreak, $today, $totalPoints);
         } else {
             $record = DailyReward::create($userId, $currentStreak, $today, $totalPoints);
+        }
+
+        try {
+            if ($pointsEarned > 0) {
+                $dateKey = (int) (new \DateTimeImmutable($today))->format('Ymd');
+                PointTransaction::addPoints(
+                    $userId,
+                    $pointsEarned,
+                    'daily_reward',
+                    $dateKey,
+                    'Điểm danh ngày ' . $today
+                );
+            }
+        } catch (\Throwable $e) {
+            error_log('[DailyRewardController::claim] Failed to add points: ' . $e->getMessage());
         }
 
         return $this->json([

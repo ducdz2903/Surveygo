@@ -26,7 +26,6 @@
                             <input type="email" class="form-control" id="email" name="email"
                                 placeholder="Nhập email hoặc số điện thoại của bạn" required autocomplete="email">
                         </div>
-
                         <!-- Mật khẩu -->
                         <div class="form-group mb-3">
                             <label for="password" class="form-label">

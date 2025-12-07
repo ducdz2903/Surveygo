@@ -119,6 +119,10 @@
                             </select>
                         </div>
                     </div>
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" role="switch" id="modal-is-quickpoll">
+                        <label class="form-check-label" for="modal-is-quickpoll">Quick Poll</label>
+                    </div>
                     <div id="options-area" class="mb-3 border rounded p-3 bg-light">
                         <label class="form-label fw-bold small text-uppercase">Các lựa chọn trả lời</label>
                         <div id="options-list">
@@ -239,8 +243,8 @@
                 <tr class="slide-in">
                     <td class="ps-4"><span class="font-monospace text-dark">#${q.maCauHoi || q.id}</span></td>
                     <td>
-                        <div class="fw-bold text-dark text-truncate" style="max-width: 350px;" 
-                             title="${escapeHtml(q.noiDungCauHoi)}">${escapeHtml(q.noiDungCauHoi)}</div>
+                <div class="fw-bold text-dark text-truncate" style="max-width: 350px;" 
+                             title="${escapeHtml(q.noiDungCauHoi)}">${escapeHtml(q.noiDungCauHoi)}${(q.isQuickPoll || q.quick_poll) ? ' <span class="badge bg-warning text-dark ms-2">Quick Poll</span>' : ''}</div>
                     </td>
                     <td>${getTypeBadge(q.loaiCauHoi)}</td>
                     <td><small class="text-muted">${q.created_at ? q.created_at.split(' ')[0] : ''}</small></td>
@@ -327,6 +331,7 @@
                 document.getElementById('question-content').value = data.noiDungCauHoi;
                 document.getElementById('modal-type-select').value = data.loaiCauHoi;
                 document.getElementById('modal-survey-select').value = data.maKhaoSat || '';
+                try { document.getElementById('modal-is-quickpoll').checked = Boolean(data.isQuickPoll || data.quick_poll); } catch(e) {}
 
                 // Toggle options area
                 const type = data.loaiCauHoi;
@@ -346,7 +351,8 @@
             const payload = {
                 noiDungCauHoi: document.getElementById('question-content').value,
                 loaiCauHoi: document.getElementById('modal-type-select').value,
-                maKhaoSat: document.getElementById('modal-survey-select').value || null
+                maKhaoSat: document.getElementById('modal-survey-select').value || null,
+                isQuickPoll: (document.getElementById('modal-is-quickpoll') ? (document.getElementById('modal-is-quickpoll').checked ? 1 : 0) : 0)
             };
 
             const url = id ? `/api/questions/${id}` : '/api/questions';

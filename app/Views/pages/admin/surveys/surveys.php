@@ -134,7 +134,22 @@
                             <input type="number" class="form-control" value="15" min="1">
                         </div>
                     </div>
-                </form>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Trạng thái</label>
+                            <select class="form-select w-100" id="survey-status" required style="width:100%;">
+                                <option value="draft">Nháp</option>
+                                <option value="pending">Chờ duyệt</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Sự kiện</label>
+                            <select class="form-select w-100" id="survey-event-select" style="width:100%;" disabled>
+                                <option value="">Đang tải sự kiện...</option>
+                            </select>
+                        </div>
+                    </div>                        
+                    </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
@@ -146,6 +161,8 @@
     </div>
 </div>
 
+<script src="/public/assets/js/toast-helper.js"></script>
+<script src="/public/assets/js/modal-helper.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         let currentPage = 1;
@@ -166,6 +183,9 @@
                 return new Date(dateString).toLocaleDateString('vi-VN');
             }
         };
+        const toast = typeof window.showToast === 'function'
+            ? window.showToast
+            : function(_, text) { try { alert(text); } catch(e) { console.log(text); } };
 
         // gọi api phân trang
         async function loadSurveys(page = 1) {
@@ -240,7 +260,6 @@
                     <td class="text-end pe-4">
                         <div class="btn-group">
                             <button class="btn btn-sm btn-light text-primary" title="Xem" onclick="window.location.href='/admin/surveys/view?id=${s.id}'"><i class="fas fa-eye"></i></button>
-                            <button class="btn btn-sm btn-light text-success" title="Sửa" onclick="window.location.href='/admin/surveys/edit?id=${s.id}'"><i class="fas fa-edit"></i></button>
                             <button class="btn btn-sm btn-light text-danger" title="Xóa" onclick="deleteSurvey(${s.id})"><i class="fas fa-trash"></i></button>
                         </div>
                     </td>
@@ -302,9 +321,21 @@
         document.getElementById('filter-status').addEventListener('change', () => loadSurveys(1));
         document.getElementById('filter-category').addEventListener('change', () => loadSurveys(1));
         document.getElementById('filter-search')?.addEventListener('input', debouncedLoad);
+        const eventSearchInput = document.getElementById('survey-event-search');
+        const debouncedEventSearch = debounce((term) => loadEventsToDropdown(term), 400);
+        eventSearchInput?.addEventListener('input', (e) => debouncedEventSearch(e.target.value));
+
+        const createModalEl = document.getElementById('createSurveyModal');
+        if (createModalEl) {
+            createModalEl.addEventListener('show.bs.modal', () => {
+                const term = eventSearchInput?.value?.trim() || '';
+                loadEventsToDropdown(term);
+            });
+        }
 
         window.loadSurveys = loadSurveys;
         window.debouncedLoad = debouncedLoad;
+        window.loadEventsToDropdown = loadEventsToDropdown;
 
         // hàm đặt lại bộ lọc
         window.resetFilters = function() {
@@ -316,16 +347,135 @@
             if (fsrch) fsrch.value = '';
             loadSurveys(1);
         };
-        window.createSurvey = function() {
-            showToast('info', 'Tính năng đang phát triển: Gọi API tạo mới tại đây');
+        // Load events into dropdown for create form
+        let eventsLoadToken = 0;
+        async function loadEventsToDropdown(searchTerm = '') {
+            const sel = document.getElementById('survey-event-select');
+            const searchValue = (searchTerm || '').trim();
+            if (!sel) return;
+            const token = ++eventsLoadToken;
+            sel.disabled = true;
+            sel.innerHTML = '<option value="">Đang tải sự kiện...</option>';
+            try {
+                const params = new URLSearchParams({ page: 1, limit: 20 });
+                if (searchValue) params.set('search', searchValue);
+                const res = await fetch('/api/events?' + params.toString(), { headers: { 'Accept': 'application/json' }});
+                if (token !== eventsLoadToken) return;
+                if (!res.ok) throw new Error('Không thể tải danh sách sự kiện');
+                const json = await res.json();
+                const items = Array.isArray(json.data) ? json.data : (Array.isArray(json) ? json : []);
+                if (!items.length) {
+                    sel.innerHTML = '<option value="">Không tìm thấy sự kiện phù hợp</option>';
+                    sel.disabled = false;
+                    return;
+                }
+                const optionsHtml = ['<option value="">Chọn sự kiện</option>'].concat(items.map(ev => {
+                    const code = ev.code || ev.maSuKien || ev.id;
+                    const title = ev.title || ev.tenSuKien || ev.name || 'Không tên';
+                    const id = ev.id ?? ev.maSuKien;
+                    return `<option value="${id}" data-code="${code || ''}">${code ? '#' + code + ' - ' : ''}${title}</option>`;
+                })).join('');
+                sel.innerHTML = optionsHtml;
+            } catch (err) {
+                if (token !== eventsLoadToken) return;
+                sel.innerHTML = '<option value="">Lỗi khi tải sự kiện</option>';
+                console.error('Load events failed', err);
+            } finally {
+                if (token === eventsLoadToken) sel.disabled = false;
+            }
+        }
+    
+        window.createSurvey = async function() {
+            console.log('Creating survey...');
+            //(tieuDe, moTa, loaiKhaoSat, thoiLuongDuTinh, isQuickPoll,
+            // maNguoiTao, trangThai, diemThuong, danhMuc, maSuKien, created_at, updated_at)
+            const form = document.getElementById('create-survey-form');
+            const tieuDe = form.querySelector('input[type="text"]').value.trim();
+            const moTa = form.querySelector('textarea').value.trim();
+            const loaiKhaoSat = document.getElementById('survey-type') ? document.getElementById('survey-type').value : form.querySelector('select').value;
+            const thoiluong = parseInt(form.querySelector('input[name="thoiluong"]')?.value ?? form.querySelectorAll('input[type="number"]')[1].value) || 0;
+            const maNguoiTao = (function() {
+                const raw = localStorage.getItem('app.user');
+                if (!raw) return 1;
+                try {
+                    const user = JSON.parse(raw);
+                    return Number(user.id ?? user.maNguoiTao ?? 1) || 1;
+                } catch (e) {
+                    return 1;
+                }
+            })();
+            const category = document.getElementById('survey-category') ? document.getElementById('survey-category').value : form.querySelectorAll('select')[1].value;
+            const trangThai = document.getElementById('survey-status') ? document.getElementById('survey-status').value : form.querySelectorAll('select')[2].value;
+            const points = parseInt(form.querySelectorAll('input[type="number"]')[0].value) || 0;
+            const created_at = new Date().toISOString();
+            const eventSelect = document.getElementById('survey-event-select');
+            const selectedEventId = eventSelect?.value;
+            const maSuKien = selectedEventId ? (Number(selectedEventId) || null) : null;
+    
+            const payload = {
+                tieuDe,
+                moTa,
+                loaiKhaoSat,
+                thoiLuongDuTinh: thoiluong,
+                isQuickPoll : loaiKhaoSat === 'quickpoll' ? 1 : 0,
+                maNguoiTao,
+                trangThai,
+                diemThuong: points,
+                danhMuc: category,
+                maSuKien,
+                created_at,
+            };
+            if (!tieuDe) {
+                toast('error', 'Vui lòng nhập tiêu đề khảo sát.');
+                return;
+            }
+            // Gọi API tạo khảo sát mới
+            const createRes = await fetch('/api/surveys', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+            });
+            if (!createRes.ok) {
+                const errJson = await createRes.json().catch(() => ({}));
+                toast('error', 'Tạo khảo sát thất bại: ' + (errJson.message || createRes.statusText));
+                return;
+            }
+            toast('success', 'Tạo khảo sát thành công!');
+            form.reset();
+            const modalEl = document.getElementById('createSurveyModal');
+            if (modalEl && window.bootstrap) {
+                const inst = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+                inst.hide();
+            }
+            // refresh list
+            if (window.loadSurveys) loadSurveys(1);
         };
         window.deleteSurvey = function(id) {
-            if(confirm('Bạn có chắc chắn muốn xóa khảo sát #' + id + '?')) {
-                showToast('info', 'Đã gửi yêu cầu xóa ' + id);
-            }
+            ModalHelper.confirm({
+                title: 'Xóa khảo sát',
+                message: 'Bạn có chắc chắn muốn xóa khảo sát #' + id + '?',
+                type: 'danger',
+                confirmText: 'Xóa',
+                cancelText: 'Hủy',
+                isDangerous: true,
+                onConfirm: async function () {
+                    try {
+                        const res = await fetch(`/api/surveys?id=${id}`, { method: 'DELETE' });
+                        const json = await res.json().catch(() => ({}));
+                        if (!res.ok || json.error) {
+                            throw new Error(json.message || res.statusText);
+                        }
+                        toast('success', 'Đã xóa khảo sát #' + id);
+                        if (window.loadSurveys) loadSurveys(currentPage);
+                    } catch (err) {
+                        toast('error', 'Xóa thất bại: ' + err.message);
+                    }
+                }
+            });
         };
 
         // Init load
         loadSurveys(1);
+        loadEventsToDropdown();
     });
 </script>
