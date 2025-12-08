@@ -205,10 +205,13 @@ class RewardRedemptionController extends Controller
                 if ($reward) {
                     $userPoint = UserPoint::findByUserId($redemption['user_id']);
                     if ($userPoint) {
-                        $userPoint['balance'] += $reward['point_cost'];
-                        $db = Container::get('db');
-                        $db->prepare("UPDATE user_points SET balance = ?, updated_at = NOW() WHERE user_id = ?")
-                            ->execute([$userPoint['balance'], $redemption['user_id']]);
+                        // Hoàn lại points trực tiếp vào DB
+                        $pointCost = (int) ($reward['point_cost'] ?? $reward['points'] ?? 0);
+                        if ($pointCost > 0) {
+                            $db = Container::get('db');
+                            $db->prepare("UPDATE user_points SET balance = balance + ?, updated_at = NOW() WHERE user_id = ?")
+                                ->execute([$pointCost, $redemption['user_id']]);
+                        }
                     }
 
                     // Hoàn lại stock
