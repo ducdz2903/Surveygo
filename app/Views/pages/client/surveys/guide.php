@@ -10,80 +10,8 @@
 </main>
 
 
+<script src="/public/assets/js/toast-helper.js"></script>
 <script>
-    // --- TÍCH HỢP TOAST HELPER ---
-    (function (global) {
-        function ensureContainer() {
-            let container = document.getElementById('global-toast-container');
-            if (container) return container;
-            container = document.createElement('div');
-            container.id = 'global-toast-container';
-            container.setAttribute('aria-live', 'polite');
-            container.setAttribute('aria-atomic', 'true');
-            container.className = 'position-fixed top-0 end-0 p-3';
-            container.style.zIndex = 1080;
-            document.body.appendChild(container);
-            return container;
-        }
-
-        function iconFor(status) {
-            switch ((status || '').toLowerCase()) {
-                case 'success': return '<i class="fas fa-check-circle me-2"></i>';
-                case 'warning': return '<i class="fas fa-exclamation-triangle me-2"></i>';
-                case 'error':
-                case 'danger': return '<i class="fas fa-times-circle me-2"></i>';
-                case 'info': return '<i class="fas fa-info-circle me-2"></i>';
-                default: return '<i class="fas fa-bell me-2"></i>';
-            }
-        }
-
-        function bgClassFor(status) {
-            switch ((status || '').toLowerCase()) {
-                case 'success': return 'bg-success text-white';
-                case 'warning': return 'bg-warning text-dark';
-                case 'error':
-                case 'danger': return 'bg-danger text-white';
-                case 'info': return 'bg-info text-dark';
-                default: return 'bg-secondary text-white';
-            }
-        }
-
-        function showToast(status, text, opts = {}) {
-            try {
-                const container = ensureContainer();
-                const toastId = 'toast-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
-                const wrapper = document.createElement('div');
-                wrapper.innerHTML = `
-                        <div id="${toastId}" class="toast align-items-center ${bgClassFor(status)} border-0 mb-2" role="alert" aria-live="assertive" aria-atomic="true">
-                          <div class="d-flex">
-                            <div class="toast-body d-flex align-items-center">${iconFor(status)}<div class="toast-text">${escapeHtml(text)}</div></div>
-                            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-                          </div>
-                        </div>
-                    `;
-                const toastEl = wrapper.firstElementChild;
-                container.appendChild(toastEl);
-                const delay = typeof opts.delay === 'number' ? opts.delay : 3000;
-                const bsToast = new bootstrap.Toast(toastEl, { delay });
-                toastEl.addEventListener('hidden.bs.toast', function () {
-                    try { toastEl.remove(); } catch (e) { /* ignore */ }
-                });
-                bsToast.show();
-                return bsToast;
-            } catch (e) {
-                console.error('Toast error', e);
-            }
-        }
-
-        function escapeHtml(unsafe) {
-            if (unsafe === null || unsafe === undefined) return '';
-            return String(unsafe).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
-        }
-        global.ToastHelper = { show: showToast };
-    })(window);
-
-    // --- LOGIC TRANG HƯỚNG DẪN ---
-
     document.addEventListener('DOMContentLoaded', async function () {
         const params = new URLSearchParams(window.location.search);
         const surveyId = params.get('id');
@@ -187,7 +115,7 @@
 
         if (!user || !user.id) {
             // SỬ DỤNG TOAST HELPER
-            ToastHelper.show('warning', 'Vui lòng đăng nhập để bắt đầu khảo sát');
+            showToast('warning', 'Vui lòng đăng nhập để bắt đầu khảo sát');
             setTimeout(() => {
                 window.location.href = '/login';
             }, 1500);
@@ -201,7 +129,7 @@
 
             if (result.data && result.data.hasSubmitted) {
                 // SỬ DỤNG TOAST HELPER
-                ToastHelper.show('warning', 'Bạn đã thực hiện khảo sát này rồi. Mỗi người chỉ được thực hiện một lần.');
+                showToast('warning', 'Bạn đã thực hiện khảo sát này rồi. Mỗi người chỉ được thực hiện một lần.');
                 return;
             }
 
@@ -211,7 +139,7 @@
         } catch (error) {
             console.error('Lỗi:', error);
             // SỬ DỤNG TOAST HELPER
-            ToastHelper.show('danger', 'Có lỗi xảy ra. Vui lòng thử lại.');
+            showToast('danger', 'Có lỗi xảy ra. Vui lòng thử lại.');
         }
     }
 </script>

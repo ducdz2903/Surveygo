@@ -31,6 +31,11 @@ class Response
         return new self($html, $status, array_merge(['Content-Type' => 'text/html; charset=utf-8'], $headers));
     }
 
+    public static function redirect(string $location, int $status = 302, array $headers = []): self
+    {
+        return new self('', $status, array_merge(['Location' => $location], $headers));
+    }
+
     public function send(): void
     {
         http_response_code($this->status);

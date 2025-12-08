@@ -41,3 +41,8 @@
     background: var(--background-light);
     color: var(--text-primary);
 }
+
+.bg-secondary-accent {
+    background: linear-gradient(135deg, #06D6A0 0%, #00BF96 100%) !important;
+    color: white;
+}

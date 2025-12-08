@@ -4,13 +4,15 @@ declare(strict_types=1);
 
 namespace App\Core;
 
+use App\Middlewares\MiddlewareInterface;
+
 /**
  * Basic router with support for HTTP verbs and middleware.
  */
 class Router
 {
     /**
-     * @var array<string, array<string, array{handler:mixed}>>
+     * @var array<string, array<string, array{handler:mixed, middleware?:array}>>
      */
     private array $routes = [
         'GET' => [],
@@ -20,35 +22,49 @@ class Router
         'DELETE' => [],
     ];
 
-    public function get(string $path, $handler): void
+    /**
+     * @var array<string>
+     */
+    private array $globalMiddleware = [];
+
+    public function get(string $path, $handler, array $middleware = []): void
     {
-        $this->addRoute('GET', $path, $handler);
+        $this->addRoute('GET', $path, $handler, $middleware);
     }
 
-    public function post(string $path, $handler): void
+    public function post(string $path, $handler, array $middleware = []): void
     {
-        $this->addRoute('POST', $path, $handler);
+        $this->addRoute('POST', $path, $handler, $middleware);
     }
 
-    public function put(string $path, $handler): void
+    public function put(string $path, $handler, array $middleware = []): void
     {
-        $this->addRoute('PUT', $path, $handler);
+        $this->addRoute('PUT', $path, $handler, $middleware);
     }
 
-    public function patch(string $path, $handler): void
+    public function patch(string $path, $handler, array $middleware = []): void
     {
-        $this->addRoute('PATCH', $path, $handler);
+        $this->addRoute('PATCH', $path, $handler, $middleware);
     }
 
-    public function delete(string $path, $handler): void
+    public function delete(string $path, $handler, array $middleware = []): void
     {
-        $this->addRoute('DELETE', $path, $handler);
+        $this->addRoute('DELETE', $path, $handler, $middleware);
     }
 
-    private function addRoute(string $method, string $path, $handler): void
+    /**
+     * Add global middleware to all routes.
+     */
+    public function middleware(MiddlewareInterface|string $middleware): void
+    {
+        $this->globalMiddleware[] = $middleware;
+    }
+
+    private function addRoute(string $method, string $path, $handler, array $middleware = []): void
     {
         $this->routes[$method][$path] = [
             'handler' => $handler,
+            'middleware' => $middleware,
         ];
     }
 
@@ -72,9 +88,63 @@ class Router
             ], 404);
         }
 
+        // Execute global middleware
+        $response = $this->executeMiddleware($this->globalMiddleware, $request);
+        if ($response !== null) {
+            return $response;
+        }
+
+        // Execute route-specific middleware
+        $routeMiddleware = $route['middleware'] ?? [];
+        $response = $this->executeMiddleware($routeMiddleware, $request);
+        if ($response !== null) {
+            return $response;
+        }
+
         $handler = $route['handler'];
         $callable = $this->resolveHandler($handler, $route['params'] ?? []);
         return $callable($request);
+    }
+
+    /**
+     * Execute middleware stack.
+     *
+     * @param array $middleware
+     * @return Response|null
+     */
+    private function executeMiddleware(array $middleware, Request $request): ?Response
+    {
+        foreach ($middleware as $middlewareItem) {
+            $instance = $this->resolveMiddleware($middlewareItem);
+            $response = $instance->handle($request);
+            if ($response !== null) {
+                return $response;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Resolve middleware instance from string class name or MiddlewareInterface instance.
+     */
+    private function resolveMiddleware($middleware): MiddlewareInterface
+    {
+        if ($middleware instanceof MiddlewareInterface) {
+            return $middleware;
+        }
+
+        if (is_string($middleware)) {
+            if (!class_exists($middleware)) {
+                throw new \InvalidArgumentException("Middleware {$middleware} not found.");
+            }
+            $instance = new $middleware();
+            if (!$instance instanceof MiddlewareInterface) {
+                throw new \RuntimeException("Middleware {$middleware} must implement MiddlewareInterface");
+            }
+            return $instance;
+        }
+
+        throw new \InvalidArgumentException('Middleware must be a string class name or MiddlewareInterface instance.');
     }
 
     private function matchDynamicRoute(string $method, string $path): ?array

@@ -98,6 +98,12 @@ class AuthController extends Controller
             ], 401);
         }
 
+        // Store user info in session
+        $_SESSION['user_id'] = $user->getId();
+        $_SESSION['user_email'] = $user->getEmail();
+        $_SESSION['user_role'] = $user->getRole();
+        $_SESSION['user_name'] = $user->getName();
+
         return $this->json([
             'error' => false,
             'message' => 'Login successful.',

@@ -63,14 +63,9 @@ body {
     transition: all 0.3s ease;
 }
 
-.navbar-brand:hover {
-    text-shadow: 0 0 15px rgba(243, 156, 18, 0.6), 0 0 30px rgba(243, 156, 18, 0.3);
-    transform: scale(1.02);
-}
 
 .navbar-logo:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    transform: scale(1.1);
+    cursor: pointer;
 }
 
 .nav-link {

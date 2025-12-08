@@ -71,6 +71,22 @@ $currentPath = $currentPath ?? ($_SERVER['REQUEST_URI'] ?? '/');
                     <span>Liên hệ</span>
                 </a>
             </li>
+
+            <li class="nav-item">
+                <a class="nav-link <?= str_contains($currentPath, '/admin/rewards') ? 'active' : '' ?>"
+                    href="/admin/rewards">
+                    <i class="fas fa-gift"></i>
+                    <span>Phần Thưởng</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link <?= str_contains($currentPath, '/admin/redemptions') ? 'active' : '' ?>"
+                    href="/admin/redemptions">
+                    <i class="fas fa-exchange-alt"></i>
+                    <span>Đổi Quà</span>
+                </a>
+            </li>
         </ul>
 
         <div class="nav-section">PHÂN TÍCH</div>
