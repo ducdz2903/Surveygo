@@ -49,22 +49,43 @@ class Question
         if (!empty($filters['maKhaoSat'])) {
             $surveyId = (int)$filters['maKhaoSat'];
 
-            // total count via map
-            $countSql = "SELECT COUNT(*) as cnt FROM survey_question_map sqm WHERE sqm.idKhaoSat = :surveyId";
-            $countStmt = $db->prepare($countSql);
-            $countStmt->execute([':surveyId' => $surveyId]);
-            $total = (int)$countStmt->fetchColumn();
+            if ($surveyId === -1) {
+                // Find questions NOT in any survey
+                $countSql = "SELECT COUNT(*) as cnt FROM questions q 
+                             LEFT JOIN survey_question_map sqm ON q.id = sqm.idCauHoi
+                             WHERE sqm.idKhaoSat IS NULL";
+                $countStmt = $db->prepare($countSql);
+                $countStmt->execute();
+                $total = (int)$countStmt->fetchColumn();
 
-            $sql = "SELECT q.* FROM survey_question_map sqm JOIN questions q ON q.id = sqm.idCauHoi
-                    WHERE sqm.idKhaoSat = :surveyId
-                    ORDER BY q.id ASC
-                    LIMIT :limit OFFSET :offset";
-            $stmt = $db->prepare($sql);
-            $stmt->bindValue(':surveyId', $surveyId, PDO::PARAM_INT);
-            $stmt->bindValue(':limit', (int)$perPage, PDO::PARAM_INT);
-            $stmt->bindValue(':offset', (int)$offset, PDO::PARAM_INT);
-            $stmt->execute();
-            $rows = $stmt->fetchAll();
+                $sql = "SELECT q.* FROM questions q
+                        LEFT JOIN survey_question_map sqm ON q.id = sqm.idCauHoi
+                        WHERE sqm.idKhaoSat IS NULL
+                        ORDER BY q.id ASC
+                        LIMIT :limit OFFSET :offset";
+                $stmt = $db->prepare($sql);
+                $stmt->bindValue(':limit', (int)$perPage, PDO::PARAM_INT);
+                $stmt->bindValue(':offset', (int)$offset, PDO::PARAM_INT);
+                $stmt->execute();
+                $rows = $stmt->fetchAll();
+            } else {
+                // total count via map
+                $countSql = "SELECT COUNT(*) as cnt FROM survey_question_map sqm WHERE sqm.idKhaoSat = :surveyId";
+                $countStmt = $db->prepare($countSql);
+                $countStmt->execute([':surveyId' => $surveyId]);
+                $total = (int)$countStmt->fetchColumn();
+
+                $sql = "SELECT q.* FROM survey_question_map sqm JOIN questions q ON q.id = sqm.idCauHoi
+                        WHERE sqm.idKhaoSat = :surveyId
+                        ORDER BY q.id ASC
+                        LIMIT :limit OFFSET :offset";
+                $stmt = $db->prepare($sql);
+                $stmt->bindValue(':surveyId', $surveyId, PDO::PARAM_INT);
+                $stmt->bindValue(':limit', (int)$perPage, PDO::PARAM_INT);
+                $stmt->bindValue(':offset', (int)$offset, PDO::PARAM_INT);
+                $stmt->execute();
+                $rows = $stmt->fetchAll();
+            }
         } else {
             $wheres = [];
             if (!empty($filters['search'])) {
@@ -154,8 +175,8 @@ class Question
             }
         }
 
-        // Auto-gen maCauHoi nếu chưa có
-        $maCauHoi = $data['maCauHoi'] ?? 'CH-' . time() . '-' . random_int(1000, 9999);
+        // Auto-gen maCauHoi nếu chưa có - use microtime for better uniqueness
+        $maCauHoi = $data['maCauHoi'] ?? 'CH-' . substr(uniqid('', true), -8);
 
         $now = (new \DateTimeImmutable())->format('Y-m-d H:i:s');
 
@@ -179,6 +200,8 @@ class Question
             $id = (int)$db->lastInsertId();
             return self::find($id);
         } catch (\PDOException $e) {
+            error_log('Question::create failed: ' . $e->getMessage());
+            error_log('Data: ' . json_encode($data));
             return null; // Duplicate maCauHoi hoặc lỗi DB
         }
     }
@@ -232,22 +255,8 @@ class Question
      */
     public function getAnswers(): array
     {
-        /** @var PDO $db */
-        $db = Container::get('db');
-
-        // answers table uses idCauHoi as FK to questions.id
-        $statement = $db->prepare('SELECT * FROM answers WHERE idCauHoi = :questionId ORDER BY id ASC');
-        $statement->execute([':questionId' => $this->id]);
-        $rows = $statement->fetchAll();
-
-        return array_map(fn($row) => [
-            'id' => (int)$row['id'],
-            'idCauHoi' => (int)$row['idCauHoi'],
-            'noiDungCauTraLoi' => $row['noiDungCauTraLoi'],
-            'creator_id' => isset($row['creator_id']) ? (int)$row['creator_id'] : 0,
-            'created_at' => $row['created_at'],
-            'updated_at' => $row['updated_at'],
-        ], $rows);
+        $answers = Answer::findByQuestion($this->id);
+        return array_map(fn($a) => $a->toArray(), $answers);
     }
 
     /**

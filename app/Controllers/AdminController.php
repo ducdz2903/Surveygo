@@ -54,6 +54,7 @@ class AdminController extends Controller
     {
         $view = new \App\Core\View();
         $data = $this->pageData($request);
+        $data['surveys'] = \App\Models\Survey::all();
         $content = $view->render('pages/admin/questions/questions', $data);
         return \App\Core\Response::html($view->render('layouts/admin', array_merge($data, ['content' => $content])));
     }

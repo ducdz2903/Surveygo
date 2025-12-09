@@ -2,39 +2,49 @@
     <div class="container">
         <!-- Header -->
         <div class="row mb-5">
-            <div class="col-lg-8">
+            <div class="col-12">
                 <h1 class="display-6 fw-bold mb-3">Quick Poll <span id="survey-count">(0)</span></h1>
                 <p class="lead text-muted">Trả lời 1 câu hỏi nhanh - Nhận điểm ngay!</p>
             </div>
         </div>
 
-        <!-- Filter Section -->
-        <div class="row mb-4">
-            <div class="col-md-6">
-                <div class="input-group">
-                    <span class="input-group-text"><i class="fas fa-search"></i></span>
-                    <input type="text" class="form-control" id="search-input" placeholder="Tìm kiếm quick poll...">
+        <!-- Main Content Card -->
+        <div class="card shadow-sm border-0" style="border-radius: 15px; overflow: hidden;">
+            <div class="card-body p-4">
+                <!-- Filter Section -->
+                <div class="row mb-4">
+                    <div class="col-md-5">
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0"><i class="fas fa-search text-muted"></i></span>
+                            <input type="text" class="form-control border-start-0 bg-light" id="search-input" placeholder="Tìm kiếm quick poll..." style="border-radius: 0 8px 8px 0;">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select bg-light" id="status-filter" style="border-radius: 8px;">
+                            <option value="">Tất cả</option>
+                            <option value="hoạtĐộng">Hot 🔥</option>
+                            <option value="pending">Mới ⭐</option>
+                            <option value="chờDuyệt">Chờ duyệt ⏳</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4 d-flex gap-2">
+                        <button class="btn btn-outline-primary btn-sm" id="btn-reset-filters" style="border-radius: 8px;">
+                            <i class="fas fa-redo me-2"></i>Xóa bộ lọc
+                        </button>
+                        <button class="btn btn-primary-gradient btn-lg d-flex align-items-center justify-content-center gap-2 px-4 py-2 fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#createQuickPollModal" style="border-radius: 10px;">
+                            <i class="fas fa-plus-circle fs-5"></i>
+                            <span>Tạo Quick-poll</span>
+                        </button>
+                    </div>
                 </div>
-            </div>
-            <div class="col-md-3">
-                <select class="form-select" id="status-filter">
-                    <option value="">Tất cả</option>
-                    <option value="hoạtĐộng">Hot 🔥</option>
-                    <option value="pending">Mới ⭐</option>
-                </select>
-            </div>
-            <div class="col-md-3">
-                <button class="btn btn-outline-primary" id="btn-reset-filters">
-                    <i class="fas fa-redo me-2"></i>Xóa bộ lọc
-                </button>
-            </div>
-        </div>
 
-        <!-- Quick Polls List -->
-        <div class="row g-4 mb-4" id="polls-container">
-            <div class="col-12 text-center py-5">
-                <div class="spinner-border text-primary" role="status">
-                    <span class="visually-hidden">Đang tải...</span>
+                <!-- Quick Polls List -->
+                <div class="row g-4" id="polls-container">
+                    <div class="col-12 text-center py-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Đang tải...</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -42,6 +52,74 @@
         <!-- Pagination will be rendered inline under the list -->
     </div>
 </main>
+
+<!-- Create Quick Poll Modal -->
+<div class="modal fade" id="createQuickPollModal" tabindex="-1" aria-labelledby="createQuickPollModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" style="margin-top: 75px;">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; overflow: hidden;">
+            <div class="modal-header bg-gradient" style="background: linear-gradient(135deg, #10BCD3 0%, #0B99B8 100%); color: white; border-bottom: none;">
+                <h5 class="modal-title fw-bold" id="createQuickPollModalLabel">
+                    <i class="fas fa-plus-circle me-2"></i>Tạo Quick Poll
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body glass-card" style="border-radius: 0; border: none; box-shadow: none; max-height: 70vh; overflow-y: auto;">
+                <form id="createQuickPollForm">
+                    <div class="mb-3">
+                        <label for="pollTitle" class="form-label fw-semibold">Tên chủ đề</label>
+                        <input type="text" class="form-control" id="pollTitle" required style="border-radius: 10px;">
+                    </div>
+                    <div class="mb-3">
+                        <label for="pollDescription" class="form-label fw-semibold">Mô tả</label>
+                        <textarea class="form-control" id="pollDescription" rows="3" required style="border-radius: 10px;"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="pollPoints" class="form-label fw-semibold">Số điểm thưởng (tối đa 100)</label>
+                        <input type="number" class="form-control" id="pollPoints" min="1" max="100" required style="border-radius: 10px;">
+                    </div>
+                    <div class="mb-3">
+                        <label for="questionType" class="form-label fw-semibold">Loại câu hỏi</label>
+                        <select class="form-select" id="questionType" required style="border-radius: 10px;">
+                            <option value="single" selected>Chọn 1</option>
+                            <option value="multiple">Chọn nhiều</option>
+                            <option value="rating">Đánh giá sao</option>
+                            <option value="yesno">Có/Không</option>
+                            <option value="text">Nhập chữ</option>
+                        </select>
+                    </div>
+                    <div class="mb-3" id="answerOptions" style="display: block;">
+                        <label class="form-label fw-semibold">Các lựa chọn trả lời</label>
+                        <div id="optionsContainer">
+                            <div class="input-group mb-2">
+                                <input type="text" class="form-control" placeholder="Lựa chọn 1" required style="border-radius: 10px 0 0 10px;">
+                                <button class="btn btn-outline-danger" type="button" onclick="removeOption(this)" style="border-radius: 0 10px 10px 0;">Xóa</button>
+                            </div>
+                            <div class="input-group mb-2">
+                                <input type="text" class="form-control" placeholder="Lựa chọn 2" required style="border-radius: 10px 0 0 10px;">
+                                <button class="btn btn-outline-danger" type="button" onclick="removeOption(this)" style="border-radius: 0 10px 10px 0;">Xóa</button>
+                            </div>
+                            <div class="input-group mb-2">
+                                <input type="text" class="form-control" placeholder="Lựa chọn 3" required style="border-radius: 10px 0 0 10px;">
+                                <button class="btn btn-outline-danger" type="button" onclick="removeOption(this)" style="border-radius: 0 10px 10px 0;">Xóa</button>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-outline-primary btn-sm" onclick="addOption()" style="border-radius: 20px;">Thêm lựa chọn</button>
+                    </div>
+                    <div class="mb-3" id="answerPreview" style="display: none;">
+                        <label class="form-label fw-semibold">Xem trước câu trả lời</label>
+                        <div id="previewContainer" class="border rounded p-3 bg-light" style="border-radius: 15px;">
+                            <!-- Preview will be rendered here -->
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer border-0 bg-light" style="border-radius: 0 0 20px 20px;">
+                <button type="button" class="btn btn-outline-secondary-accent" data-bs-dismiss="modal" style="border-radius: 25px;">Hủy</button>
+                <button type="button" class="btn btn-primary-gradient" onclick="saveQuickPoll()" style="border-radius: 25px;">Lưu Quick Poll</button>
+            </div>
+        </div>
+    </div>
+</div>
 <script>
     const BASE = (typeof BASE_URL !== 'undefined') ? BASE_URL : '';
     const pageSize = 6;
@@ -216,5 +294,205 @@
             document.getElementById('status-filter').value = '';
             loadQuickPolls(1, {});
         });
+
+        // Modal functionality
+        document.getElementById('questionType').addEventListener('change', function () {
+            toggleAnswerOptions();
+        });
+
+        // Initialize modal on show
+        document.getElementById('createQuickPollModal').addEventListener('show.bs.modal', function () {
+            resetModal();
+        });
     });
+
+    // Toggle answer options visibility based on question type
+    function toggleAnswerOptions() {
+        const questionType = document.getElementById('questionType').value;
+        const answerOptions = document.getElementById('answerOptions');
+        const answerPreview = document.getElementById('answerPreview');
+        if (questionType === 'single' || questionType === 'multiple') {
+            answerOptions.style.display = 'block';
+            answerPreview.style.display = 'none';
+        } else {
+            answerOptions.style.display = 'none';
+            answerPreview.style.display = 'block';
+            renderPreview(questionType);
+        }
+    }
+
+    // Render preview based on question type
+    function renderPreview(questionType) {
+        const container = document.getElementById('previewContainer');
+        let html = '';
+
+        switch (questionType) {
+            case 'rating':
+                html = `
+                    <div class="text-center preview-rating">
+                        <p class="mb-3 fw-semibold">Đánh giá:</p>
+                        <div class="rating-stars d-flex justify-content-center gap-1" style="pointer-events: none;">
+                            <i class="fas fa-star text-warning fs-4"></i>
+                            <i class="fas fa-star text-warning fs-4"></i>
+                            <i class="fas fa-star text-warning fs-4"></i>
+                            <i class="fas fa-star text-warning fs-4"></i>
+                            <i class="fas fa-star text-muted fs-4"></i>
+                        </div>
+                        <small class="text-muted mt-2 d-block">1-5 sao (không thể chỉnh sửa trong xem trước)</small>
+                    </div>
+                `;
+                break;
+            case 'yesno':
+                html = `
+                    <div class="text-center preview-yesno">
+                        <p class="mb-3 fw-semibold">Chọn câu trả lời:</p>
+                        <div class="d-flex justify-content-center gap-3">
+                            <button class="btn btn-outline-success btn-lg" disabled style="cursor: not-allowed;">Có</button>
+                            <button class="btn btn-outline-danger btn-lg" disabled style="cursor: not-allowed;">Không</button>
+                        </div>
+                        <small class="text-muted mt-2 d-block">Các nút này chỉ để xem trước, không thể nhấn</small>
+                    </div>
+                `;
+                break;
+            case 'text':
+                html = `
+                    <div class="preview-text">
+                        <p class="mb-3 fw-semibold">Nhập câu trả lời:</p>
+                        <textarea class="form-control bg-light" rows="3" placeholder="Nhập câu trả lời của bạn..." readonly style="resize: none; border: 2px dashed #dee2e6;"></textarea>
+                        <small class="text-muted mt-2 d-block">Ô văn bản này chỉ để xem trước, không thể nhập liệu</small>
+                    </div>
+                `;
+                break;
+            default:
+                html = '<p class="text-muted text-center">Chọn loại câu hỏi để xem trước.</p>';
+        }
+
+        container.innerHTML = html;
+    }
+
+    // Add a new answer option
+    function addOption() {
+        const container = document.getElementById('optionsContainer');
+        const optionCount = container.children.length + 1;
+        const newOption = document.createElement('div');
+        newOption.className = 'input-group mb-2';
+        newOption.innerHTML = `
+            <input type="text" class="form-control" placeholder="Lựa chọn ${optionCount}" required>
+            <button class="btn btn-outline-danger" type="button" onclick="removeOption(this)">Xóa</button>
+        `;
+        container.appendChild(newOption);
+    }
+
+    // Remove an answer option
+    function removeOption(button) {
+        const container = document.getElementById('optionsContainer');
+        if (container.children.length > 1) {
+            button.parentElement.remove();
+        } else {
+            alert('Phải có ít nhất một lựa chọn.');
+        }
+    }
+
+    // Reset modal form
+    function resetModal() {
+        document.getElementById('createQuickPollForm').reset();
+        document.getElementById('answerOptions').style.display = 'block';
+        document.getElementById('answerPreview').style.display = 'none';
+        const container = document.getElementById('optionsContainer');
+        container.innerHTML = `
+            <div class="input-group mb-2">
+                <input type="text" class="form-control" placeholder="Lựa chọn 1" required>
+                <button class="btn btn-outline-danger" type="button" onclick="removeOption(this)">Xóa</button>
+            </div>
+            <div class="input-group mb-2">
+                <input type="text" class="form-control" placeholder="Lựa chọn 2" required>
+                <button class="btn btn-outline-danger" type="button" onclick="removeOption(this)">Xóa</button>
+            </div>
+            <div class="input-group mb-2">
+                <input type="text" class="form-control" placeholder="Lựa chọn 3" required>
+                <button class="btn btn-outline-danger" type="button" onclick="removeOption(this)">Xóa</button>
+            </div>
+        `;
+    }
+
+    // Save quick poll - integrated with backend
+    async function saveQuickPoll() {
+        const form = document.getElementById('createQuickPollForm');
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+
+        const pollData = {
+            title: document.getElementById('pollTitle').value,
+            description: document.getElementById('pollDescription').value,
+            points: parseInt(document.getElementById('pollPoints').value),
+            questionType: document.getElementById('questionType').value,
+            options: []
+        };
+
+        // Collect options for single/multiple choice questions
+        if (pollData.questionType === 'single' || pollData.questionType === 'multiple') {
+            const options = document.querySelectorAll('#optionsContainer input');
+            options.forEach(option => {
+                if (option.value.trim()) {
+                    pollData.options.push(option.value.trim());
+                }
+            });
+
+            // Validate that we have at least 2 options
+            if (pollData.options.length < 2) {
+                alert('Vui lòng thêm ít nhất 2 lựa chọn cho câu hỏi.');
+                return;
+            }
+        }
+
+        try {
+            // Show loading state
+            const saveButton = document.querySelector('button[onclick="saveQuickPoll()"]');
+            const originalText = saveButton.innerHTML;
+            saveButton.disabled = true;
+            saveButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Đang lưu...';
+
+            // Send request to backend
+            const response = await fetch(`${BASE}/api/surveys/quick-poll`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(pollData)
+            });
+
+            const result = await response.json();
+
+            if (result.error) {
+                // Handle error
+                alert('Lỗi: ' + (result.message || 'Không thể tạo Quick Poll'));
+                console.error('Error creating quick poll:', result);
+            } else {
+                // Success
+                alert('Quick Poll đã được tạo thành công! 🎉');
+                
+                // Close modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('createQuickPollModal'));
+                modal.hide();
+
+                // Reload the quick polls list
+                loadQuickPolls(1, getFilters());
+            }
+
+            // Restore button state
+            saveButton.disabled = false;
+            saveButton.innerHTML = originalText;
+
+        } catch (error) {
+            console.error('Error saving quick poll:', error);
+            alert('Lỗi kết nối tới máy chủ. Vui lòng thử lại.');
+            
+            // Restore button state
+            const saveButton = document.querySelector('button[onclick="saveQuickPoll()"]');
+            saveButton.disabled = false;
+            saveButton.innerHTML = 'Lưu Quick Poll';
+        }
+    }
 </script>

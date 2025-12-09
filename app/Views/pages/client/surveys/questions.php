@@ -195,6 +195,27 @@
                 `;
         }
 
+        // Handle rating type questions with 5 stars
+        if (loaiCauHoi === 'rating') {
+            const currentRating = answers[questionId] || 0;
+            return `
+                    <div class="rating-container text-center" data-question-id="${questionId}">
+                        <div class="rating-stars d-flex justify-content-center gap-2 mb-3" style="font-size: 2.5rem;">
+                            ${[1, 2, 3, 4, 5].map(star => `
+                                <i class="fas fa-star rating-star ${star <= currentRating ? 'text-warning' : 'text-muted'}" 
+                                   data-rating="${star}" 
+                                   style="cursor: pointer; transition: color 0.2s;"
+                                   onclick="setRating(${questionId}, ${star})"></i>
+                            `).join('')}
+                        </div>
+                        <input type="hidden" id="rating_${questionId}" name="question_${questionId}" value="${currentRating}">
+                        <p class="text-muted" id="rating-text-${questionId}">
+                            ${currentRating > 0 ? `Đánh giá: ${currentRating} sao` : 'Chọn số sao để đánh giá'}
+                        </p>
+                    </div>
+                `;
+        }
+
         const inputType = loaiCauHoi === 'single_choice' ? 'radio' : 'checkbox';
         let questionAnswers = [];
         if (question.answers && question.answers.length > 0) {
@@ -263,6 +284,40 @@
         });
     }
 
+    // Function to handle star rating clicks
+    function setRating(questionId, rating) {
+        // Update the answers object
+        answers[questionId] = rating;
+        
+        // Update the hidden input
+        const hiddenInput = document.getElementById(`rating_${questionId}`);
+        if (hiddenInput) {
+            hiddenInput.value = rating;
+        }
+        
+        // Update all stars visual state
+        const container = document.querySelector(`[data-question-id="${questionId}"]`);
+        if (container) {
+            const stars = container.querySelectorAll('.rating-star');
+            stars.forEach((star, index) => {
+                const starRating = parseInt(star.getAttribute('data-rating'));
+                if (starRating <= rating) {
+                    star.classList.remove('text-muted');
+                    star.classList.add('text-warning');
+                } else {
+                    star.classList.remove('text-warning');
+                    star.classList.add('text-muted');
+                }
+            });
+            
+            // Update the rating text
+            const ratingText = document.getElementById(`rating-text-${questionId}`);
+            if (ratingText) {
+                ratingText.textContent = `Đánh giá: ${rating} sao`;
+            }
+        }
+    }
+
     function saveCurrentAnswer() {
         const question = surveyData.questions[currentQuestion];
         const loaiCauHoi = question.loaiCauHoi;
@@ -271,6 +326,9 @@
         if (loaiCauHoi === 'text') {
             const textarea = document.querySelector(`textarea[name="${inputName}"]`);
             answers[question.id] = textarea ? textarea.value : null;
+        } else if (loaiCauHoi === 'rating') {
+            const ratingInput = document.getElementById(`rating_${question.id}`);
+            answers[question.id] = ratingInput ? parseInt(ratingInput.value) || null : null;
         } else if (loaiCauHoi === 'single_choice') {
             const checked = document.querySelector(`input[name="${inputName}"]:checked`);
             answers[question.id] = checked ? checked.value : null;

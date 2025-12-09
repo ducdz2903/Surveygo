@@ -73,8 +73,10 @@ $router->get('/api/health', fn() => Response::json([
 ]));
 
 // Survey API routes
-$router->get('/api/surveys', [App\Controllers\SurveyController::class, 'index']);
-$router->get('/api/surveys/show', [App\Controllers\SurveyController::class, 'show']);
+
+$router->post('/api/surveys/quick-poll', [App\Controllers\SurveyController::class, 'createQuickPoll']); // Tạo quick poll
+$router->get('/api/surveys', [App\Controllers\SurveyController::class, 'index']); // Lấy ra danh sách khảo sát
+$router->get('/api/surveys/show', [App\Controllers\SurveyController::class, 'show']); // Lấy chi tiết một khảo sát
 $router->post('/api/surveys', [App\Controllers\SurveyController::class, 'create'], [new RoleMiddleware(['admin', 'moderator'])]);
 $router->put('/api/surveys', [App\Controllers\SurveyController::class, 'update'], [new RoleMiddleware(['admin', 'moderator'])]);
 $router->delete('/api/surveys', [App\Controllers\SurveyController::class, 'delete'], [new RoleMiddleware(['admin'])]);
@@ -82,8 +84,8 @@ $router->post('/api/surveys/publish', [App\Controllers\SurveyController::class, 
 $router->post('/api/surveys/approve', [App\Controllers\SurveyController::class, 'approve'], [new RoleMiddleware(['admin', 'moderator'])]);
 $router->post('/api/surveys/attach-question', [App\Controllers\SurveyController::class, 'attachQuestion'], [new RoleMiddleware(['admin', 'moderator'])]);
 $router->post('/api/surveys/detach-question', [App\Controllers\SurveyController::class, 'detachQuestion'], [new RoleMiddleware(['admin', 'moderator'])]);
-$router->post('/api/surveys/{id}/submit', [App\Controllers\SurveyController::class, 'submit'], [new AuthMiddleware()]);
-$router->get('/api/surveys/{id}/check-submission', [App\Controllers\SurveyController::class, 'checkSubmission'], [new AuthMiddleware()]);
+$router->post('/api/surveys/{id}/submit', [App\Controllers\SurveyController::class, 'submit'], [new AuthMiddleware()]); // Submit khảo sát
+$router->get('/api/surveys/{id}/check-submission', [App\Controllers\SurveyController::class, 'checkSubmission'], [new AuthMiddleware()]); // Kiểm tra đã submit chưa
 
 // Question API routes
 $router->get('/api/questions/{id}/answers', [App\Controllers\QuestionController::class, 'getAnswersForQuestion']);
@@ -93,7 +95,11 @@ $router->get('/api/questions/show', [App\Controllers\QuestionController::class, 
 $router->post('/api/questions', [App\Controllers\QuestionController::class, 'create'], [new RoleMiddleware(['admin', 'moderator'])]);
 $router->put('/api/questions', [App\Controllers\QuestionController::class, 'update'], [new RoleMiddleware(['admin', 'moderator'])]);
 $router->delete('/api/questions', [App\Controllers\QuestionController::class, 'delete'], [new RoleMiddleware(['admin'])]);
+$router->delete('/api/questions/{id}', [App\Controllers\QuestionController::class, 'delete']); // Xóa câu hỏi
 
+// Contact messages API
+$router->put('/api/contact-messages', [App\Controllers\ContactController::class, 'update'], [new RoleMiddleware(['admin'])]);
+$router->delete('/api/contact-messages', [App\Controllers\ContactController::class, 'delete'], [new RoleMiddleware(['admin'])]);
 // Events API
 $router->get('/api/events', [App\Controllers\EventController::class, 'index']);
 
@@ -109,8 +115,6 @@ $router->delete('/api/feedbacks', [App\Controllers\FeedbackController::class, 'd
 $router->get('/api/contact-messages', [App\Controllers\ContactController::class, 'index'], [new RoleMiddleware(['admin'])]);
 $router->get('/api/contact-messages/show', [App\Controllers\ContactController::class, 'show'], [new RoleMiddleware(['admin'])]);
 $router->post('/api/contact-messages', [App\Controllers\ContactController::class, 'create']);
-$router->put('/api/contact-messages', [App\Controllers\ContactController::class, 'update'], [new RoleMiddleware(['admin'])]);
-$router->delete('/api/contact-messages', [App\Controllers\ContactController::class, 'delete'], [new RoleMiddleware(['admin'])]);
 
 // Daily rewards API
 $router->get('/api/daily-rewards/status', [DailyRewardController::class, 'status'], [new AuthMiddleware()]);

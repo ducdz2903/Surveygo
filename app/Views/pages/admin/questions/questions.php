@@ -4,7 +4,7 @@
             <h4 class="mb-1">Quản lý Câu hỏi</h4>
             <p class="text-muted mb-0">Ngân hàng câu hỏi và quản lý liên kết khảo sát</p>
         </div>
-        <button class="btn btn-primary" onclick="openCreateModal()">
+        <button class="btn btn-primary" onclick="openQuestionModal('create')">
             <i class="fas fa-plus me-2"></i>Tạo câu hỏi mới
         </button>
     </div>
@@ -27,7 +27,7 @@
                     <select class="form-select" id="filter-type">
                         <option value="">Tất cả loại</option>
                         <option value="single_choice">Một lựa chọn (Radio)</option>
-                        <option value="multi_choice">Nhiều lựa chọn (Checkbox)</option>
+                        <option value="multiple_choice">Nhiều lựa chọn (Checkbox)</option>
                         <option value="text">Văn bản (Text)</option>
                         <option value="rating">Đánh giá (Rating)</option>
                     </select>
@@ -36,8 +36,12 @@
                     <label class="form-label fw-bold small text-uppercase text-muted">Danh mục</label>
                     <select class="form-select" id="filter-survey">
                         <option value="">Tất cả danh mục</option>
-                        <option value="1">Khảo sát thói quen đọc</option>
-                        <option value="2">Đánh giá dịch vụ</option>
+                        <option value="-1">Không liên kết khảo sát</option>
+                        <?php if (!empty($surveys)): ?>
+                            <?php foreach ($surveys as $survey): ?>
+                                <option value="<?= $survey->getId() ?>"><?= htmlspecialchars($survey->getTieuDe()) ?></option>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
                     </select>
                 </div>
                 <div class="col-md-3 d-flex align-items-end">
@@ -105,7 +109,7 @@
                             <label class="form-label fw-bold">Loại câu hỏi</label>
                             <select class="form-select" id="modal-type-select">
                                 <option value="single_choice">Một lựa chọn (Radio)</option>
-                                <option value="multi_choice">Nhiều lựa chọn (Checkbox)</option>
+                                <option value="multiple_choice">Nhiều lựa chọn (Checkbox)</option>
                                 <option value="text">Văn bản (Text)</option>
                                 <option value="rating">Đánh giá (Star/Scale)</option>
                             </select>
@@ -113,9 +117,12 @@
                         <div class="col-md-6">
                             <label class="form-label fw-bold">Gán vào khảo sát</label>
                             <select class="form-select" id="modal-survey-select">
-                                <option value="">-- Chọn khảo sát --</option>
-                                <option value="1">Khảo sát thói quen đọc</option>
-                                <option value="2">Đánh giá dịch vụ</option>
+                                <option value="">Không liên kết khảo sát</option>
+                                <?php if (!empty($surveys)): ?>
+                                    <?php foreach ($surveys as $survey): ?>
+                                        <option value="<?= $survey->getId() ?>"><?= htmlspecialchars($survey->getTieuDe()) ?></option>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
                             </select>
                         </div>
                     </div>
@@ -141,15 +148,19 @@
                                 </button>
                             </div>
                         </div>
-                        <button type="button" class="btn btn-sm btn-outline-primary mt-2">
+                        <button type="button" class="btn btn-sm btn-outline-primary mt-2" id="btn-add-option">
                             <i class="fas fa-plus me-1"></i>Thêm lựa chọn
                         </button>
+                    </div>
+                    <div id="preview-area" class="mb-3 border rounded p-3 bg-white d-none">
+                        <label class="form-label fw-bold small text-uppercase text-primary">Xem trước</label>
+                        <div id="preview-content" class="p-2"></div>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                <button type="button" class="btn btn-primary" onclick="saveQuestion()">
+                <button type="button" class="btn btn-primary" id="btn-save-question">
                     <i class="fas fa-save me-2"></i>Lưu câu hỏi
                 </button>
             </div>
@@ -157,7 +168,48 @@
     </div>
 </div>
 
+<script src="/public/assets/js/modal-helper.js"></script>
+
 <script>
+    // Toast Helper
+    const showToast = (type, message) => {
+        let container = document.getElementById('toast-container');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'toast-container';
+            container.className = 'position-fixed top-0 end-0 p-3';
+            container.style.zIndex = '1050';
+            document.body.appendChild(container);
+        }
+
+        const toastId = 'toast-' + Date.now();
+        const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+        const bgClass = type === 'success' ? 'bg-success' : 'bg-danger';
+
+        const html = `
+            <div id="${toastId}" class="toast align-items-center text-white ${bgClass} border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        <i class="fas ${icon} me-2"></i>${message}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            </div>
+        `;
+
+        const template = document.createElement('template');
+        template.innerHTML = html.trim();
+        const toastEl = template.content.firstChild;
+        container.appendChild(toastEl);
+
+        const toast = new bootstrap.Toast(toastEl, { delay: 3000 });
+        toast.show();
+
+        toastEl.addEventListener('hidden.bs.toast', () => {
+            toastEl.remove();
+        });
+    };
+
     document.addEventListener('DOMContentLoaded', function () {
         let currentPage = 1;
         const itemsPerPage = 10;
@@ -169,7 +221,7 @@
         const getTypeBadge = (type) => {
             const map = {
                 'single_choice': { class: 'bg-primary', icon: 'fa-dot-circle', text: 'Radio' },
-                'multi_choice': { class: 'bg-info', icon: 'fa-check-square', text: 'Checkbox' },
+                'multiple_choice': { class: 'bg-info', icon: 'fa-check-square', text: 'Checkbox' },
                 'text': { class: 'bg-secondary', icon: 'fa-align-left', text: 'Text' },
                 'rating': { class: 'bg-warning text-dark', icon: 'fa-star', text: 'Rating' }
             };
@@ -250,8 +302,11 @@
                     <td><small class="text-muted">${q.created_at ? q.created_at.split(' ')[0] : ''}</small></td>
                     <td class="text-end pe-4">
                         <div class="btn-group">
-                            <button class="btn btn-sm btn-light text-primary" onclick="editQuestion(${q.id})" title="Sửa">
+                            <button class="btn btn-sm btn-light text-primary" onclick="openQuestionModal('edit', ${q.id})" title="Sửa">
                                 <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-light text-info" onclick="openQuestionModal('view', ${q.id})" title="Xem">
+                                <i class="fas fa-eye"></i>
                             </button>
                             <button class="btn btn-sm btn-light text-danger" onclick="deleteQuestion(${q.id})" title="Xóa">
                                 <i class="fas fa-trash"></i>
@@ -307,92 +362,318 @@
             container.innerHTML = html;
         }
 
+        // Helper to set form readonly state
+        const setFormReadOnly = (isReadOnly) => {
+            const form = document.getElementById('question-form');
+            const elements = form.querySelectorAll('input, select, textarea, button:not([data-bs-dismiss])');
+            
+            // Disable/Enable all form elements
+            elements.forEach(el => {
+                el.disabled = isReadOnly;
+            });
+            
+            const btnSave = document.getElementById('btn-save-question');
+            
+            // Toggle Save Button
+            if (isReadOnly) {
+                btnSave.style.display = 'none';
+            } else {
+                btnSave.style.display = 'block';
+            }
+        };
+
+        const updateLivePreview = () => {
+            const type = document.getElementById('modal-type-select').value;
+            // Gather answers from inputs
+            const answerInputs = document.querySelectorAll('#options-list input');
+            const answers = Array.from(answerInputs).map(input => ({ noiDungCauTraLoi: input.value }));
+            
+            renderPreview(type, answers);
+        };
+
+        const addOption = (value = '') => {
+            const list = document.getElementById('options-list');
+            const div = document.createElement('div');
+            div.className = 'input-group mb-2 option-item';
+            div.innerHTML = `
+                <span class="input-group-text"><i class="fas fa-circle small"></i></span>
+                <input type="text" class="form-control" placeholder="Nhập lựa chọn..." value="${escapeHtml(value)}">
+                <button type="button" class="btn btn-outline-danger btn-remove-option">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            list.appendChild(div);
+            
+            // Bind input event for live preview
+            div.querySelector('input').addEventListener('input', updateLivePreview);
+            div.querySelector('.btn-remove-option').addEventListener('click', function() {
+                div.remove();
+                updateLivePreview();
+            });
+        };
+
+        const renderPreview = (type, answers) => {
+            const container = document.getElementById('preview-content');
+            container.innerHTML = '';
+
+            if (type === 'single_choice') {
+                if (!answers || answers.length === 0) {
+                    container.innerHTML = '<span class="text-muted fst-italic">Chưa có lựa chọn nào</span>';
+                    return;
+                }
+                answers.forEach(ans => {
+                    const div = document.createElement('div');
+                    div.className = 'form-check mb-2';
+                    div.innerHTML = `
+                        <input class="form-check-input" type="radio" disabled>
+                        <label class="form-check-label opacity-100 text-dark">${escapeHtml(ans.noiDungCauTraLoi)}</label>
+                    `;
+                    container.appendChild(div);
+                });
+            } else if (type === 'multiple_choice') {
+                 if (!answers || answers.length === 0) {
+                    container.innerHTML = '<span class="text-muted fst-italic">Chưa có lựa chọn nào</span>';
+                    return;
+                }
+                answers.forEach(ans => {
+                    const div = document.createElement('div');
+                    div.className = 'form-check mb-2';
+                    div.innerHTML = `
+                        <input class="form-check-input" type="checkbox" disabled>
+                        <label class="form-check-label opacity-100 text-dark">${escapeHtml(ans.noiDungCauTraLoi)}</label>
+                    `;
+                    container.appendChild(div);
+                });
+            } else if (type === 'text') {
+                container.innerHTML = `
+                    <textarea class="form-control" rows="3" disabled placeholder="Người dùng sẽ nhập câu trả lời tại đây..."></textarea>
+                `;
+            } else if (type === 'rating') {
+                container.innerHTML = `
+                    <div class="d-flex gap-2">
+                        <i class="far fa-star fa-2x text-warning"></i>
+                        <i class="far fa-star fa-2x text-warning"></i>
+                        <i class="far fa-star fa-2x text-warning"></i>
+                        <i class="far fa-star fa-2x text-warning"></i>
+                        <i class="far fa-star fa-2x text-warning"></i>
+                    </div>
+                `;
+            }
+        };
+
+
 
         // hàm đổi trang
         window.changePage = (p) => { currentPage = p; loadQuestions(); };
 
-        // hàm tạo modal 
-        window.openCreateModal = () => {
-            document.getElementById('question-form').reset();
+        // Unified Modal Function
+        window.openQuestionModal = (mode, id = null) => {
+            const form = document.getElementById('question-form');
+            form.reset();
             document.getElementById('question-id').value = '';
-            document.getElementById('modalTitle').textContent = 'Tạo câu hỏi mới';
-            document.getElementById('options-area').style.display = 'block';
-            new bootstrap.Modal(document.getElementById('questionModal')).show();
-        };
+            document.getElementById('options-list').innerHTML = '';
+            
+            const modalTitle = document.getElementById('modalTitle');
+            const optionsArea = document.getElementById('options-area');
 
-        // hàm sửa
-        window.editQuestion = async (id) => {
-            try {
-                const res = await fetch(`/api/questions/${id}`);
-                const json = await res.json();
-                const data = json.data || json;
+            // Reset UI State
+            setFormReadOnly(false);
+            optionsArea.style.display = 'block';
 
-                document.getElementById('question-id').value = data.id;
-                document.getElementById('question-content').value = data.noiDungCauHoi;
-                document.getElementById('modal-type-select').value = data.loaiCauHoi;
-                document.getElementById('modal-survey-select').value = data.maKhaoSat || '';
-                try { document.getElementById('modal-is-quickpoll').checked = Boolean(data.isQuickPoll || data.quick_poll); } catch(e) {}
-
-                // Toggle options area
-                const type = data.loaiCauHoi;
-                document.getElementById('options-area').style.display = 
-                    (type === 'text' || type === 'rating') ? 'none' : 'block';
-
-                document.getElementById('modalTitle').textContent = 'Cập nhật câu hỏi #' + id;
+            if (mode === 'create') {
+                modalTitle.textContent = 'Tạo câu hỏi mới';
+                addOption('');
+                addOption('');
+                setFormReadOnly(false);
+                updateLivePreview();
                 new bootstrap.Modal(document.getElementById('questionModal')).show();
-            } catch (e) {
-                showToast('error', 'Lỗi lấy dữ liệu: ' + e.message);
+            } 
+            else if (mode === 'edit' || mode === 'view') {
+                if (mode === 'edit') {
+                    modalTitle.textContent = 'Cập nhật câu hỏi #' + id;
+                    setFormReadOnly(false);
+                } else {
+                    modalTitle.textContent = 'Chi tiết câu hỏi';
+                    setFormReadOnly(true);
+                }
+                fetchQuestion(id);
             }
         };
 
+        async function fetchQuestion(id) {
+            try {
+                const res = await fetch(`/api/questions/show?id=${id}`);
+                const json = await res.json();
+                if (json.error || !res.ok) {
+                    showToast('error', json.message || 'Không thể tải câu hỏi');
+                    return;
+                }
+                const data = json.data || json;
+                fillQuestionForm(data);
+                new bootstrap.Modal(document.getElementById('questionModal')).show();
+            } catch (e) {
+                console.error(e);
+                showToast('error', 'Lỗi lấy dữ liệu: ' + e.message);
+            }
+        }
+
+        function fillQuestionForm(data) {
+             const optionsArea = document.getElementById('options-area');
+
+            // Populate Fields
+            document.getElementById('question-id').value = data.id || '';
+            document.getElementById('question-content').value = data.noiDungCauHoi;
+            document.getElementById('modal-type-select').value = data.loaiCauHoi;
+            document.getElementById('modal-survey-select').value = data.maKhaoSat || '';
+            try { document.getElementById('modal-is-quickpoll').checked = Boolean(data.isQuickPoll || data.quick_poll); } catch(e) {}
+
+            // Toggle Options Area based on Type
+            optionsArea.style.display = (data.loaiCauHoi === 'text' || data.loaiCauHoi === 'rating') ? 'none' : 'block';
+
+            // Populate Options
+            if (data.answers && data.answers.length > 0) {
+                data.answers.forEach(ans => addOption(ans.noiDungCauTraLoi));
+            } else {
+                addOption('');
+                addOption('');
+            }
+
+            updateLivePreview(); // Force Preview Update
+        }
+
         // hàm lưu
-        window.saveQuestion = async () => {
+        // Logic xử lý khi nhấn nút Lưu câu hỏi
+        document.getElementById('btn-save-question').addEventListener('click', async function() {
+            const form = document.getElementById('question-form');
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            const modalTitle = document.getElementById('modalTitle').textContent;
             const id = document.getElementById('question-id').value;
+            
+            // Handle maKhaoSat explicitly
+            let maKhaoSat = document.getElementById('modal-survey-select').value;
+            if (!maKhaoSat || maKhaoSat === '-1' || maKhaoSat === '') {
+                maKhaoSat = null;
+            }
+
+            // Collect data - base payload
             const payload = {
                 noiDungCauHoi: document.getElementById('question-content').value,
                 loaiCauHoi: document.getElementById('modal-type-select').value,
-                maKhaoSat: document.getElementById('modal-survey-select').value || null,
-                isQuickPoll: (document.getElementById('modal-is-quickpoll') ? (document.getElementById('modal-is-quickpoll').checked ? 1 : 0) : 0)
+                isQuickPoll: (document.getElementById('modal-is-quickpoll') ? (document.getElementById('modal-is-quickpoll').checked ? 1 : 0) : 0),
+                answers: [] // Prepare answers array
             };
 
-            const url = id ? `/api/questions/${id}` : '/api/questions';
-            const method = id ? 'PUT' : 'POST';
-
-            try {
-                const res = await fetch(url, {
-                    method: method,
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-
-                if (res.ok) {
-                    bootstrap.Modal.getInstance(document.getElementById('questionModal')).hide();
-                    loadQuestions();
-                    showToast('success', 'Lưu thành công!');
-                } else {
-                    showToast('error', 'Có lỗi xảy ra!');
-                }
-            } catch (e) {
-                console.error(e);
+            // Only add maKhaoSat if it has a valid value
+            if (maKhaoSat !== null) {
+                payload.maKhaoSat = parseInt(maKhaoSat);
             }
-        };
 
-        // hàm xóa
-        window.deleteQuestion = async (id) => {
-            if (confirm('Bạn có chắc muốn xóa câu hỏi này?')) {
+            // Add id only for update operations
+            if (id) {
+                payload.id = id;
+            }
+
+            // Collect Answers
+            const type = document.getElementById('modal-type-select').value;
+            if (type === 'single_choice' || type === 'multiple_choice') {
+                const answerInputs = document.querySelectorAll('#options-list input');
+                answerInputs.forEach(input => {
+                    if (input.value.trim() !== '') {
+                        payload.answers.push({ noiDungCauTraLoi: input.value.trim() });
+                    }
+                });
+            }
+
+            // Logic phân nhánh dựa trên tiêu đề form hoặc ID
+            if (modalTitle === 'Tạo câu hỏi mới' || !id) {
+                // Tạo câu hỏi mới
+                console.log('Creating question with payload:', JSON.stringify(payload, null, 2));
                 try {
-                    const res = await fetch(`/api/questions/${id}`, { method: 'DELETE' });
+                    const res = await fetch('/api/questions', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+
                     if (res.ok) {
+                        const modalEl = document.getElementById('questionModal');
+                        const modalInstance = bootstrap.Modal.getInstance(modalEl);
+                        
+                        // Reset form when modal is hidden
+                        modalEl.addEventListener('hidden.bs.modal', function resetForm() {
+                            const form = document.getElementById('question-form');
+                            form.reset();
+                            document.getElementById('question-id').value = '';
+                            document.getElementById('options-list').innerHTML = '';
+                            // Remove this listener after it fires once
+                            modalEl.removeEventListener('hidden.bs.modal', resetForm);
+                        }, { once: true });
+                        
+                        modalInstance.hide();
                         loadQuestions();
-                        showToast('success', 'Xóa thành công!');
+                        showToast('success', 'Tạo câu hỏi mới thành công!');
                     } else {
-                        showToast('error', 'Không thể xóa!');
+                        console.error('HTTP Status:', res.status);
+                        console.error('Payload sent:', payload);
+                        const err = await res.json().catch(() => ({ message: 'Không thể parse response' }));
+                        console.error('Error Response:', err);
+                        let msg = err.message || 'Không thể tạo câu hỏi';
+                        if (err.errors) {
+                            msg += ': ' + Object.values(err.errors).join(', ');
+                        }
+                        showToast('error', 'Lỗi ' + res.status + ': ' + msg);
                     }
                 } catch (e) {
                     console.error(e);
+                    showToast('error', 'Lỗi kết nối khi tạo mới');
+                }
+            } else if (modalTitle.startsWith('Cập nhật câu hỏi #') || (id && id !== 'undefined')) {
+                // Cập nhật câu hỏi
+                if (!id || id === 'undefined') {
+                    showToast('error', 'Lỗi: ID câu hỏi không hợp lệ');
+                    return;
+                }
+                try {
+                    // Update to match backend route: PUT /api/questions?id={id}
+                    const res = await fetch(`/api/questions?id=${id}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (res.ok) {
+                        const modalEl = document.getElementById('questionModal');
+                        const modalInstance = bootstrap.Modal.getInstance(modalEl);
+                        
+                        // Reset form when modal is hidden
+                        modalEl.addEventListener('hidden.bs.modal', function resetForm() {
+                            const form = document.getElementById('question-form');
+                            form.reset();
+                            document.getElementById('question-id').value = '';
+                            document.getElementById('options-list').innerHTML = '';
+                            // Remove this listener after it fires once
+                            modalEl.removeEventListener('hidden.bs.modal', resetForm);
+                        }, { once: true });
+                        
+                        modalInstance.hide();
+                        loadQuestions();
+                        showToast('success', 'Cập nhật thành công!');
+                    } else {
+                        const err = await res.json();
+                        showToast('error', 'Lỗi: ' + (err.message || 'Không thể cập nhật'));
+                    }
+                } catch (e) {
+                    console.error(e);
+                    showToast('error', 'Lỗi kết nối khi cập nhật');
                 }
             }
-        };
+        });
+
 
         function debounce(fn, delay) {
             let timeout;
@@ -421,6 +702,14 @@
             const type = this.value;
             const optionsArea = document.getElementById('options-area');
             optionsArea.style.display = (type === 'text' || type === 'rating') ? 'none' : 'block';
+            updateLivePreview();
+        });
+
+        document.getElementById('question-content').addEventListener('input', updateLivePreview);
+        
+        document.getElementById('btn-add-option').addEventListener('click', () => {
+            addOption();
+            updateLivePreview();
         });
 
         window.loadQuestions = loadQuestions;
@@ -435,4 +724,29 @@
         // Init
         loadQuestions();
     });
+        // Ghi đè hàm xóa để dùng modal-helper.js
+        window.deleteQuestion = (id) => {
+            showConfirm({
+                title: 'Xác nhận xóa',
+                message: 'Bạn có chắc muốn xóa câu hỏi này?',
+                type: 'danger',
+                confirmText: 'Xóa',
+                cancelText: 'Hủy',
+                isDangerous: true,
+                onConfirm: async () => {
+                    try {
+                        const res = await fetch(`/api/questions/${id}`, { method: 'DELETE' });
+                        if (res.ok) {
+                            loadQuestions();
+                            showToast('success', 'Xóa thành công!');
+                        } else {
+                            showToast('error', 'Không thể xóa!');
+                        }
+                    } catch (e) {
+                        console.error(e);
+                        showToast('error', 'Lỗi kết nối khi xóa!');
+                    }
+                }
+            });
+        };
 </script>
