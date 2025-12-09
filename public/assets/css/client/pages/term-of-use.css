@@ -103,7 +103,6 @@
 .terms-section {
     margin-bottom: 50px;
     padding-bottom: 40px;
-    border-bottom: 1px solid var(--border-color);
     scroll-margin-top: 100px;
 }
 
@@ -117,7 +116,6 @@
     color: var(--text-color);
     margin-bottom: 20px;
     padding-bottom: 12px;
-    border-bottom: 3px solid var(--primary-color);
     display: inline-block;
 }
 
@@ -136,7 +134,6 @@
     padding: 25px 40px;
     border-radius: 10px;
     margin: 25px 0;
-    border-left: 4px solid var(--primary-color);
     list-style: none;
 }
 
