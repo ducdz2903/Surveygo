@@ -492,4 +492,29 @@ INSERT IGNORE INTO user_points (user_id, balance, total_earned, created_at, upda
 (14, 15, 20, NOW(), NOW()),
 (15, 75, 90, NOW(), NOW());
 
+-- dữ liệu cho bảng survey_question_map
+INSERT IGNORE INTO survey_question_map (idKhaoSat, idCauHoi, created_at, updated_at) VALUES
+  (1, 1, NOW(), NOW()),
+  (1, 2, NOW(), NOW()),
+  (2, 3, NOW(), NOW()),
+  (2, 4, NOW(), NOW()),
+  (3, 5, NOW(), NOW()),
+  (3, 6, NOW(), NOW()),
+  (4, 7, NOW(), NOW()),
+  (4, 8, NOW(), NOW()),
+  (5, 9, NOW(), NOW()),
+  (5, 10, NOW(), NOW()),
+  (6, 11, NOW(), NOW()),
+  (6, 12, NOW(), NOW()),
+  (7,13,NOW(),NOW()),
+  (8,14,NOW(),NOW()),
+  (9,15,NOW(),NOW()),
+  (10,16,NOW(),NOW()),
+  (11,17,NOW(),NOW()),
+  (12,18,NOW(),NOW()),
+  (13,19,NOW(),NOW()),
+  (14,20,NOW(),NOW()),
+  (15,21,NOW(),NOW()),
+  (16,22,NOW(),NOW());
+
 
