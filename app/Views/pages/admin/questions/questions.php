@@ -168,6 +168,8 @@
     </div>
 </div>
 
+<script src="/public/assets/js/modal-helper.js"></script>
+
 <script>
     // Toast Helper
     const showToast = (type, message) => {
@@ -672,22 +674,6 @@
             }
         });
 
-        // hàm xóa
-        window.deleteQuestion = async (id) => {
-            if (confirm('Bạn có chắc muốn xóa câu hỏi này?')) {
-                try {
-                    const res = await fetch(`/api/questions/${id}`, { method: 'DELETE' });
-                    if (res.ok) {
-                        loadQuestions();
-                        showToast('success', 'Xóa thành công!');
-                    } else {
-                        showToast('error', 'Không thể xóa!');
-                    }
-                } catch (e) {
-                    console.error(e);
-                }
-            }
-        };
 
         function debounce(fn, delay) {
             let timeout;
@@ -738,4 +724,29 @@
         // Init
         loadQuestions();
     });
+        // Ghi đè hàm xóa để dùng modal-helper.js
+        window.deleteQuestion = (id) => {
+            showConfirm({
+                title: 'Xác nhận xóa',
+                message: 'Bạn có chắc muốn xóa câu hỏi này?',
+                type: 'danger',
+                confirmText: 'Xóa',
+                cancelText: 'Hủy',
+                isDangerous: true,
+                onConfirm: async () => {
+                    try {
+                        const res = await fetch(`/api/questions/${id}`, { method: 'DELETE' });
+                        if (res.ok) {
+                            loadQuestions();
+                            showToast('success', 'Xóa thành công!');
+                        } else {
+                            showToast('error', 'Không thể xóa!');
+                        }
+                    } catch (e) {
+                        console.error(e);
+                        showToast('error', 'Lỗi kết nối khi xóa!');
+                    }
+                }
+            });
+        };
 </script>
