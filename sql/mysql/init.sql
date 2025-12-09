@@ -185,6 +185,70 @@ CREATE TABLE IF NOT EXISTS feedbacks (
   FOREIGN KEY (idNguoiDung) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- bảng quà thưởng
+CREATE TABLE IF NOT EXISTS rewards (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  
+  code VARCHAR(20) NOT NULL UNIQUE, -- mã phần thưởng
+  name VARCHAR(255) NOT NULL,       -- tên ví dụ: "Rút tiền Momo", "Thẻ Steam 100K"
+
+  type ENUM('cash','e_wallet','giftcard','physical') NOT NULL, 
+  -- cash = banking
+  -- e_wallet = momo, zalopay
+  -- giftcard = apple, steam
+  -- physical = tai nghe, chuột
+
+  provider VARCHAR(100) DEFAULT NULL, 
+  -- momo, zalopay, apple, steam, ngân hàng..., hoặc null nếu quà vật lý
+
+  point_cost INT UNSIGNED NOT NULL, -- số điểm cần để đổi
+
+  value VARCHAR(255) DEFAULT NULL,
+  -- ví dụ thẻ 100K → 100000
+  -- quà vật lý có thể null
+
+  stock INT UNSIGNED DEFAULT NULL,
+  -- quà vật lý cần stock
+  -- ví điện tử thì stock = null
+
+  image VARCHAR(255) DEFAULT NULL,   -- hình ảnh minh họa
+
+  description TEXT DEFAULT NULL,
+
+  -- Gift card specific columns
+  giftcard_code VARCHAR(100) DEFAULT NULL,    -- mã quà tặng
+  giftcard_serial VARCHAR(100) DEFAULT NULL,  -- serial number
+  giftcard_expiry_date DATE DEFAULT NULL,     -- ngày hết hạn
+
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- bảng lịch sử đổi quà
+CREATE TABLE IF NOT EXISTS reward_redemptions (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+
+  user_id INT UNSIGNED NOT NULL,
+  reward_id INT UNSIGNED NOT NULL,
+
+  status ENUM('pending','processing','completed','rejected')
+    NOT NULL DEFAULT 'pending',
+
+  note VARCHAR(255) DEFAULT NULL,        -- admin ghi chú
+  receiver_info TEXT DEFAULT NULL,       -- thông tin nhận: tên, SĐT, địa chỉ hoặc tài khoản ví
+  
+  bank_name VARCHAR(255) DEFAULT NULL,   -- tên ngân hàng (cho cash redemptions)
+  account_number VARCHAR(50) DEFAULT NULL,-- số tài khoản / số điện thoại
+
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (reward_id) REFERENCES rewards(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
 INSERT IGNORE INTO users (id, code, name, avatar, email, phone, password, gender, role, created_at, updated_at) VALUES
   (1, 'US001','Nguyễn Văn AB', NULL, 'user1@example.com', NULL, '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'other', 'user', NOW(), NOW()),
   (2, 'US002' ,'Trần Thị B', NULL, 'user2@example.com', NULL, '$2y$10$92IXUNpkjO0rOO5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'other', 'user', NOW(), NOW()),
@@ -365,3 +429,67 @@ INSERT IGNORE INTO feedbacks (id,ma, idKhaoSat, idNguoiDung, tenNguoiDung , danh
   (13, 'FB013', 8, NULL, 'Khách Ẩn Danh', 4, 'Khảo sát gọn và dễ thao tác.', NOW(), NOW()),
   (14, 'FB014', 9, NULL, 'Khách Ẩn Danh', 5, 'Rất tốt, tôi thích khảo sát dạng này.', NOW(), NOW()),
   (15, 'FB015', 7, NULL, 'Khách Ẩn Danh', 4, 'Nội dung hữu ích, nên giữ.', NOW(), NOW());
+
+INSERT INTO rewards (code, name, type, provider, point_cost, value, stock, image, description, giftcard_code, giftcard_serial, giftcard_expiry_date)
+VALUES
+('RW-CASH-20K',  'Rút tiền Banking 20.000đ',  'cash', 'bank', 2000, 20000, 1000, 'banking_20k.png', 'Rút tiền về tài khoản ngân hàng.', NULL, NULL, NULL),
+('RW-CASH-200K', 'Rút tiền Banking 200.000đ', 'cash', 'bank', 20000, 200000, 1000, 'banking_200k.png', 'Rút tiền về tài khoản ngân hàng.', NULL, NULL, NULL),
+('RW-CASH-500K', 'Rút tiền Banking 500.000đ', 'cash', 'bank', 50000, 500000, 1000, 'banking_500k.png', 'Rút tiền về tài khoản ngân hàng.', NULL, NULL, NULL),
+
+('RW-MOMO-20K',  'Ví MoMo 20.000đ', 'e_wallet', 'momo', 2000, 20000, NULL, 'momo_20k.png', 'Nạp tiền vào ví MoMo.', NULL, NULL, NULL),
+('RW-ZALO-100K', 'ZaloPay 100.000đ', 'e_wallet', 'zalopay', 10000, 100000, NULL, 'zalopay_100k.png', 'Nạp tiền ZaloPay.', NULL, NULL, NULL),
+('RW-SHOPEE-50K', 'ShopeePay 50.000đ', 'e_wallet', 'shopeepay', 5000, 50000, NULL, 'shopeepay_50k.png', 'Nạp tiền ShopeePay.', NULL, NULL, NULL),
+
+('RW-CARD-VIETTEL-50', 'Thẻ Viettel 50.000đ', 'giftcard', 'viettel', 6000, 50000, 100, 'viettel_50.png', 'Mã thẻ cào Viettel.', '123456789012345', 'VT-SN-2024001', '2025-12-31'),
+('RW-CARD-VIETTEL-100', 'Thẻ Viettel 100.000đ', 'giftcard', 'viettel', 12000, 100000, 80, 'viettel_100.png', 'Mã thẻ cào Viettel.', '987654321098765', 'VT-SN-2024002', '2025-12-31'),
+('RW-CARD-MOBI-50', 'Thẻ Mobifone 50.000đ', 'giftcard', 'mobifone', 6000, 50000, 70, 'mobifone_50.png', 'Mã thẻ Mobifone.', '111222333444555', 'MB-SN-2024001', '2025-12-31'),
+('RW-CARD-VINA-100', 'Thẻ Vinaphone 100.000đ', 'giftcard', 'vinaphone', 12000, 100000, 60, 'vinaphone_100.png', 'Mã thẻ Vinaphone.', '555666777888999', 'VN-SN-2024001', '2025-12-31'),
+
+('RW-APPLE-200', 'Apple Gift Card 200.000đ', 'giftcard', 'apple', 24000, 200000, 40, 'apple_giftcard_200.png', 'Mã Apple App Store.', 'APPLE-GC-2024-001', 'APPL-SN-2024-0001', '2025-06-30'),
+('RW-GOOGLE-100', 'Google Play 100.000đ', 'giftcard', 'google', 12000, 100000, 50, 'googleplay_100.png', 'Mã Google Play nạp ứng dụng.', 'GOOGLE-GP-2024-001', 'GOOG-SN-2024-0001', '2025-06-30'),
+('RW-GARENA-100', 'Garena 100.000đ', 'giftcard', 'garena', 12000, 100000 , 50, 'garena_100.png', 'Nạp Garena cho Liên Quân / FreeFire.', 'GARENA-2024-001', 'GARN-SN-2024-0001', '2025-12-31'),
+('RW-GARENA-200', 'Garena 200.000đ', 'giftcard', 'garena', 24000, 200000, 30, 'garena_200.png', 'Mã thẻ Garena 200K.', NULL, NULL, NULL),
+
+('RW-TIKI-50', 'Voucher Tiki 50.000đ', 'giftcard', 'tiki', 6000, 50000, 200, 'tiki_50.png', 'Voucher mua sắm Tiki.', NULL, NULL, NULL),
+('RW-SHOPEE-100', 'Voucher Shopee 100.000đ', 'giftcard', 'shopee', 12000, 100000, 150, 'shopee_100.png', 'Voucher Shopee áp dụng toàn sàn.', NULL, NULL, NULL),
+('RW-LAZADA-50', 'Voucher Lazada 50.000đ', 'giftcard', 'lazada', 6000, 50000, 180, 'lazada_50.png', 'Voucher Lazada.', NULL, NULL, NULL),
+
+('RW-PH-SPEAKER', 'Loa Bluetooth mini', 'physical', NULL, 18000, NULL, 25, 'speaker.png', 'Loa Bluetooth âm thanh lớn.', NULL, NULL, NULL),
+('RW-PH-POWERA', 'Sạc dự phòng 10.000mAh', 'physical', NULL, 22000, NULL, 20, 'powerbank.png', 'Sạc dự phòng dung lượng cao.', NULL, NULL, NULL),
+('RW-PH-LAMP', 'Đèn bàn học chống cận', 'physical', NULL, 12000, NULL, 30, 'study_lamp.png', 'Đèn LED tiết kiệm điện.', NULL, NULL, NULL),
+
+('RW-PH-BACKPACK', 'Balo chống nước', 'physical', NULL, 20000, NULL, 12, 'backpack.png', 'Balo thời trang chống nước.', NULL, NULL, NULL),
+('RW-PH-NOTEBOOK', 'Sổ tay 200 trang', 'physical', NULL, 3000, NULL, 100, 'notebook.png', 'Sổ tay học tập.', NULL, NULL, NULL),
+('RW-PH-PENSET', 'Bộ bút gel cao cấp', 'physical', NULL, 4000, NULL, 80, 'penset.png', 'Bút viết mực gel.', NULL, NULL, NULL),
+
+('RW-PH-COFFEE', 'Voucher Highlands 50.000đ', 'giftcard', 'highlands', 6000, 50000, 100, 'highlands_50.png', 'Voucher mua nước Highlands.', NULL, NULL, NULL),
+('RW-PH-FOOD', 'Voucher GrabFood 50.000đ', 'giftcard', 'grabfood', 6000, 50000, 100, 'grabfood_50.png', 'Voucher GrabFood.', NULL, NULL, NULL),
+('RW-PH-MILKTEA', 'Voucher GongCha 50.000đ', 'giftcard', 'gongcha', 6000, 50000, 100, 'gongcha_50.png', 'Voucher trà sữa GongCha.', NULL, NULL, NULL);
+
+INSERT IGNORE INTO reward_redemptions
+(user_id, reward_id, status, note, receiver_info, bank_name, account_number, created_at, updated_at)
+VALUES
+(1, 3, 'pending', NULL, 'Nguyễn Văn A, 0901234567', 'momo', '0901234567', NOW(), NOW()),
+(2, 1, 'completed', 'Đã chuyển khoản thành công.', 'Trần Thị B', 'bank', '0123456789', NOW(), NOW()),
+(3, 9, 'processing', 'Đang chuẩn bị giao hàng.', 'Phạm Văn C - Địa chỉ: 123 Lê Lợi, Q1, TP.HCM', NULL, NULL, NOW(), NOW()),
+(4, 6, 'completed', NULL, 'user4@example.com', NULL, NULL, NOW(), NOW()),
+(5, 7, 'rejected', 'Mã không hợp lệ - vui lòng đổi lại.', 'user5@example.com', NULL, NULL, NOW(), NOW());
+
+INSERT IGNORE INTO user_points (user_id, balance, total_earned, created_at, updated_at) VALUES
+(1, 50, 50, NOW(), NOW()),
+(2, 120, 150, NOW(), NOW()),
+(3, 50000, 50000, NOW(), NOW()),     -- admin
+(4, 80, 100, NOW(), NOW()),
+(5, 20, 40, NOW(), NOW()),
+(6, 300, 320, NOW(), NOW()),
+(7, 10, 10, NOW(), NOW()),
+(8, 200, 250, NOW(), NOW()),
+(9, 90, 100, NOW(), NOW()),
+(10, 140, 160, NOW(), NOW()),
+(11, 60, 80, NOW(), NOW()),
+(12, 30, 30, NOW(), NOW()),
+(13, 110, 130, NOW(), NOW()),
+(14, 15, 20, NOW(), NOW()),
+(15, 75, 90, NOW(), NOW());
+
+

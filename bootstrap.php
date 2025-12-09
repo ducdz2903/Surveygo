@@ -9,6 +9,11 @@ declare(strict_types=1);
 // Define base path for convenience.
 define('BASE_PATH', __DIR__);
 
+// Start session for authentication
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 // Register a very small PSR-4-like autoloader for the App namespace.
 spl_autoload_register(function (string $class): void {
     $prefix = 'App\\';

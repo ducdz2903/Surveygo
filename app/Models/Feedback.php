@@ -16,8 +16,8 @@ class Feedback
     private ?string $tenNguoiDung;
     private int $danhGia;
     private ?string $binhLuan;
-    private DateTime|string $createdAt;
-    private DateTime|string $updatedAt;
+    private string $createdAt;
+    private string $updatedAt;
 
     public function __construct(array $row)
     {
@@ -38,18 +38,18 @@ class Feedback
         $db = Container::get('db');
 
         $ma = $data['ma'] ?? ('FB' . str_pad((string) rand(1, 9999), 3, '0', STR_PAD_LEFT));
-        $idKhaoSat = (int) ($data['idKhaoSat '] ?? 0);
-        $idNguoiDung = (int) ($data['idNguoiDung '] ?? 0);
+        $idKhaoSat = (int) ($data['idKhaoSat'] ?? 0);
+        $idNguoiDung = (int) ($data['idNguoiDung'] ?? 0);
         $tenNguoiDung = (string) ($data['tenNguoiDung'] ?? '');
         $danhGia = (int) ($data['danhGia'] ?? 0);
         $binhLuan = $data['binhLuan'] ?? null;
-        $sql = 'INSERT INTO feedbacks (ma, idKhaoSat , idNguoiDung , tenNguoiDung, danhGia, binhLuan, created_at, updated_at)
-                VALUES (:ma, :idKhaoSat , :idNguoiDung , :tenNguoiDung, :danhGia, :binhLuan, NOW(), NOW())';
+        $sql = 'INSERT INTO feedbacks (ma, idKhaoSat, idNguoiDung, tenNguoiDung, danhGia, binhLuan, created_at, updated_at)
+                VALUES (:ma, :idKhaoSat, :idNguoiDung, :tenNguoiDung, :danhGia, :binhLuan, NOW(), NOW())';
 
         $stmt = $db->prepare($sql);
         $stmt->bindParam(':ma', $ma);
-        $stmt->bindParam(':idKhaoSat ', $idKhaoSat);
-        $stmt->bindParam(':idNguoiDung ', $idNguoiDung);
+        $stmt->bindParam(':idKhaoSat', $idKhaoSat);
+        $stmt->bindParam(':idNguoiDung', $idNguoiDung);
         $stmt->bindParam(':tenNguoiDung', $tenNguoiDung);
         $stmt->bindParam(':danhGia', $danhGia);
         $stmt->bindParam(':binhLuan', $binhLuan);

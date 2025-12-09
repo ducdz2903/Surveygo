@@ -79,7 +79,7 @@ $url = static function (array $urls, string $key, string $fallbackPath = '/') us
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end">
                         <li><a class="dropdown-item" href="<?= $url($urls, 'home', '/home') ?>">Trang chủ</a></li>
-                        <li><a class="dropdown-item" href="<?= $url($urls, 'profile', '/profile') ?>">Trang cá nhân</a>
+                        <li><a class="dropdown-item" href="<?= $url($urls, 'profile', '/profile') ?>">Hồ sơ người dùng</a>
                         </li>
                         <li><a class="dropdown-item" href="<?= $url($urls, 'daily-rewards', '/daily-rewards') ?>">Điểm
                                 danh</a></li>
