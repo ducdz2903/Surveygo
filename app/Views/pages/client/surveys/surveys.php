@@ -55,6 +55,7 @@
             const queryParams = new URLSearchParams({
                 page: page,
                 limit: pageSize,
+                trangThai: 'published',
                 isQuickPoll: false,
                 ...filters,
             });
