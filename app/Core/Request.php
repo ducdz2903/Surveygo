@@ -147,6 +147,12 @@ class Request
     public function isJson(): bool
     {
         $contentType = $this->header('Content-Type') ?? $this->header('content-type');
+        
+        // Fallback for environments where apache_request_headers/getallheaders might fail or return empty
+        if (!$contentType && isset($this->server['CONTENT_TYPE'])) {
+            $contentType = $this->server['CONTENT_TYPE'];
+        }
+
         return $contentType && stripos($contentType, 'application/json') !== false;
     }
 
