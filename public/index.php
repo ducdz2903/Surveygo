@@ -10,12 +10,14 @@ use App\Controllers\DailyRewardController;
 use App\Controllers\RewardController;
 use App\Controllers\RewardRedemptionController;
 use App\Controllers\UserPointController;
+use App\Controllers\ActivityLogController;
 use App\Core\Request;
 use App\Core\Response;
 use App\Core\Router;
 use App\Middlewares\AuthMiddleware;
 use App\Middlewares\RoleMiddleware;
 use App\Middlewares\GuestMiddleware;
+use App\Helpers\ActivityLogHelper;
 
 $router = new Router();
 
@@ -102,11 +104,11 @@ $router->put('/api/contact-messages', [App\Controllers\ContactController::class,
 $router->delete('/api/contact-messages', [App\Controllers\ContactController::class, 'delete'], [new RoleMiddleware(['admin'])]);
 // Events API
 $router->get('/api/events', [App\Controllers\EventController::class, 'index']);
+$router->post('/api/events', [App\Controllers\EventController::class, 'create'], [new RoleMiddleware(['admin', 'moderator'])]);
+$router->post('/api/events/{id}/join', [App\Controllers\EventController::class, 'join'], [new AuthMiddleware()]);
 $router->get('/api/events/show', [App\Controllers\EventController::class, 'show']);
-$router->post('/api/events', [App\Controllers\EventController::class, 'create']);
 $router->put('/api/events', [App\Controllers\EventController::class, 'update']);
 $router->delete('/api/events', [App\Controllers\EventController::class, 'delete']);
-
 // Feedbacks API
 $router->get('/api/feedbacks', [App\Controllers\FeedbackController::class, 'index'], [new AuthMiddleware()]);
 $router->get('/api/feedbacks/show', [App\Controllers\FeedbackController::class, 'show'], [new AuthMiddleware()]);
@@ -167,6 +169,15 @@ $router->get('/api/admin/redemptions', [RewardRedemptionController::class, 'apiL
 $router->post('/api/admin/redemptions/update-status', [RewardRedemptionController::class, 'updateStatus'], [new RoleMiddleware(['admin'])]);
 $router->post('/api/admin/redemptions/delete', [RewardRedemptionController::class, 'delete'], [new RoleMiddleware(['admin'])]);
 $router->get('/api/admin/redemptions/stats', [RewardRedemptionController::class, 'stats'], [new RoleMiddleware(['admin'])]);
+
+// Activity Log Routes
+$router->get('/api/activity-logs/my', [ActivityLogController::class, 'getMyLogs'], [new AuthMiddleware()]);
+$router->get('/api/admin/activity-logs', [ActivityLogController::class, 'index'], [new RoleMiddleware(['admin'])]);
+$router->get('/api/admin/activity-logs/user/:id', [ActivityLogController::class, 'getUserLogs'], [new RoleMiddleware(['admin'])]);
+$router->get('/api/admin/activity-logs/entity/:type/:id', [ActivityLogController::class, 'getEntityLogs'], [new RoleMiddleware(['admin'])]);
+$router->get('/api/admin/activity-logs/action/:action', [ActivityLogController::class, 'getActionLogs'], [new RoleMiddleware(['admin'])]);
+$router->delete('/api/admin/activity-logs/cleanup', [ActivityLogController::class, 'cleanup'], [new RoleMiddleware(['admin'])]);
+$router->get('/admin/activity-logs/view', [ActivityLogController::class, 'viewPage'], [new RoleMiddleware(['admin'])]);
 
 $request = Request::capture();
 

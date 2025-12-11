@@ -137,31 +137,9 @@
                                 <h5><i class="fas fa-history me-2"></i>Lịch sử hoạt động</h5>
                             </div>
                             <div class="card-body">
-                                <div class="activity-timeline">
-                                    <div class="activity-item">
-                                        <div class="activity-icon icon-success"> <i class="fas fa-poll"></i>
-                                        </div>
-                                        <div class="activity-content">
-                                            <h6>Hoàn thành khảo sát "Thói quen tiêu dùng"</h6>
-                                            <p>+ 50 điểm - 1 giờ trước</p>
-                                        </div>
-                                    </div>
-                                    <div class="activity-item">
-                                        <div class="activity-icon icon-secondary-accent"> <i
-                                                class="fas fa-user-check"></i>
-                                        </div>
-                                        <div class="activity-content">
-                                            <h6>Cập nhật thông tin cá nhân</h6>
-                                            <p>2 ngày trước</p>
-                                        </div>
-                                    </div>
-                                    <div class="activity-item">
-                                        <div class="activity-icon icon-warning"> <i class="fas fa-gift"></i>
-                                        </div>
-                                        <div class="activity-content">
-                                            <h6>Đổi 1000 điểm lấy thẻ cào 100k</h6>
-                                            <p>5 ngày trước</p>
-                                        </div>
+                                <div id="activity-timeline-container" class="activity-timeline">
+                                    <div class="text-center text-muted py-5">
+                                        <p><i class="fas fa-spinner fa-spin me-2"></i>Đang tải...</p>
                                     </div>
                                 </div>
                             </div>
@@ -296,8 +274,80 @@
         });
     }
 
+    // Load activity logs từ API
+    async function loadActivityLogs() {
+        try {
+            const response = await fetch(`/api/activity-logs/my?limit=10`);
+            if (!response.ok) throw new Error('Failed to fetch activity logs');
+            
+            const result = await response.json();
+            const container = document.getElementById('activity-timeline-container');
+            
+            if (!result.success || !result.data || result.data.length === 0) {
+                container.innerHTML = '<div class="text-center text-muted py-5"><p>Chưa có hoạt động nào.</p></div>';
+                return;
+            }
+
+            const actionIcons = {
+                'survey_submitted': { icon: 'fas fa-check-circle', class: 'icon-success' },
+                'participated_event': { icon: 'fas fa-calendar-check', class: 'icon-primary' },
+                'reward_redeemed': { icon: 'fas fa-gift', class: 'icon-accent' },
+                'survey_created': { icon: 'fas fa-plus-circle', class: 'icon-success' },
+                'event_created': { icon: 'fas fa-calendar-plus', class: 'icon-primary' },
+                'question_created': { icon: 'fas fa-lightbulb', class: 'icon-accent' },
+                'profile_updated': { icon: 'fas fa-user-edit', class: 'icon-secondary-accent' },
+            };
+
+            let html = result.data.map(activity => {
+                const iconData = actionIcons[activity.action] || { icon: 'fas fa-circle', class: 'icon-secondary' };
+                
+                const timeDate = new Date(activity.created_at);
+                const now = new Date();
+                const diffMs = now - timeDate;
+                const diffMins = Math.floor(diffMs / 60000);
+                const diffHours = Math.floor(diffMs / 3600000);
+                const diffDays = Math.floor(diffMs / 86400000);
+                
+                let timeStr = '';
+                if (diffMins < 1) timeStr = 'Vừa xong';
+                else if (diffMins < 60) timeStr = `${diffMins} phút trước`;
+                else if (diffHours < 24) timeStr = `${diffHours} giờ trước`;
+                else if (diffDays < 30) timeStr = `${diffDays} ngày trước`;
+                else timeStr = timeDate.toLocaleDateString('vi-VN');
+
+                return `
+                    <div class="activity-item">
+                        <div class="activity-icon ${iconData.class}">
+                            <i class="${iconData.icon}"></i>
+                        </div>
+                        <div class="activity-content">
+                            <h6>${activity.description || activity.action}</h6>
+                            <p>${timeStr}</p>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            container.innerHTML = html;
+        } catch (error) {
+            console.error('Lỗi khi tải activity logs:', error);
+            const container = document.getElementById('activity-timeline-container');
+            container.innerHTML = '<div class="text-center text-danger py-5"><p>Lỗi khi tải hoạt động.</p></div>';
+        }
+    }
+
     // setup nhận sự kiện nút
     document.addEventListener('DOMContentLoaded', () => {
+        // Load activity logs khi tab được click
+        const activityTab = document.querySelector('a[href="#activity"]');
+        if (activityTab) {
+            activityTab.addEventListener('click', loadActivityLogs);
+            // Nếu tab activity đã active, load ngay
+            if (activityTab.classList.contains('active')) {
+                loadActivityLogs();
+            }
+        }
+        
         const avatarInput = document.getElementById('avatar-upload');
         const avatarImg = document.querySelector('.avatar-img');
         let selectedAvatarData = null; // base64 string cho ảnh đại diện

@@ -9,6 +9,7 @@ use App\Core\Container;
 use App\Models\Reward;
 use App\Models\UserPoint;
 use App\Models\User;
+use App\Helpers\ActivityLogHelper;
 
 class RewardController extends Controller
 {
@@ -335,7 +336,20 @@ class RewardController extends Controller
             }
 
             // Tạo record redemption
-            $this->createRedemption($currentUser['id'], $rewardId);
+            $redemptionId = $this->createRedemption($currentUser['id'], $rewardId);
+            if (!$redemptionId) {
+                return Response::json(['success' => false, 'message' => 'Lỗi khi tạo đơn đổi quà'], 500);
+            }
+
+            // Log activity
+            try {
+                error_log('[RewardController::redeem] Attempting to log redemption - userId: ' . $currentUser['id'] . ', redemptionId: ' . $redemptionId . ', rewardId: ' . $rewardId);
+                ActivityLogHelper::logRewardRedeemed((int)$currentUser['id'], (int)$redemptionId, (int)$rewardId);
+                error_log('[RewardController::redeem] Activity logged successfully');
+            } catch (\Throwable $e) {
+                error_log('[RewardController::redeem] Failed to log activity: ' . $e->getMessage());
+                error_log('[RewardController::redeem] Stack trace: ' . $e->getTraceAsString());
+            }
 
             return Response::json([
                 'success' => true,
@@ -676,7 +690,11 @@ class RewardController extends Controller
         // TODO: Tạo model RewardRedemption
         $query = "INSERT INTO reward_redemptions (user_id, reward_id, status) VALUES (?, ?, 'pending')";
         $db = \App\Core\Database::getInstance();
-        return $db->execute($query, [$userId, $rewardId]);
+        $stmt = $db->prepare($query);
+        if ($stmt->execute([$userId, $rewardId])) {
+            return (int) $db->lastInsertId();
+        }
+        return false;
     }
 
     /**

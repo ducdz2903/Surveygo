@@ -11,6 +11,7 @@ use App\Core\Container;
 use App\Models\RewardRedemption;
 use App\Models\Reward;
 use App\Models\UserPoint;
+use App\Helpers\ActivityLogHelper;
 
 class RewardRedemptionController extends Controller
 {
@@ -158,6 +159,16 @@ class RewardRedemptionController extends Controller
                 ->execute([$reward['stock'], $rewardId]);
 
             $db->commit();
+
+            // Log activity
+            try {
+                error_log('[RewardRedemptionController::create] Attempting to log redemption - userId: ' . $userId . ', redemptionId: ' . $redemptionId . ', rewardId: ' . $rewardId);
+                ActivityLogHelper::logRewardRedeemed((int)$userId, (int)$redemptionId, (int)$rewardId);
+                error_log('[RewardRedemptionController::create] Activity logged successfully');
+            } catch (\Throwable $e) {
+                error_log('[RewardRedemptionController::create] Failed to log activity: ' . $e->getMessage());
+                error_log('[RewardRedemptionController::create] Stack trace: ' . $e->getTraceAsString());
+            }
 
             return Response::json([
                 'success' => true,

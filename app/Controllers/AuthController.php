@@ -9,6 +9,7 @@ use App\Core\Container;
 use App\Core\Controller;
 use App\Core\Request;
 use App\Models\User;
+use App\Helpers\ActivityLogHelper;
 
 class AuthController extends Controller
 {

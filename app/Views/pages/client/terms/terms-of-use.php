@@ -26,8 +26,10 @@
                 </div>
             </div>
 
+            <div class="col-lg-1"></div>
+
             <!-- Main Content Area -->
-            <div class="col-lg-9">
+            <div class="col-lg-8">
                 <div class="terms-body">
                     <!-- Section 1 -->
                     <div class="terms-section" id="section1">

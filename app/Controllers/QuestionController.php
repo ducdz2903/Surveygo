@@ -10,6 +10,7 @@ use App\Core\Container;
 use App\Models\Question;
 use App\Models\Answer;
 use App\Models\SurveyQuestionMap;
+use App\Helpers\ActivityLogHelper;
 use PDO;
 
 class QuestionController extends Controller
@@ -156,6 +157,21 @@ class QuestionController extends Controller
                     ]);
                 }
             }
+        }
+
+        // Log activity
+        try {
+            // Get userId from session if available
+            $userId = $_SESSION['user_id'] ?? 0;
+            if ($userId) {
+                ActivityLogHelper::logQuestionCreated(
+                    $userId,
+                    $question->getId(),
+                    $question->getNoiDungCauHoi()
+                );
+            }
+        } catch (\Throwable $e) {
+            error_log('[QuestionController::create] Failed to log activity: ' . $e->getMessage());
         }
 
         return $this->json([

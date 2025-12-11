@@ -1,6 +1,5 @@
 <main class="page-content pt-5 mt-5 pb-5">
     <div class="container">
-        <!-- Header -->
         <div class="row mb-5">
             <div class="col-lg-8">
                 <h1 class="display-6 fw-bold mb-3">Danh sách Khảo sát <span id="survey-count">(0)</span></h1>
@@ -8,7 +7,7 @@
             </div>
         </div>
 
-        <!-- Filter Section -->
+        <!-- bộ lọc -->
         <div class="row mb-4">
             <div class="col-md-6">
                 <div class="input-group">
@@ -30,7 +29,7 @@
             </div>
         </div>
 
-        <!-- Surveys List -->
+        <!-- bảng khảo sát -->
         <div class="row g-4 mb-4" id="surveys-container">
             <div class="col-12 text-center py-5">
                 <div class="spinner-border text-primary" role="status">
@@ -39,7 +38,6 @@
             </div>
         </div>
 
-        <!-- Pagination (rendered inline below the list) -->
     </div>
 </main>
 
@@ -117,11 +115,8 @@
                 `;
         }).join('');
 
-        // Update total count display (like home)
         const countEl = document.getElementById('survey-count');
         if (countEl) countEl.textContent = `(${meta.total})`;
-
-        // Add simple prev/next pagination like home
         if (meta.totalPages > 1) {
             let pagHtml = `
                 <div class="col-12 d-flex justify-content-center gap-2 mt-4">
@@ -135,7 +130,6 @@
     }
 
 
-    // Filter handlers
     document.getElementById('search-input').addEventListener('input', function (e) {
         const filters = { ...currentFilters };
         if (e.target.value.trim()) {
@@ -162,7 +156,6 @@
         loadSurveys(1, {});
     });
 
-    // Load initial data
     document.addEventListener('DOMContentLoaded', function () {
         loadSurveys(1, {});
     });

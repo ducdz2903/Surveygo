@@ -427,10 +427,9 @@ INSERT IGNORE INTO feedbacks (id,ma, idKhaoSat, idNguoiDung, tenNguoiDung , danh
   (11, 'FB011', 6, NULL, 'Khách Ẩn Danh', 5, 'Tôi thấy khảo sát chất lượng.', NOW(), NOW()),
   (12, 'FB012', 2, NULL, 'Khách Ẩn Danh', 3, 'Cũng được, câu hỏi bình thường.', NOW(), NOW()),
   (13, 'FB013', 8, NULL, 'Khách Ẩn Danh', 4, 'Khảo sát gọn và dễ thao tác.', NOW(), NOW()),
-  (14, 'FB014', 9, NULL, 'Khách Ẩn Danh', 5, 'Rất tốt, tôi thích khảo sát dạng này.', NOW(), NOW()),
-  (15, 'FB015', 7, NULL, 'Khách Ẩn Danh', 4, 'Nội dung hữu ích, nên giữ.', NOW(), NOW());
+  (14, 'FB014', 9, NULL, 'Khách Ẩn Danh', 5, 'Rất tốt, tôi thích khảo sát dạng này.', NOW(), NOW());
 
-INSERT INTO rewards (code, name, type, provider, point_cost, value, stock, image, description, giftcard_code, giftcard_serial, giftcard_expiry_date)
+INSERT IGNORE INTO rewards (code, name, type, provider, point_cost, value, stock, image, description, giftcard_code, giftcard_serial, giftcard_expiry_date)
 VALUES
 ('RW-CASH-20K',  'Rút tiền Banking 20.000đ',  'cash', 'bank', 2000, 20000, 1000, 'banking_20k.png', 'Rút tiền về tài khoản ngân hàng.', NULL, NULL, NULL),
 ('RW-CASH-200K', 'Rút tiền Banking 200.000đ', 'cash', 'bank', 20000, 200000, 1000, 'banking_200k.png', 'Rút tiền về tài khoản ngân hàng.', NULL, NULL, NULL),
@@ -491,6 +490,114 @@ INSERT IGNORE INTO user_points (user_id, balance, total_earned, created_at, upda
 (13, 110, 130, NOW(), NOW()),
 (14, 15, 20, NOW(), NOW()),
 (15, 75, 90, NOW(), NOW());
+
+CREATE TABLE IF NOT EXISTS activity_logs (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  user_id INT UNSIGNED NOT NULL,
+  action VARCHAR(100) NOT NULL,
+  entity_type VARCHAR(50) DEFAULT NULL,
+  entity_id INT UNSIGNED DEFAULT NULL,
+  description TEXT DEFAULT NULL,
+  ip_address VARCHAR(45) DEFAULT NULL,
+  user_agent VARCHAR(255) DEFAULT NULL,
+  old_values JSON DEFAULT NULL,
+  new_values JSON DEFAULT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  INDEX idx_user_id (user_id),
+  INDEX idx_created_at (created_at),
+  INDEX idx_action (action)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+INSERT IGNORE INTO activity_logs (user_id, action, entity_type, entity_id, description, ip_address, user_agent, old_values, new_values, created_at) VALUES
+-- User 1 activities
+(1, 'survey_submitted', 'survey', 1, 'Hoàn thành khảo sát: Khảo sát về thói quen đọc sách', '127.0.0.1', 'Mozilla/5.0', NULL, '{"survey_id": 1, "points_earned": 10}', DATE_SUB(NOW(), INTERVAL 5 MINUTE)),
+(1, 'reward_redeemed', 'reward_redemption', 1, 'Đổi thưởng thành công: Rút tiền Banking 20.000đ', '127.0.0.1', 'Mozilla/5.0', NULL, '{"reward_id": 1, "points_spent": 2000}', DATE_SUB(NOW(), INTERVAL 30 MINUTE)),
+
+-- User 2 activities
+(2, 'survey_submitted', 'survey', 2, 'Hoàn thành khảo sát: Khảo sát về sức khỏe cộng đồng', '127.0.0.1', 'Mozilla/5.0', NULL, '{"survey_id": 2, "points_earned": 15}', DATE_SUB(NOW(), INTERVAL 90 MINUTE)),
+(2, 'participated_event', 'event', 1, 'Tham gia sự kiện: Sự kiện Khởi động Năm Mới', '127.0.0.1', 'Mozilla/5.0', NULL, '{"event_id": 1}', DATE_SUB(NOW(), INTERVAL 2 HOUR)),
+
+-- User 4 activities
+(4, 'survey_submitted', 'survey', 4, 'Hoàn thành khảo sát: Khảo sát về ứng dụng di động', '127.0.0.1', 'Mozilla/5.0', NULL, '{"survey_id": 4, "points_earned": 12}', DATE_SUB(NOW(), INTERVAL 260 MINUTE)),
+(4, 'reward_redeemed', 'reward_redemption', 2, 'Đổi thưởng thành công: Ví MoMo 20.000đ', '127.0.0.1', 'Mozilla/5.0', NULL, '{"reward_id": 4, "points_spent": 2000}', DATE_SUB(NOW(), INTERVAL 5 HOUR)),
+
+-- User 5 activities
+(5, 'survey_submitted', 'survey', 5, 'Hoàn thành khảo sát: Khảo sát về dịch vụ khách hàng', '127.0.0.1', 'Mozilla/5.0', NULL, '{"survey_id": 5, "points_earned": 20}', DATE_SUB(NOW(), INTERVAL 6 HOUR)),
+(5, 'participated_event', 'event', 2, 'Tham gia sự kiện: Hội thảo Sức khỏe Cộng đồng', '127.0.0.1', 'Mozilla/5.0', NULL, '{"event_id": 2}', DATE_SUB(NOW(), INTERVAL 8 HOUR)),
+
+-- User 6 activities
+(6, 'survey_submitted', 'survey', 6, 'Hoàn thành khảo sát: Khảo sát về nhu cầu giáo dục trực tuyến', '127.0.0.1', 'Mozilla/5.0', NULL, '{"survey_id": 6, "points_earned": 15}', DATE_SUB(NOW(), INTERVAL 10 HOUR)),
+(6, 'reward_redeemed', 'reward_redemption', 3, 'Đổi thưởng thành công: ShopeePay 50.000đ', '127.0.0.1', 'Mozilla/5.0', NULL, '{"reward_id": 6, "points_spent": 5000}', DATE_SUB(NOW(), INTERVAL 12 HOUR)),
+
+-- User 7 activities
+(7, 'survey_submitted', 'survey', 3, 'Hoàn thành khảo sát: Khảo sát về trang web thương mại điện tử', '127.0.0.1', 'Mozilla/5.0', NULL, '{"survey_id": 3, "points_earned": 12}', DATE_SUB(NOW(), INTERVAL 14 HOUR)),
+(7, 'participated_event', 'event', 3, 'Tham gia sự kiện: Workshop về Digital Marketing 2024', '127.0.0.1', 'Mozilla/5.0', NULL, '{"event_id": 3}', DATE_SUB(NOW(), INTERVAL 1 DAY)),
+
+-- Admin 3 activities
+(3, 'survey_created', 'survey', 7, 'Tạo khảo sát mới: Mức độ hài lòng tổng quan', '127.0.0.1', 'Mozilla/5.0', NULL, '{"survey_id": 7, "title": "Mức độ hài lòng tổng quan", "status": "pending"}', DATE_SUB(NOW(), INTERVAL 135 MINUTE)),
+(3, 'event_created', 'event', 4, 'Tạo sự kiện mới: Ngày hội Công nghệ', '127.0.0.1', 'Mozilla/5.0', NULL, '{"event_id": 4, "title": "Ngày hội Công nghệ", "status": "upcoming"}', DATE_SUB(NOW(), INTERVAL 3 HOUR)),
+(3, 'question_created', 'question', 13, 'Tạo câu hỏi mới: Bạn cảm thấy mức độ hài lòng hiện tại như thế nào?', '127.0.0.1', 'Mozilla/5.0', NULL, '{"question_id": 13, "type": "single_choice"}', DATE_SUB(NOW(), INTERVAL 5 HOUR)),
+
+-- Admin 1 activities
+(1, 'survey_created', 'survey', 8, 'Tạo khảo sát mới: Bạn hay uống cà phê không?', '127.0.0.1', 'Mozilla/5.0', NULL, '{"survey_id": 8, "title": "Bạn hay uống cà phê không?", "status": "pending"}', DATE_SUB(NOW(), INTERVAL 7 HOUR)),
+(1, 'event_created', 'event', 1, 'Cập nhật sự kiện: Sự kiện Khởi động Năm Mới', '127.0.0.1', 'Mozilla/5.0', NULL, '{"event_id": 1, "participants": 150}', DATE_SUB(NOW(), INTERVAL 26 HOUR)),
+(1, 'question_created', 'question', 19, 'Tạo câu hỏi mới: Bạn thích tổ chức Year End Party trong nhà hay ngoài trời?', '127.0.0.1', 'Mozilla/5.0', NULL, '{"question_id": 19, "type": "single_choice"}', DATE_SUB(NOW(), INTERVAL 29 HOUR));
+
+CREATE TABLE IF NOT EXISTS activity_logs (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  user_id INT UNSIGNED NOT NULL,
+  action VARCHAR(100) NOT NULL,
+  entity_type VARCHAR(50) DEFAULT NULL,
+  entity_id INT UNSIGNED DEFAULT NULL,
+  description TEXT DEFAULT NULL,
+  ip_address VARCHAR(45) DEFAULT NULL,
+  user_agent VARCHAR(255) DEFAULT NULL,
+  old_values JSON DEFAULT NULL,
+  new_values JSON DEFAULT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  INDEX idx_user_id (user_id),
+  INDEX idx_created_at (created_at),
+  INDEX idx_action (action)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+INSERT IGNORE INTO activity_logs (user_id, action, entity_type, entity_id, description, ip_address, user_agent, old_values, new_values, created_at) VALUES
+-- User 1 activities
+(1, 'survey_submitted', 'survey', 1, 'Hoàn thành khảo sát: Khảo sát về thói quen đọc sách', '127.0.0.1', 'Mozilla/5.0', NULL, '{"survey_id": 1, "points_earned": 10}', DATE_SUB(NOW(), INTERVAL 5 MINUTE)),
+(1, 'reward_redeemed', 'reward_redemption', 1, 'Đổi thưởng thành công: Rút tiền Banking 20.000đ', '127.0.0.1', 'Mozilla/5.0', NULL, '{"reward_id": 1, "points_spent": 2000}', DATE_SUB(NOW(), INTERVAL 30 MINUTE)),
+
+-- User 2 activities
+(2, 'survey_submitted', 'survey', 2, 'Hoàn thành khảo sát: Khảo sát về sức khỏe cộng đồng', '127.0.0.1', 'Mozilla/5.0', NULL, '{"survey_id": 2, "points_earned": 15}', DATE_SUB(NOW(), INTERVAL 90 MINUTE)),
+(2, 'participated_event', 'event', 1, 'Tham gia sự kiện: Sự kiện Khởi động Năm Mới', '127.0.0.1', 'Mozilla/5.0', NULL, '{"event_id": 1}', DATE_SUB(NOW(), INTERVAL 2 HOUR)),
+
+-- User 4 activities
+(4, 'survey_submitted', 'survey', 4, 'Hoàn thành khảo sát: Khảo sát về ứng dụng di động', '127.0.0.1', 'Mozilla/5.0', NULL, '{"survey_id": 4, "points_earned": 12}', DATE_SUB(NOW(), INTERVAL 260 MINUTE)),
+(4, 'reward_redeemed', 'reward_redemption', 2, 'Đổi thưởng thành công: Ví MoMo 20.000đ', '127.0.0.1', 'Mozilla/5.0', NULL, '{"reward_id": 4, "points_spent": 2000}', DATE_SUB(NOW(), INTERVAL 5 HOUR)),
+
+-- User 5 activities
+(5, 'survey_submitted', 'survey', 5, 'Hoàn thành khảo sát: Khảo sát về dịch vụ khách hàng', '127.0.0.1', 'Mozilla/5.0', NULL, '{"survey_id": 5, "points_earned": 20}', DATE_SUB(NOW(), INTERVAL 6 HOUR)),
+(5, 'participated_event', 'event', 2, 'Tham gia sự kiện: Hội thảo Sức khỏe Cộng đồng', '127.0.0.1', 'Mozilla/5.0', NULL, '{"event_id": 2}', DATE_SUB(NOW(), INTERVAL 8 HOUR)),
+
+-- User 6 activities
+(6, 'survey_submitted', 'survey', 6, 'Hoàn thành khảo sát: Khảo sát về nhu cầu giáo dục trực tuyến', '127.0.0.1', 'Mozilla/5.0', NULL, '{"survey_id": 6, "points_earned": 15}', DATE_SUB(NOW(), INTERVAL 10 HOUR)),
+(6, 'reward_redeemed', 'reward_redemption', 3, 'Đổi thưởng thành công: ShopeePay 50.000đ', '127.0.0.1', 'Mozilla/5.0', NULL, '{"reward_id": 6, "points_spent": 5000}', DATE_SUB(NOW(), INTERVAL 12 HOUR)),
+
+-- User 7 activities
+(7, 'survey_submitted', 'survey', 3, 'Hoàn thành khảo sát: Khảo sát về trang web thương mại điện tử', '127.0.0.1', 'Mozilla/5.0', NULL, '{"survey_id": 3, "points_earned": 12}', DATE_SUB(NOW(), INTERVAL 14 HOUR)),
+(7, 'participated_event', 'event', 3, 'Tham gia sự kiện: Workshop về Digital Marketing 2024', '127.0.0.1', 'Mozilla/5.0', NULL, '{"event_id": 3}', DATE_SUB(NOW(), INTERVAL 1 DAY)),
+
+-- Admin 3 activities
+(3, 'survey_created', 'survey', 7, 'Tạo khảo sát mới: Mức độ hài lòng tổng quan', '127.0.0.1', 'Mozilla/5.0', NULL, '{"survey_id": 7, "title": "Mức độ hài lòng tổng quan", "status": "pending"}', DATE_SUB(NOW(), INTERVAL 135 MINUTE)),
+(3, 'event_created', 'event', 4, 'Tạo sự kiện mới: Ngày hội Công nghệ', '127.0.0.1', 'Mozilla/5.0', NULL, '{"event_id": 4, "title": "Ngày hội Công nghệ", "status": "upcoming"}', DATE_SUB(NOW(), INTERVAL 3 HOUR)),
+(3, 'question_created', 'question', 13, 'Tạo câu hỏi mới: Bạn cảm thấy mức độ hài lòng hiện tại như thế nào?', '127.0.0.1', 'Mozilla/5.0', NULL, '{"question_id": 13, "type": "single_choice"}', DATE_SUB(NOW(), INTERVAL 5 HOUR)),
+
+-- Admin 1 activities
+(1, 'survey_created', 'survey', 8, 'Tạo khảo sát mới: Bạn hay uống cà phê không?', '127.0.0.1', 'Mozilla/5.0', NULL, '{"survey_id": 8, "title": "Bạn hay uống cà phê không?", "status": "pending"}', DATE_SUB(NOW(), INTERVAL 7 HOUR)),
+(1, 'event_created', 'event', 1, 'Cập nhật sự kiện: Sự kiện Khởi động Năm Mới', '127.0.0.1', 'Mozilla/5.0', NULL, '{"event_id": 1, "participants": 150}', DATE_SUB(NOW(), INTERVAL 26 HOUR)),
+(1, 'question_created', 'question', 19, 'Tạo câu hỏi mới: Bạn thích tổ chức Year End Party trong nhà hay ngoài trời?', '127.0.0.1', 'Mozilla/5.0', NULL, '{"question_id": 19, "type": "single_choice"}', DATE_SUB(NOW(), INTERVAL 29 HOUR));
 
 -- dữ liệu cho bảng survey_question_map
 INSERT IGNORE INTO survey_question_map (idKhaoSat, idCauHoi, created_at, updated_at) VALUES
