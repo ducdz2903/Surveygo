@@ -7,23 +7,44 @@ namespace App\Models;
 use App\Core\Container;
 use PDO;
 
-/**
- * Activity Log Model - Track user actions
- * 
- * Ghi lại tất cả hoạt động của user:
- * - Login, logout
- * - CRUD operations
- * - File uploads
- * - Status changes
- */
 class ActivityLog
 {
     private PDO $db;
     private string $table = 'activity_logs';
 
-    public function __construct()
+    private int $id;
+    private int $userId;
+    private string $action;
+    private ?string $entityType;
+    private ?int $entityId;
+    private ?string $description;
+    private ?string $ipAddress;
+    private ?string $userAgent;
+    private ?array $oldValues;
+    private ?array $newValues;
+    private string $createdAt;
+
+    public function __construct(array $attributes = [])
     {
         $this->db = Container::get('db');
+
+        if (!empty($attributes)) {
+            $this->id = (int) ($attributes['id'] ?? 0);
+            $this->userId = (int) ($attributes['user_id'] ?? 0);
+            $this->action = (string) ($attributes['action'] ?? '');
+            $this->entityType = $attributes['entity_type'] ?? null;
+            $this->entityId = isset($attributes['entity_id']) ? (int) $attributes['entity_id'] : null;
+            $this->description = $attributes['description'] ?? null;
+            $this->ipAddress = $attributes['ip_address'] ?? null;
+            $this->userAgent = $attributes['user_agent'] ?? null;
+            $this->oldValues = isset($attributes['old_values']) && is_string($attributes['old_values']) 
+                ? json_decode($attributes['old_values'], true) 
+                : ($attributes['old_values'] ?? null);
+            $this->newValues = isset($attributes['new_values']) && is_string($attributes['new_values'])
+                ? json_decode($attributes['new_values'], true)
+                : ($attributes['new_values'] ?? null);
+            $this->createdAt = $attributes['created_at'] ?? '';
+        }
     }
 
 
@@ -127,4 +148,116 @@ class ActivityLog
             return $_SERVER['REMOTE_ADDR'] ?? 'unknown';
         }
     }
+
+    // Getter methods
+    public function getId(): int
+    {
+        return $this->id;
+    }
+
+    public function getUserId(): int
+    {
+        return $this->userId;
+    }
+
+    public function getAction(): string
+    {
+        return $this->action;
+    }
+
+    public function getEntityType(): ?string
+    {
+        return $this->entityType;
+    }
+
+    public function getEntityId(): ?int
+    {
+        return $this->entityId;
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function getIpAddress(): ?string
+    {
+        return $this->ipAddress;
+    }
+
+    public function getUserAgent(): ?string
+    {
+        return $this->userAgent;
+    }
+
+    public function getOldValues(): ?array
+    {
+        return $this->oldValues;
+    }
+
+    public function getNewValues(): ?array
+    {
+        return $this->newValues;
+    }
+
+    public function getCreatedAt(): string
+    {
+        return $this->createdAt;
+    }
+
+    // Setter methods
+    public function setUserId(int $userId): self
+    {
+        $this->userId = $userId;
+        return $this;
+    }
+
+    public function setAction(string $action): self
+    {
+        $this->action = $action;
+        return $this;
+    }
+
+    public function setEntityType(?string $entityType): self
+    {
+        $this->entityType = $entityType;
+        return $this;
+    }
+
+    public function setEntityId(?int $entityId): self
+    {
+        $this->entityId = $entityId;
+        return $this;
+    }
+
+    public function setDescription(?string $description): self
+    {
+        $this->description = $description;
+        return $this;
+    }
+
+    public function setIpAddress(?string $ipAddress): self
+    {
+        $this->ipAddress = $ipAddress;
+        return $this;
+    }
+
+    public function setUserAgent(?string $userAgent): self
+    {
+        $this->userAgent = $userAgent;
+        return $this;
+    }
+
+    public function setOldValues(?array $oldValues): self
+    {
+        $this->oldValues = $oldValues;
+        return $this;
+    }
+
+    public function setNewValues(?array $newValues): self
+    {
+        $this->newValues = $newValues;
+        return $this;
+    }
 }
+

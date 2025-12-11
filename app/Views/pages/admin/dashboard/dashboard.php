@@ -256,6 +256,31 @@
             const activityList = document.getElementById('activity-list');
             if (!activityList) return;
             
+            // Hàm dịch action thành tiếng Việt
+            const translateAction = (action) => {
+                const translations = {
+                    'survey_submitted': 'Hoàn thành khảo sát',
+                    'survey_created': 'Tạo khảo sát',
+                    'event_created': 'Tạo sự kiện',
+                    'question_created': 'Tạo câu hỏi',
+                    'participated_event': 'Tham gia sự kiện',
+                    'reward_redeemed': 'Đổi thưởng',
+                    'profile_updated': 'Cập nhật hồ sơ',
+                    'login': 'Đăng nhập',
+                    'logout': 'Đăng xuất',
+                    'contact_message': 'Gửi liên hệ',
+                    'feedback_submitted': 'Gửi phản hồi',
+                    'daily_reward_claimed': 'Nhận thưởng hàng ngày',
+                    'user_created': 'Tạo người dùng',
+                    'user_updated': 'Cập nhật người dùng',
+                    'user_deleted': 'Xóa người dùng',
+                    'reward_created': 'Tạo phần thưởng',
+                    'reward_updated': 'Cập nhật phần thưởng',
+                    'reward_deleted': 'Xóa phần thưởng',
+                };
+                return translations[action] || action.replace(/_/g, ' ');
+            };
+            
             try {
                 const response = await fetch('/api/admin/activity-logs?limit=5');
                 const result = await response.json();
@@ -275,6 +300,7 @@
                         const iconConfig = actionIcons[activity.action] || { icon: 'fas fa-history', color: 'secondary' };
                         const createdDate = new Date(activity.created_at);
                         const timeText = createdDate.toLocaleString('vi-VN');
+                        const translatedAction = translateAction(activity.action);
                         
                         return `
                             <li class="list-group-item border-0 py-3">
@@ -283,7 +309,7 @@
                                         <i class="${iconConfig.icon}"></i>
                                     </div>
                                     <div class="flex-grow-1">
-                                        <div class="small"><strong>${activity.user_name || 'Unknown'}</strong> ${activity.action}</div>
+                                        <div class="small"><strong>${activity.user_name || 'Unknown'}</strong> ${translatedAction}</div>
                                         <div class="text-muted" style="font-size: 0.75rem;">${timeText}</div>
                                     </div>
                                 </div>

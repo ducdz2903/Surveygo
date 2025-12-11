@@ -152,6 +152,25 @@
                 'profile_updated': { icon: 'fas fa-user', class: 'activity-icon-info', label: '👤' },
             };
 
+            // Hàm dịch action thành tiếng Việt
+            const translateAction = (action) => {
+                const translations = {
+                    'survey_submitted': 'Hoàn thành khảo sát',
+                    'survey_created': 'Tạo khảo sát',
+                    'survey_updated': 'Cập nhật khảo sát',
+                    'event_created': 'Tạo sự kiện',
+                    'question_created': 'Tạo câu hỏi',
+                    'participated_event': 'Tham gia sự kiện',
+                    'reward_redeemed': 'Đổi thưởng',
+                    'profile_updated': 'Cập nhật hồ sơ',
+                    'login': 'Đăng nhập',
+                    'logout': 'Đăng xuất',
+                    'daily_reward_claimed': 'Nhận thưởng hàng ngày',
+                    'redemption_status_changed': 'Cập nhật trạng thái đổi thưởng',
+                };
+                return translations[action] || action.replace(/_/g, ' ');
+            };
+
             let html = result.data.map(activity => {
                 const iconData = actionIcons[activity.action] || { 
                     icon: 'fas fa-circle', 
@@ -175,13 +194,15 @@
                     timeStr = diffMins + ' phút trước';
                 }
 
+                const translatedAction = translateAction(activity.action);
+
                 return `
                     <div class="activity-item">
                         <div class="activity-icon ${iconData.class}">
                             <i class="${iconData.icon}"></i>
                         </div>
                         <div class="activity-content">
-                            <h4>${activity.description || activity.action}</h4>
+                            <h4>${activity.description || translatedAction}</h4>
                             <p class="mb-0 small text-muted">
                                 ${activity.entity_type ? activity.entity_type + ' #' + activity.entity_id : 'System'}
                             </p>

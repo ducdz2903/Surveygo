@@ -75,5 +75,34 @@ class ActivityLogHelper
         ]);
     }
 
+    /**
+     * Dịch action thành tiếng Việt
+     */
+    public static function translateAction(string $action): string
+    {
+        $translations = [
+            'survey_submitted' => 'Hoàn thành khảo sát',
+            'survey_created' => 'Tạo khảo sát',
+            'event_created' => 'Tạo sự kiện',
+            'question_created' => 'Tạo câu hỏi',
+            'participated_event' => 'Tham gia sự kiện',
+            'reward_redeemed' => 'Đổi thưởng',
+            'profile_updated' => 'Cập nhật hồ sơ',
+            'login' => 'Đăng nhập',
+            'logout' => 'Đăng xuất',
+            'contact_message' => 'Gửi liên hệ',
+            'feedback_submitted' => 'Gửi phản hồi',
+            'daily_reward_claimed' => 'Nhận thưởng hàng ngày',
+            'user_created' => 'Tạo người dùng',
+            'user_updated' => 'Cập nhật người dùng',
+            'user_deleted' => 'Xóa người dùng',
+            'reward_created' => 'Tạo phần thưởng',
+            'reward_updated' => 'Cập nhật phần thưởng',
+            'reward_deleted' => 'Xóa phần thưởng',
+        ];
+
+        return $translations[$action] ?? ucfirst(str_replace('_', ' ', $action));
+    }
+
 }
 
