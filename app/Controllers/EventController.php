@@ -128,7 +128,6 @@ class EventController extends Controller
                 'Quay thưởng Lucky Wheel (' . date('Y-m-d H:i:s') . ')'
             );
 
-
             $spinUsed = $userPoint->useLuckyWheelSpin();
             if (!$spinUsed) {
                 error_log('[EventController::spinLuckyWheel] Failed to deduct spin for user ' . $userId);
