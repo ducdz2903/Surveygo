@@ -1,0 +1,61 @@
+#!/usr/bin/env sh
+# .githooks/post-checkout
+# Trigger DB rebuild when switching branches if init.sql changed.
+
+set -eu
+
+oldrev="$1"
+newrev="$2"
+typeflag="$3"   # 1 = branch/commit checkout, 0 = file checkout
+
+# Chỉ chạy khi chuyển branch hoặc commit, không phải khi checkout file
+if [ "$typeflag" -eq 0 ]; then
+  exit 0
+fi
+# Lấy danh sách file bị thay đổi giữa oldrev và newrev
+CHANGED_FILES=$(git diff --name-only "$oldrev" "$newrev" || true)
+
+# Chỉ chạy khi init.sql thay đổi
+echo "$CHANGED_FILES" | grep -q "^sql/mysql/init.sql$" || {
+  echo "[post-checkout] init.sql not changed — skipping."
+  exit 0
+}
+
+echo "[post-checkout] Detected init.sql change — rebuilding DB..."
+
+# Detect MySQL client
+MYSQL_CMD="mysql"
+if ! command -v "$MYSQL_CMD" >/dev/null 2>&1; then
+  if [ -f "/c/xampp/mysql/bin/mysql.exe" ]; then
+    MYSQL_CMD="/c/xampp/mysql/bin/mysql.exe"
+  elif [ -f "C:/xampp/mysql/bin/mysql.exe" ]; then
+    MYSQL_CMD="C:/xampp/mysql/bin/mysql.exe"
+  else
+    echo "[post-checkout] MySQL client not found." >&2
+    exit 1
+  fi
+fi
+
+DB_USER="root"
+DB_NAME="mvc_app"
+
+echo "[post-checkout] Dropping DB $DB_NAME..."
+if ! "$MYSQL_CMD" -u "$DB_USER" -e "DROP DATABASE IF EXISTS \`$DB_NAME\`;" ; then
+  echo "[post-checkout] ERROR: DROP DATABASE failed."
+  exit 1
+fi
+
+echo "[post-checkout] Creating DB $DB_NAME..."
+if ! "$MYSQL_CMD" -u "$DB_USER" -e "CREATE DATABASE IF NOT EXISTS \`$DB_NAME\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;" ; then
+  echo "[post-checkout] ERROR: CREATE DATABASE failed."
+  exit 1
+fi
+
+echo "[post-checkout] Importing sql/mysql/init.sql..."
+if ! "$MYSQL_CMD" --default-character-set=utf8mb4 -u "$DB_USER" "$DB_NAME" < sql/mysql/init.sql ; then
+  echo "[post-checkout] ERROR: Import failed."
+  exit 1
+fi
+
+echo "[post-checkout] Database rebuild complete."
+exit 0

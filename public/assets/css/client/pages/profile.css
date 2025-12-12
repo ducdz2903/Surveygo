@@ -306,6 +306,20 @@
     box-shadow: 0 5px 15px rgba(245, 158, 11, 0.4);
 }
 
+.activity-icon.icon-info {
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4);
+}
+
+.activity-icon.icon-secondary {
+    background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+    box-shadow: 0 5px 15px rgba(107, 114, 128, 0.4);
+}
+
+.activity-icon.icon-danger {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    box-shadow: 0 5px 15px rgba(239, 68, 68, 0.4);
+}
 
 .activity-content h6 {
     font-size: 0.95rem;

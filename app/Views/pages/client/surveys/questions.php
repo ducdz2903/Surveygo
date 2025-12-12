@@ -27,81 +27,74 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal Phản hồi -->
+    <div class="modal fade" id="feedbackModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content feedback-modal">
+                <div class="modal-header feedback-header border-0">
+                    <div>
+                        <h5 class="modal-title fw-bold">Đánh giá khảo sát</h5>
+                        <p class="small text-muted mb-0">Giúp chúng tôi cải thiện dịch vụ</p>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body p-4">
+                    <form id="feedback-form">
+                        <!-- Rating Section -->
+                        <div class="mb-4">
+                            <label class="d-block mb-3 fw-600">
+                                Bạn cảm thấy như thế nào? <span class="text-danger">*</span>
+                            </label>
+                            <div class="d-flex gap-2 justify-content-center" id="rating-stars">
+                                <button type="button" class="rating-btn" data-rating="1" title="Rất tệ">
+                                    <i class="fas fa-star"></i>
+                                </button>
+                                <button type="button" class="rating-btn" data-rating="2" title="Tệ">
+                                    <i class="fas fa-star"></i>
+                                </button>
+                                <button type="button" class="rating-btn" data-rating="3" title="Bình thường">
+                                    <i class="fas fa-star"></i>
+                                </button>
+                                <button type="button" class="rating-btn" data-rating="4" title="Tốt">
+                                    <i class="fas fa-star"></i>
+                                </button>
+                                <button type="button" class="rating-btn" data-rating="5" title="Rất tốt">
+                                    <i class="fas fa-star"></i>
+                                </button>
+                            </div>
+                            <p class="text-center text-muted small mt-3 mb-0" id="rating-text">Chọn một đánh giá</p>
+                            <input type="hidden" id="rating-value" name="danhGia" value="0">
+                        </div>
+
+                        <!-- Comment Section -->
+                        <div class="mb-3">
+                            <label for="feedback-text" class="form-label fw-600">
+                                Góp ý thêm <span class="text-muted fw-normal">(tuỳ chọn)</span>
+                            </label>
+                            <textarea id="feedback-text" name="binhLuan" class="form-control feedback-input" rows="3"
+                                placeholder="Chia sẻ ý kiến của bạn..."></textarea>
+                            <small class="text-muted d-block mt-2">Tối đa 500 ký tự</small>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="modal-footer border-top bg-light">
+                    <button type="button" class="btn btn-sm btn-secondary" id="btn-skip-feedback">
+                        Bỏ qua
+                    </button>
+                    <button type="button" class="btn btn-sm btn-primary" id="btn-submit-feedback">
+                        <i class="fas fa-check me-1"></i>Gửi phản hồi
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 </main>
 
+<script src="/public/assets/js/toast-helper.js"></script>
 <script>
-    // --- TÍCH HỢP TOAST HELPER ---
-    (function (global) {
-        function ensureContainer() {
-            let container = document.getElementById('global-toast-container');
-            if (container) return container;
-            container = document.createElement('div');
-            container.id = 'global-toast-container';
-            container.setAttribute('aria-live', 'polite');
-            container.setAttribute('aria-atomic', 'true');
-            container.className = 'position-fixed top-0 end-0 p-3';
-            container.style.zIndex = 1080;
-            document.body.appendChild(container);
-            return container;
-        }
-
-        function iconFor(status) {
-            switch ((status || '').toLowerCase()) {
-                case 'success': return '<i class="fas fa-check-circle me-2"></i>';
-                case 'warning': return '<i class="fas fa-exclamation-triangle me-2"></i>';
-                case 'error':
-                case 'danger': return '<i class="fas fa-times-circle me-2"></i>';
-                case 'info': return '<i class="fas fa-info-circle me-2"></i>';
-                default: return '<i class="fas fa-bell me-2"></i>';
-            }
-        }
-
-        function bgClassFor(status) {
-            switch ((status || '').toLowerCase()) {
-                case 'success': return 'bg-success text-white';
-                case 'warning': return 'bg-warning text-dark';
-                case 'error':
-                case 'danger': return 'bg-danger text-white';
-                case 'info': return 'bg-info text-dark';
-                default: return 'bg-secondary text-white';
-            }
-        }
-
-        function showToast(status, text, opts = {}) {
-            try {
-                const container = ensureContainer();
-                const toastId = 'toast-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
-                const wrapper = document.createElement('div');
-                wrapper.innerHTML = `
-                        <div id="${toastId}" class="toast align-items-center ${bgClassFor(status)} border-0 mb-2" role="alert" aria-live="assertive" aria-atomic="true">
-                          <div class="d-flex">
-                            <div class="toast-body d-flex align-items-center">${iconFor(status)}<div class="toast-text">${escapeHtml(text)}</div></div>
-                            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-                          </div>
-                        </div>
-                    `;
-                const toastEl = wrapper.firstElementChild;
-                container.appendChild(toastEl);
-                const delay = typeof opts.delay === 'number' ? opts.delay : 3000;
-                const bsToast = new bootstrap.Toast(toastEl, { delay });
-                toastEl.addEventListener('hidden.bs.toast', function () {
-                    try { toastEl.remove(); } catch (e) { /* ignore */ }
-                });
-                bsToast.show();
-                return bsToast;
-            } catch (e) {
-                console.error('Toast error', e);
-            }
-        }
-
-        function escapeHtml(unsafe) {
-            if (unsafe === null || unsafe === undefined) return '';
-            return String(unsafe).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
-        }
-        global.ToastHelper = { show: showToast };
-    })(window);
-
-
     // --- LOGIC TRẢ LỜI CÂU HỎI ---
 
     let surveyData = null;
@@ -202,6 +195,27 @@
                 `;
         }
 
+        // Handle rating type questions with 5 stars
+        if (loaiCauHoi === 'rating') {
+            const currentRating = answers[questionId] || 0;
+            return `
+                    <div class="rating-container text-center" data-question-id="${questionId}">
+                        <div class="rating-stars d-flex justify-content-center gap-2 mb-3" style="font-size: 2.5rem;">
+                            ${[1, 2, 3, 4, 5].map(star => `
+                                <i class="fas fa-star rating-star ${star <= currentRating ? 'text-warning' : 'text-muted'}" 
+                                   data-rating="${star}" 
+                                   style="cursor: pointer; transition: color 0.2s;"
+                                   onclick="setRating(${questionId}, ${star})"></i>
+                            `).join('')}
+                        </div>
+                        <input type="hidden" id="rating_${questionId}" name="question_${questionId}" value="${currentRating}">
+                        <p class="text-muted" id="rating-text-${questionId}">
+                            ${currentRating > 0 ? `Đánh giá: ${currentRating} sao` : 'Chọn số sao để đánh giá'}
+                        </p>
+                    </div>
+                `;
+        }
+
         const inputType = loaiCauHoi === 'single_choice' ? 'radio' : 'checkbox';
         let questionAnswers = [];
         if (question.answers && question.answers.length > 0) {
@@ -270,6 +284,40 @@
         });
     }
 
+    // Function to handle star rating clicks
+    function setRating(questionId, rating) {
+        // Update the answers object
+        answers[questionId] = rating;
+        
+        // Update the hidden input
+        const hiddenInput = document.getElementById(`rating_${questionId}`);
+        if (hiddenInput) {
+            hiddenInput.value = rating;
+        }
+        
+        // Update all stars visual state
+        const container = document.querySelector(`[data-question-id="${questionId}"]`);
+        if (container) {
+            const stars = container.querySelectorAll('.rating-star');
+            stars.forEach((star, index) => {
+                const starRating = parseInt(star.getAttribute('data-rating'));
+                if (starRating <= rating) {
+                    star.classList.remove('text-muted');
+                    star.classList.add('text-warning');
+                } else {
+                    star.classList.remove('text-warning');
+                    star.classList.add('text-muted');
+                }
+            });
+            
+            // Update the rating text
+            const ratingText = document.getElementById(`rating-text-${questionId}`);
+            if (ratingText) {
+                ratingText.textContent = `Đánh giá: ${rating} sao`;
+            }
+        }
+    }
+
     function saveCurrentAnswer() {
         const question = surveyData.questions[currentQuestion];
         const loaiCauHoi = question.loaiCauHoi;
@@ -278,6 +326,9 @@
         if (loaiCauHoi === 'text') {
             const textarea = document.querySelector(`textarea[name="${inputName}"]`);
             answers[question.id] = textarea ? textarea.value : null;
+        } else if (loaiCauHoi === 'rating') {
+            const ratingInput = document.getElementById(`rating_${question.id}`);
+            answers[question.id] = ratingInput ? parseInt(ratingInput.value) || null : null;
         } else if (loaiCauHoi === 'single_choice') {
             const checked = document.querySelector(`input[name="${inputName}"]:checked`);
             answers[question.id] = checked ? checked.value : null;
@@ -305,7 +356,7 @@
 
             if (!user || !user.id) {
                 // SỬ DỤNG TOAST HELPER
-                ToastHelper.show('warning', 'Vui lòng đăng nhập để nộp bài');
+                window.ToastHelper?.show('warning', 'Vui lòng đăng nhập để nộp bài');
                 setTimeout(() => { window.location.href = '/login'; }, 1500);
                 return;
             }
@@ -333,15 +384,24 @@
                 return;
             }
 
-            // SỬ DỤNG TOAST HELPER
-            ToastHelper.show('success', 'Nộp bài thành công!');
+            window.ToastHelper?.show('success', 'Nộp bài thành công!');
+
+            // Lưu surveyId và userId để sử dụng trong feedback modal
+            window.currentSurveyId = surveyId;
+            window.currentUserId = user.id;
+            window.currentUserName = user.name || 'Người dùng';
+
+            // Hiển thị modal phản hồi thay vì redirect ngay
             setTimeout(() => {
-                window.location.href = '/surveys';
-            }, 1000);
+                const feedbackModal = new bootstrap.Modal(document.getElementById('feedbackModal'), {
+                    backdrop: 'static',
+                    keyboard: false
+                });
+                feedbackModal.show();
+            }, 500);
         } catch (error) {
             console.error('Lỗi:', error);
-            // SỬ DỤNG TOAST HELPER
-            ToastHelper.show('danger', 'Có lỗi xảy ra khi nộp bài');
+            window.ToastHelper?.show('error', 'Có lỗi xảy ra khi nộp bài');
         }
     }
 
@@ -361,4 +421,103 @@
         const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
         return String(text).replace(/[&<>"']/g, m => map[m]);
     }
+
+    // Setup feedback modal handlers
+    document.addEventListener('DOMContentLoaded', function () {
+        // Setup rating stars
+        const ratingStars = document.querySelectorAll('.rating-btn');
+        const ratingValue = document.getElementById('rating-value');
+        const ratingText = document.getElementById('rating-text');
+
+        ratingStars.forEach(star => {
+            star.addEventListener('click', function (e) {
+                e.preventDefault();
+                const rating = this.dataset.rating;
+                ratingValue.value = rating;
+
+                // Update UI - remove active from all, add to clicked
+                ratingStars.forEach(s => s.classList.remove('active'));
+                for (let i = 0; i < rating; i++) {
+                    ratingStars[i].classList.add('active');
+                }
+
+                // Update text
+                const ratingTexts = {
+                    1: '⭐ Rất tệ',
+                    2: '⭐⭐ Tệ',
+                    3: '⭐⭐⭐ Bình thường',
+                    4: '⭐⭐⭐⭐ Tốt',
+                    5: '⭐⭐⭐⭐⭐ Rất tốt'
+                };
+                ratingText.textContent = ratingTexts[rating];
+            });
+        });
+
+        // Nút bỏ qua phản hồi
+        document.getElementById('btn-skip-feedback')?.addEventListener('click', function () {
+            const modal = bootstrap.Modal.getInstance(document.getElementById('feedbackModal'));
+            modal?.hide();
+            setTimeout(() => {
+                window.location.href = '/surveys';
+            }, 300);
+        });
+
+        // Nút gửi phản hồi
+        document.getElementById('btn-submit-feedback')?.addEventListener('click', async function () {
+            const rating = parseInt(document.getElementById('rating-value').value) || 0;
+            const feedbackText = document.getElementById('feedback-text')?.value?.trim() || '';
+
+            if (rating === 0) {
+                window.ToastHelper?.show('warning', 'Vui lòng chọn đánh giá');
+                return;
+            }
+
+            if (feedbackText.length > 500) {
+                window.ToastHelper?.show('warning', 'Phản hồi không được vượt quá 500 ký tự');
+                return;
+            }
+
+            const btn = this;
+            btn.disabled = true;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Đang gửi...';
+
+            try {
+                const response = await fetch('/api/feedbacks/submit', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        idKhaoSat: window.currentSurveyId,
+                        idNguoiDung: window.currentUserId,
+                        tenNguoiDung: window.currentUserName,
+                        danhGia: rating,
+                        binhLuan: feedbackText
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.error) {
+                    window.ToastHelper?.show('error', result.message || 'Lỗi khi gửi phản hồi');
+                    btn.disabled = false;
+                    btn.innerHTML = originalText;
+                    return;
+                }
+
+                window.ToastHelper?.show('success', 'Cảm ơn phản hồi của bạn!');
+
+                const modal = bootstrap.Modal.getInstance(document.getElementById('feedbackModal'));
+                modal?.hide();
+
+                setTimeout(() => {
+                    window.location.href = '/surveys';
+                }, 500);
+            } catch (error) {
+                console.error('Lỗi:', error);
+                window.ToastHelper?.show('error', 'Có lỗi xảy ra khi gửi phản hồi');
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        });
+    });
 </script>

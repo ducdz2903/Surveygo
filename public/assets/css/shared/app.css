@@ -274,3 +274,10 @@ code {
     border-color: transparent;
     box-shadow: 0 5px 15px rgba(236, 72, 153, 0.5);
 }
+
+#global-toast-container {
+    position: fixed !important;
+    top: 3rem !important;
+    right: 1rem !important;
+    z-index: 2000 !important;
+}

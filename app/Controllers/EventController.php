@@ -8,6 +8,7 @@ use App\Core\Controller;
 use App\Core\Request;
 use App\Models\Event;
 use App\Models\User;
+use App\Helpers\ActivityLogHelper;
 
 class EventController extends Controller
 {
@@ -64,112 +65,91 @@ class EventController extends Controller
         ]);
     }
 
-    public function spinLuckyWheel(Request $request)
+    /**
+     * POST /api/events/{id}/join
+     * User tham gia sự kiện
+     */
+    public function join(Request $request)
     {
-        $userId = (int) ($request->input('userId') ?? 0);
+        $eventId = (int) $request->getAttribute('id');
+        $userId = $_SESSION['user_id'] ?? null;
 
-        if ($userId <= 0) {
+        if (!$eventId) {
             return $this->json([
                 'error' => true,
-                'message' => 'User ID is required.',
+                'message' => 'Event ID không hợp lệ.',
             ], 422);
         }
 
-        $user = User::findById($userId);
-        if (!$user) {
+        if (!$userId) {
             return $this->json([
                 'error' => true,
-                'message' => 'User not found.',
+                'message' => 'Vui lòng đăng nhập để tham gia sự kiện.',
+            ], 401);
+        }
+
+        $event = Event::find($eventId);
+        if (!$event) {
+            return $this->json([
+                'error' => true,
+                'message' => 'Sự kiện không tồn tại.',
             ], 404);
         }
 
-        // KT lượt quay còn
-        $userPoint = \App\Models\UserPoint::getOrCreate($userId);
-        $availableSpins = $userPoint->getLuckyWheelSpins();
-
-        if ($availableSpins <= 0) {
-            return $this->json([
-                'error' => true,
-                'message' => 'Bạn không còn lượt quay! Điểm danh hàng ngày để nhận thêm lượt quay.',
-                'data' => [
-                    'available_spins' => 0,
-                ]
-            ], 400);
-        }
-
-        //Hard code tỷ lệ
-        $prizes = [
-            10 => 40,
-            20 => 30,
-            50 => 20,
-            100 => 5,
-            200 => 3,
-            500 => 2
-        ];
-
-        $rand = mt_rand(1, 100);
-        $points = 10; // Default
-        $cumulative = 0;
-
-        foreach ($prizes as $prize => $percent) {
-            $cumulative += $percent;
-            if ($rand <= $cumulative) {
-                $points = $prize;
-                break;
-            }
-        }
-
+        // Log activity
         try {
-            $tx = \App\Models\PointTransaction::addPoints(
-                $userId,
-                $points,
-                'lucky_wheel',
-                null,
-                'Quay thưởng Lucky Wheel (' . date('Y-m-d H:i:s') . ')'
-            );
-
-
-            $spinUsed = $userPoint->useLuckyWheelSpin();
-            if (!$spinUsed) {
-                error_log('[EventController::spinLuckyWheel] Failed to deduct spin for user ' . $userId);
-            }
-
-            return $this->json([
-                'error' => false,
-                'message' => "Chúc mừng! Bạn nhận được {$points} điểm.",
-                'data' => [
-                    'points_added' => $points,
-                    'new_balance' => $tx->getBalanceAfter(),
-                    'spins_remaining' => max(0, $availableSpins - 1),
-                ]
-            ]);
-
+            ActivityLogHelper::logParticipatedEvent($userId, $eventId);
         } catch (\Throwable $e) {
-            return $this->json([
-                'error' => true,
-                'message' => 'Lỗi hệ thống: ' . $e->getMessage(),
-            ], 500);
+            error_log('[EventController::join] Failed to log activity: ' . $e->getMessage());
         }
+
+        return $this->json([
+            'error' => false,
+            'message' => 'Tham gia sự kiện thành công.',
+            'data' => [
+                'eventId' => $eventId,
+                'eventName' => $event->getTenSuKien(),
+            ],
+        ], 201);
     }
 
-    private function getSpinsToday(int $userId): int
-{
-    $db = \App\Core\Container::get('db');
-    $today = date('Y-m-d');
-    
-    $stmt = $db->prepare(
-        'SELECT COUNT(*) FROM point_transactions 
-         WHERE user_id = :user_id 
-           AND source = :source 
-           AND DATE(created_at) = :today'
-    );
-    
-    $stmt->execute([
-        ':user_id' => $userId,
-        ':source' => 'lucky_wheel',
-        ':today' => $today,
-    ]);
-    
-    return (int) $stmt->fetchColumn();
-}
+    /**
+     * POST /api/events
+     * Admin tạo sự kiện mới
+     */
+    public function create(Request $request)
+    {
+        $data = $request->input();
+
+        if (empty($data['tenSuKien'])) {
+            return $this->json([
+                'error' => true,
+                'message' => 'Tên sự kiện là bắt buộc.',
+            ], 422);
+        }
+
+        $event = Event::create($data);
+        if (!$event) {
+            return $this->json([
+                'error' => true,
+                'message' => 'Không thể tạo sự kiện.',
+            ], 500);
+        }
+
+        // Log activity
+        try {
+            $userId = $_SESSION['user_id'] ?? ($data['maNguoiTao'] ?? 0);
+            if ($userId) {
+                ActivityLogHelper::logEventCreated($userId, $event->getId(), $event->getTenSuKien());
+            }
+        } catch (\Throwable $e) {
+            error_log('[EventController::create] Failed to log activity: ' . $e->getMessage());
+        }
+
+        return $this->json([
+            'error' => false,
+            'message' => 'Sự kiện được tạo thành công.',
+            'data' => $event->toArray(),
+        ], 201);
+    }
 }

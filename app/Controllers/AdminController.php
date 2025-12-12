@@ -54,6 +54,7 @@ class AdminController extends Controller
     {
         $view = new \App\Core\View();
         $data = $this->pageData($request);
+        $data['surveys'] = \App\Models\Survey::all();
         $content = $view->render('pages/admin/questions/questions', $data);
         return \App\Core\Response::html($view->render('layouts/admin', array_merge($data, ['content' => $content])));
     }
@@ -123,5 +124,21 @@ class AdminController extends Controller
                 'login' => $baseUrl . '/login',
             ],
         ];
+    }
+
+    public function rewards(Request $request)
+    {
+        $view = new \App\Core\View();
+        $data = $this->pageData($request);
+        $content = $view->render('pages/admin/rewards/rewards', $data);
+        return \App\Core\Response::html($view->render('layouts/admin', array_merge($data, ['content' => $content])));
+    }
+
+    public function redemptions(Request $request)
+    {
+        $view = new \App\Core\View();
+        $data = $this->pageData($request);
+        $content = $view->render('pages/admin/redemptions/reward_redemptions', $data);
+        return \App\Core\Response::html($view->render('layouts/admin', array_merge($data, ['content' => $content])));
     }
 }

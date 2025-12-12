@@ -9,6 +9,7 @@ use App\Core\Container;
 use App\Core\Controller;
 use App\Core\Request;
 use App\Models\User;
+use App\Helpers\ActivityLogHelper;
 
 class AuthController extends Controller
 {
@@ -97,6 +98,12 @@ class AuthController extends Controller
                 'message' => 'Invalid credentials.',
             ], 401);
         }
+
+        // Store user info in session
+        $_SESSION['user_id'] = $user->getId();
+        $_SESSION['user_email'] = $user->getEmail();
+        $_SESSION['user_role'] = $user->getRole();
+        $_SESSION['user_name'] = $user->getName();
 
         return $this->json([
             'error' => false,

@@ -41,6 +41,8 @@ class SurveyQuestionMap
                 ':question' => $questionId,
             ]);
         } catch (\Throwable $e) {
+            // Debug: Log or return error
+            file_put_contents('debug_log.txt', $e->getMessage() . PHP_EOL, FILE_APPEND);
             return false;
         }
     }
@@ -59,6 +61,22 @@ class SurveyQuestionMap
                 ':survey' => $surveyId,
                 ':question' => $questionId,
             ]);
+        } catch (\Throwable $e) {
+            return false;
+        }
+    }
+
+    /**
+     * Gỡ tất cả mapping của một câu hỏi (khi gán sang khảo sát mới hoặc không gán)
+     */
+    public static function detachAllByQuestion(int $questionId): bool
+    {
+        /** @var PDO $db */
+        $db = Container::get('db');
+
+        try {
+            $stmt = $db->prepare('DELETE FROM survey_question_map WHERE idCauHoi = :question');
+            return $stmt->execute([':question' => $questionId]);
         } catch (\Throwable $e) {
             return false;
         }

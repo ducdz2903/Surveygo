@@ -13,6 +13,8 @@ use App\Models\User;
 use App\Models\SurveySubmission;
 use App\Models\UserResponse;
 use App\Models\PointTransaction;
+use App\Models\Answer;
+use App\Helpers\ActivityLogHelper;
 
 use PDO;
 
@@ -172,11 +174,136 @@ class SurveyController extends Controller
             ], 422);
         }
 
+        // Log activity
+        try {
+            ActivityLogHelper::logSurveyCreated(
+                (int)$data['maNguoiTao'],
+                $survey->getId(),
+                $survey->getTieuDe()
+            );
+        } catch (\Throwable $e) {
+            error_log('[SurveyController::create] Failed to log activity: ' . $e->getMessage());
+        }
+
         return $this->json([
             'error' => false,
             'message' => 'Khảo sát được tạo thành công.',
             'data' => $survey->toArray(),
         ], 201);
+    }
+
+    /**
+     * POST /api/surveys/quick-poll
+     * Create a Quick Poll (Survey + Question + Answers) in one go
+     */
+    public function createQuickPoll(Request $request)
+    {
+        try {
+            $data = $request->input();
+
+            // 1. Basic Validation
+            if (empty($data['title'])) {
+                return $this->json(['error' => true, 'message' => 'Tiêu đề là bắt buộc.'], 422);
+            }
+            if (empty($data['questionType'])) {
+                return $this->json(['error' => true, 'message' => 'Loại câu hỏi là bắt buộc.'], 422);
+            }
+
+            // 2. Prepare Data
+            $userId = (int) ($data['maNguoiTao'] ?? 1); 
+            
+            // Check if user exists, otherwise find a valid one to avoid FK error
+            $user = User::findById($userId);
+            if (!$user) {
+                // Fallback: try to find the first user (usually admin)
+                $db = \App\Core\Container::get('db');
+                $stmt = $db->query("SELECT id FROM users LIMIT 1");
+                $fallbackUser = $stmt->fetch(PDO::FETCH_ASSOC);
+                if ($fallbackUser) {
+                    $userId = (int)$fallbackUser['id'];
+                } else {
+                     return $this->json(['error' => true, 'message' => 'Không tìm thấy người dùng nào để gán quyền tạo.'], 500);
+                }
+            }
+            
+            $surveyData = [
+                'tieuDe' => $data['title'],
+                'moTa' => $data['description'] ?? '',
+                'loaiKhaoSat' => 'quick_poll',
+                'isQuickPoll' => 1,
+                'diemThuong' => (int)($data['points'] ?? 0),
+                'maNguoiTao' => $userId,
+                'trangThai' => 'published',
+                'thoiLuongDuTinh' => 1
+            ];
+
+            // 3. Execution Wrapper
+            
+            // A. Create Survey
+            $survey = Survey::create($surveyData);
+            if (!$survey) {
+                return $this->json(['error' => true, 'message' => 'Không thể tạo khảo sát (DB Error).'], 500);
+            }
+
+            // B. Create Question
+            $questionData = [
+                'noiDungCauHoi' => $data['title'],
+                'loaiCauHoi' => $data['questionType'], 
+                'isQuickPoll' => 1,
+                'batBuocTraLoi' => 1,
+                'maKhaoSat' => $survey->getId()
+            ];
+
+            // Map frontend types to backend types
+            $typeMap = [
+                'single' => 'single_choice',
+                'multiple' => 'multiple_choice',
+                'text' => 'text',
+                'rating' => 'rating',
+                'yesno' => 'yes_no'
+            ];
+            $questionData['loaiCauHoi'] = $typeMap[$data['questionType']] ?? $data['questionType'];
+
+            $question = Question::create($questionData);
+            if (!$question) {
+                $survey->delete();
+                return $this->json(['error' => true, 'message' => 'Không thể tạo câu hỏi.'], 500);
+            }
+
+            // C. Link Survey & Question
+            $this->attachQuestionToSurvey($survey->getId(), $question->getId());
+
+            // D. Create Answers
+            if (!empty($data['options']) && is_array($data['options'])) {
+                foreach ($data['options'] as $optionText) {
+                    if (trim($optionText) === '') continue;
+                    Answer::create([
+                        'idCauHoi' => $question->getId(),
+                        'noiDungCauTraLoi' => trim($optionText),
+                        'creator_id' => $userId
+                    ]);
+                }
+            } 
+            elseif ($data['questionType'] === 'yesno') {
+                 Answer::create(['idCauHoi' => $question->getId(), 'noiDungCauTraLoi' => 'Có', 'creator_id' => $userId]);
+                 Answer::create(['idCauHoi' => $question->getId(), 'noiDungCauTraLoi' => 'Không', 'creator_id' => $userId]);
+            }
+
+            return $this->json([
+                'error' => false,
+                'message' => 'Quick Poll created successfully',
+                'data' => [
+                    'survey' => $survey->toArray(),
+                    'question' => $question->toArray()
+                ]
+            ], 201);
+        } catch (\Throwable $e) {
+            return $this->json([
+                'error' => true,
+                'message' => 'Exception: ' . $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ], 500);
+        }
     }
 
     /**
@@ -734,6 +861,13 @@ class SurveyController extends Controller
                 }
             } catch (\Throwable $e) {
                 error_log('[SurveyController::submit] Failed to add points: ' . $e->getMessage());
+            }
+
+            // Log activity
+            try {
+                ActivityLogHelper::logSurveySubmitted($userId, $surveyId);
+            } catch (\Throwable $e) {
+                error_log('[SurveyController::submit] Failed to log activity: ' . $e->getMessage());
             }
 
             return $this->json([

@@ -7,6 +7,7 @@ namespace App\Controllers;
 use App\Core\Container;
 use App\Core\Controller;
 use App\Core\Request;
+use App\Models\ActivityLog;
 
 class HomeController extends Controller
 {
@@ -26,6 +27,16 @@ class HomeController extends Controller
         $data = $this->pageData($request);
         $base = rtrim((string) ($data['baseUrl'] ?? ''), '/');
         $data['headExtra'] = '<link rel="stylesheet" href="' . $base . '/public/assets/css/client/pages/home.css">';
+        
+        // Get recent activities for current user
+        $userId = $_SESSION['user_id'] ?? null;
+        if ($userId) {
+            $activityLog = new ActivityLog();
+            $data['recentActivities'] = $activityLog->getByUserId($userId, 5, 0);
+        } else {
+            $data['recentActivities'] = [];
+        }
+        
         $content = $view->render("pages/client/home/home", $data);
         return \App\Core\Response::html($view->render('layouts/main', array_merge($data, ['content' => $content])));
     }

@@ -12,7 +12,7 @@
                         <div class="points-label">Điểm hiện có</div>
                         <div class="points-value" id="user-points">1,250</div>
                     </div>
-                    <a href="/rewards" class="btn btn-outline-accent flex-shrink-0"> <i class="fas fa-gift me-2"></i>Đổi
+                    <a href="<?= rtrim($baseUrl, '/') ?>/rewards" class="btn btn-outline-accent flex-shrink-0"> <i class="fas fa-gift me-2"></i>Đổi
                         thưởng ngay
                     </a>
                 </div>
@@ -26,7 +26,7 @@
         <h2 class="section-title mb-4">Hành động nhanh</h2>
         <div class="row g-3 g-lg-4">
             <div class="col-md-4">
-                <a href="#" class="action-card">
+                <a href="<?= rtrim($baseUrl, '/') ?>/profile" class="action-card">
                     <div class="action-icon"
                         style="--icon-bg: var(--primary-color-soft); --icon-color: var(--primary-color);">
                         <i class="fas fa-user-edit"></i>
@@ -39,7 +39,7 @@
                 </a>
             </div>
             <div class="col-md-4">
-                <a href="#" class="action-card">
+                <a href="<?= rtrim($baseUrl, '/') ?>/daily-rewards" class="action-card">
                     <div class="action-icon"
                         style="--icon-bg: var(--success-color-soft); --icon-color: var(--success-color);">
                         <i class="fas fa-calendar-check"></i>
@@ -52,7 +52,7 @@
                 </a>
             </div>
             <div class="col-md-4">
-                <a href="#" class="action-card">
+                <a href="<?= rtrim($baseUrl, '/') ?>/events" class="action-card">
                     <div class="action-icon"
                         style="--icon-bg: var(--accent-color-soft); --icon-color: var(--accent-color);">
                         <i class="fas fa-users"></i>
@@ -104,42 +104,122 @@
 <section class="activity-section bg-body-light py-5">
     <div class="container">
         <h2 class="section-title mb-3">Hoạt động gần đây</h2>
-        <div class="activity-list">
-            <div class="activity-item">
-                <div class="activity-icon activity-icon-success">
-                    <i class="fas fa-check-circle"></i>
+        <div class="activity-list" id="activity-list">
+            <div class="text-center text-muted py-5">
+                <div class="spinner-border spinner-border-sm" role="status">
+                    <span class="visually-hidden">Loading...</span>
                 </div>
-                <div class="activity-content">
-                    <h4>Hoàn thành khảo sát "Trải nghiệm du lịch"</h4>
-                    <p>Bạn đã nhận được +45 điểm</p>
-                </div>
-                <div class="activity-time">2 giờ trước</div>
-            </div>
-
-            <div class="activity-item">
-                <div class="activity-icon activity-icon-warning">
-                    <i class="fas fa-gift"></i>
-                </div>
-                <div class="activity-content">
-                    <h4>Đổi thưởng thành công</h4>
-                    <p>Voucher Shopee 50.000đ</p>
-                </div>
-                <div class="activity-time">1 ngày trước</div>
-            </div>
-
-            <div class="activity-item">
-                <div class="activity-icon activity-icon-success">
-                    <i class="fas fa-check-circle"></i>
-                </div>
-                <div class="activity-content">
-                    <h4>Hoàn thành khảo sát "Thói quen ăn uống"</h4>
-                    <p>Bạn đã nhận được +35 điểm</p>
-                </div>
-                <div class="activity-time">2 ngày trước</div>
+                <p class="mt-2">Đang tải...</p>
             </div>
         </div>
     </div>
 </section>
+
+<script>
+    document.addEventListener('DOMContentLoaded', async function() {
+        try {
+            // Kiểm tra role từ localStorage
+            const userJson = localStorage.getItem('app.user');
+            let apiEndpoint = '/api/activity-logs/my?limit=5'; // Default cho user thường
+            
+            if (userJson) {
+                const user = JSON.parse(userJson);
+                // Nếu là admin, gọi endpoint admin
+                if (user.role === 'admin') {
+                    apiEndpoint = '/api/admin/activity-logs?limit=5';
+                }
+            }
+
+            const response = await fetch(apiEndpoint);
+            const result = await response.json();
+            
+            if (!result.success || !result.data || result.data.length === 0) {
+                document.getElementById('activity-list').innerHTML = 
+                    '<div class="text-center text-muted py-5"><p>Chưa có hoạt động nào.</p></div>';
+                return;
+            }
+
+            const actionIcons = {
+                'survey_created': { icon: 'fas fa-plus-circle', class: 'activity-icon-success', label: '📋' },
+                'survey_updated': { icon: 'fas fa-edit', class: 'activity-icon-warning', label: '✏️' },
+                'survey_submitted': { icon: 'fas fa-check-circle', class: 'activity-icon-success', label: '✅' },
+                'participated_event': { icon: 'fas fa-calendar-check', class: 'activity-icon-primary', label: '📅' },
+                'reward_redeemed': { icon: 'fas fa-gift', class: 'activity-icon-warning', label: '🎁' },
+                'event_created': { icon: 'fas fa-calendar-plus', class: 'activity-icon-primary', label: '⭐' },
+                'question_created': { icon: 'fas fa-lightbulb', class: 'activity-icon-accent', label: '💡' },
+                'daily_reward_claimed': { icon: 'fas fa-star', class: 'activity-icon-success', label: '⭐' },
+                'redemption_status_changed': { icon: 'fas fa-sync', class: 'activity-icon-warning', label: '🔄' },
+                'profile_updated': { icon: 'fas fa-user', class: 'activity-icon-info', label: '👤' },
+            };
+
+            // Hàm dịch action thành tiếng Việt
+            const translateAction = (action) => {
+                const translations = {
+                    'survey_submitted': 'Hoàn thành khảo sát',
+                    'survey_created': 'Tạo khảo sát',
+                    'survey_updated': 'Cập nhật khảo sát',
+                    'event_created': 'Tạo sự kiện',
+                    'question_created': 'Tạo câu hỏi',
+                    'participated_event': 'Tham gia sự kiện',
+                    'reward_redeemed': 'Đổi thưởng',
+                    'profile_updated': 'Cập nhật hồ sơ',
+                    'login': 'Đăng nhập',
+                    'logout': 'Đăng xuất',
+                    'daily_reward_claimed': 'Nhận thưởng hàng ngày',
+                    'redemption_status_changed': 'Cập nhật trạng thái đổi thưởng',
+                };
+                return translations[action] || action.replace(/_/g, ' ');
+            };
+
+            let html = result.data.map(activity => {
+                const iconData = actionIcons[activity.action] || { 
+                    icon: 'fas fa-circle', 
+                    class: 'activity-icon-secondary', 
+                    label: '●' 
+                };
+
+                const timeDate = new Date(activity.created_at);
+                const now = new Date();
+                const diffMs = now - timeDate;
+                const diffMins = Math.floor(diffMs / 60000);
+                const diffHours = Math.floor(diffMs / 3600000);
+                const diffDays = Math.floor(diffMs / 86400000);
+
+                let timeStr = 'vừa xong';
+                if (diffDays > 0) {
+                    timeStr = diffDays + ' ngày trước';
+                } else if (diffHours > 0) {
+                    timeStr = diffHours + ' giờ trước';
+                } else if (diffMins > 0) {
+                    timeStr = diffMins + ' phút trước';
+                }
+
+                const translatedAction = translateAction(activity.action);
+
+                return `
+                    <div class="activity-item">
+                        <div class="activity-icon ${iconData.class}">
+                            <i class="${iconData.icon}"></i>
+                        </div>
+                        <div class="activity-content">
+                            <h4>${activity.description || translatedAction}</h4>
+                            <p class="mb-0 small text-muted">
+                                ${activity.entity_type ? activity.entity_type + ' #' + activity.entity_id : 'System'}
+                            </p>
+                        </div>
+                        <div class="activity-time">${timeStr}</div>
+                    </div>
+                `;
+            }).join('');
+
+            document.getElementById('activity-list').innerHTML = html;
+        } catch (error) {
+            console.error('Lỗi khi tải activity logs:', error);
+            document.getElementById('activity-list').innerHTML = 
+                '<div class="text-center text-danger py-5"><p>Lỗi khi tải hoạt động.</p></div>';
+        }
+    });
+</script>
 
 <script>
     let currentPage = 1;

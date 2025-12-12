@@ -158,6 +158,22 @@ class Answer
         }
     }
 
+    /**
+     * Xóa tất cả câu trả lời của một câu hỏi
+     */
+    public static function deleteByQuestion(int $questionId): bool
+    {
+        /** @var PDO $db */
+        $db = Container::get('db');
+
+        try {
+            $statement = $db->prepare('DELETE FROM answers WHERE idCauHoi = :questionId');
+            return $statement->execute([':questionId' => $questionId]);
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
+
     // Getters
     public function getId(): int
     {

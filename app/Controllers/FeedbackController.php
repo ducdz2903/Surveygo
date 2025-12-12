@@ -129,4 +129,44 @@ class FeedbackController extends Controller
         }
         return $this->json(['error' => false, 'message' => 'Đã xóa feedback.']);
     }
+
+    // POST /api/feedbacks/submit - submit feedback sau khi hoàn thành khảo sát
+    public function submit(Request $request)
+    {
+        $data = $request->input();
+
+        // Validate required fields
+        if (empty($data['idKhaoSat']) || !is_numeric($data['idKhaoSat'])) {
+            return $this->json(['error' => true, 'message' => 'idKhaoSat là bắt buộc'], 422);
+        }
+
+        if (empty($data['idNguoiDung']) || !is_numeric($data['idNguoiDung'])) {
+            return $this->json(['error' => true, 'message' => 'idNguoiDung là bắt buộc'], 422);
+        }
+
+        // Validate rating (1-5)
+        $danhGia = (int) ($data['danhGia'] ?? 0);
+        if ($danhGia < 1 || $danhGia > 5) {
+            return $this->json(['error' => true, 'message' => 'Đánh giá phải từ 1 đến 5'], 422);
+        }
+
+        // binhLuan (optional)
+        $binhLuan = !empty($data['binhLuan']) ? trim((string) $data['binhLuan']) : null;
+
+        // Create feedback
+        $feedbackData = [
+            'idKhaoSat' => (int) $data['idKhaoSat'],
+            'idNguoiDung' => (int) $data['idNguoiDung'],
+            'tenNguoiDung' => $data['tenNguoiDung'] ?? 'Ẩn danh',
+            'danhGia' => $danhGia,
+            'binhLuan' => $binhLuan,
+        ];
+
+        $fb = Feedback::create($feedbackData);
+        if (!$fb) {
+            return $this->json(['error' => true, 'message' => 'Không thể lưu phản hồi.'], 500);
+        }
+
+        return $this->json(['error' => false, 'message' => 'Phản hồi được lưu thành công.', 'data' => $fb->toArray()], 201);
+    }
 }

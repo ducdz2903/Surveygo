@@ -8,7 +8,9 @@ use App\Core\Controller;
 use App\Core\Request;
 use App\Core\Container;
 use App\Models\Question;
+use App\Models\Answer;
 use App\Models\SurveyQuestionMap;
+use App\Helpers\ActivityLogHelper;
 use PDO;
 
 class QuestionController extends Controller
@@ -78,9 +80,13 @@ class QuestionController extends Controller
             ], 404);
         }
 
+        // Include answers for preview
+        $data = $question->toArray();
+        $data['answers'] = $question->getAnswers();
+
         return $this->json([
             'error' => false,
-            'data' => $question->toArray(),
+            'data' => $data,
         ]);
     }
 
@@ -135,6 +141,39 @@ class QuestionController extends Controller
             ], 422);
         }
 
+        // Link to Survey if maKhaoSat is provided
+        if (!empty($data['maKhaoSat']) && is_numeric($data['maKhaoSat'])) {
+            SurveyQuestionMap::attach((int)$data['maKhaoSat'], $question->getId());
+        }
+
+        // Handle Answers (if any)
+        if (!empty($data['answers']) && is_array($data['answers'])) {
+            foreach ($data['answers'] as $ans) {
+                if (!empty($ans['noiDungCauTraLoi'])) {
+                    Answer::create([
+                        'idCauHoi' => $question->getId(), // Use new ID
+                        'noiDungCauTraLoi' => $ans['noiDungCauTraLoi'],
+                        'creator_id' => 1 // simplified, should be current user
+                    ]);
+                }
+            }
+        }
+
+        // Log activity
+        try {
+            // Get userId from session if available
+            $userId = $_SESSION['user_id'] ?? 0;
+            if ($userId) {
+                ActivityLogHelper::logQuestionCreated(
+                    $userId,
+                    $question->getId(),
+                    $question->getNoiDungCauHoi()
+                );
+            }
+        } catch (\Throwable $e) {
+            error_log('[QuestionController::create] Failed to log activity: ' . $e->getMessage());
+        }
+
         return $this->json([
             'error' => false,
             'message' => 'Câu hỏi được tạo thành công.',
@@ -179,6 +218,38 @@ class QuestionController extends Controller
             ], 500);
         }
 
+        // Update Survey Link (if maKhaoSat key exists in payload)
+        if (array_key_exists('maKhaoSat', $data)) {
+            // Treat null, empty string, or -1 as "unlink"
+            $surveyId = $data['maKhaoSat'];
+            
+            // Always detach all current links for this question (assuming 1-to-many from Question side for this UI)
+            SurveyQuestionMap::detachAllByQuestion($question->getId());
+
+            // If a valid survey ID is selected, attach it
+            if ($surveyId && is_numeric($surveyId) && (int)$surveyId > 0) {
+                 SurveyQuestionMap::attach((int)$surveyId, $question->getId());
+            }
+        }
+
+        // Handle Answers Update (Replace Strategy)
+        // Only if 'answers' key exists in payload (even if empty, meaning "remove all")
+        if (isset($data['answers']) && is_array($data['answers'])) {
+            // Delete old answers
+            Answer::deleteByQuestion($question->getId());
+            
+            // Add new answers
+            foreach ($data['answers'] as $ans) {
+                if (!empty($ans['noiDungCauTraLoi'])) {
+                    Answer::create([
+                        'idCauHoi' => $question->getId(),
+                        'noiDungCauTraLoi' => $ans['noiDungCauTraLoi'],
+                        'creator_id' => 1
+                    ]);
+                }
+            }
+        }
+
         // Reload
         $question = Question::find((int)$id);
 
@@ -192,7 +263,7 @@ class QuestionController extends Controller
     // xoá
     public function delete(Request $request)
     {
-        $id = $request->query('id') ?? $request->input('id');
+        $id = $request->getAttribute('id') ?? $request->query('id') ?? $request->input('id');
 
         if (!$id || !is_numeric($id)) {
             return $this->json([
