@@ -13,6 +13,7 @@ class UserPoint
     private int $userId;
     private int $balance;
     private int $totalEarned;
+    private int $luckyWheelSpins;
     private string $createdAt;
     private string $updatedAt;
 
@@ -22,6 +23,7 @@ class UserPoint
         $this->userId = (int) ($attributes['user_id'] ?? 0);
         $this->balance = (int) ($attributes['balance'] ?? 0);
         $this->totalEarned = (int) ($attributes['total_earned'] ?? 0);
+        $this->luckyWheelSpins = (int) ($attributes['lucky_wheel_spins'] ?? 0);
         $this->createdAt = (string) ($attributes['created_at'] ?? '');
         $this->updatedAt = (string) ($attributes['updated_at'] ?? '');
     }
@@ -67,6 +69,46 @@ class UserPoint
         return self::create($userId, $forUpdate);
     }
 
+    public function addLuckyWheelSpins(int $amount): void
+    {
+        $db = Container::get('db');
+        $stmt = $db->prepare(
+            'UPDATE user_points 
+             SET lucky_wheel_spins = lucky_wheel_spins + :amount,
+                 updated_at = NOW()
+             WHERE user_id = :user_id'
+        );
+        $stmt->execute([
+            ':amount' => $amount,
+            ':user_id' => $this->userId
+        ]);
+        $this->luckyWheelSpins += $amount;
+    }
+
+    public function useLuckyWheelSpin(): bool
+    {
+        if ($this->luckyWheelSpins <= 0) {
+            return false;
+        }
+    
+        $db = Container::get('db');
+        $stmt = $db->prepare(
+            'UPDATE user_points 
+             SET lucky_wheel_spins = lucky_wheel_spins - 1,
+                 updated_at = NOW()
+             WHERE user_id = :user_id 
+               AND lucky_wheel_spins > 0'
+        );
+        $stmt->execute([':user_id' => $this->userId]);
+    
+        if ($stmt->rowCount() > 0) {
+            $this->luckyWheelSpins--;
+            return true;
+        }
+    
+    return false;
+}
+
     public function getId(): int
     {
         return $this->id;
@@ -87,6 +129,11 @@ class UserPoint
         return $this->totalEarned;
     }
 
+    public function getLuckyWheelSpins(): int
+    {
+        return $this->luckyWheelSpins;
+    }
+    
     public function toArray(): array
     {
         return [

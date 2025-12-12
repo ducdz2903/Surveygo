@@ -134,6 +134,7 @@ CREATE TABLE IF NOT EXISTS user_points ( -- Quản lí tổng số điểm của
   user_id INT UNSIGNED NOT NULL,
   balance INT UNSIGNED NOT NULL DEFAULT 0, -- Số điểm còn trong ví
   total_earned INT UNSIGNED NOT NULL DEFAULT 0, -- Tổng số điểm đã kiếm được
+  lucky_wheel_spins INT UNSIGNED NOT NULL DEFAULT 0, -- Số lượt quay lucky wheel
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   UNIQUE KEY uniq_user_points (user_id),
@@ -143,7 +144,7 @@ CREATE TABLE IF NOT EXISTS user_points ( -- Quản lí tổng số điểm của
 CREATE TABLE IF NOT EXISTS point_transactions ( -- Log lịch sử cộng và rút điểm của người dùng
   id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   user_id INT UNSIGNED NOT NULL,
-  source ENUM('daily_reward','survey','manual_adjustment') NOT NULL,
+  source ENUM('daily_reward','survey','lucky_wheel','manual_adjustment') NOT NULL,
   ref_id INT UNSIGNED DEFAULT NULL,
   amount INT UNSIGNED NOT NULL,
   balance_after INT UNSIGNED NOT NULL,

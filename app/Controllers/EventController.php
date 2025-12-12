@@ -66,6 +66,97 @@ class EventController extends Controller
     }
 
     /**
+     * POST /api/events/lucky-wheel/spin
+     * Quay thưởng Lucky Wheel
+     */
+    public function spinLuckyWheel(Request $request)
+    {
+        $userId = (int) ($request->input('userId') ?? 0);
+
+        if ($userId <= 0) {
+            return $this->json([
+                'error' => true,
+                'message' => 'User ID is required.',
+            ], 422);
+        }
+
+        $user = User::findById($userId);
+        if (!$user) {
+            return $this->json([
+                'error' => true,
+                'message' => 'User not found.',
+            ], 404);
+        }
+
+        // KT lượt quay còn
+        $userPoint = \App\Models\UserPoint::getOrCreate($userId);
+        $availableSpins = $userPoint->getLuckyWheelSpins();
+
+        if ($availableSpins <= 0) {
+            return $this->json([
+                'error' => true,
+                'message' => 'Bạn không còn lượt quay! Điểm danh hàng ngày để nhận thêm lượt quay.',
+                'data' => [
+                    'available_spins' => 0,
+                ]
+            ], 400);
+        }
+
+        // Hard code tỷ lệ
+        $prizes = [
+            10 => 40,
+            20 => 30,
+            50 => 20,
+            100 => 5,
+            200 => 3,
+            500 => 2
+        ];
+
+        $rand = mt_rand(1, 100);
+        $points = 10; // Default
+        $cumulative = 0;
+
+        foreach ($prizes as $prize => $percent) {
+            $cumulative += $percent;
+            if ($rand <= $cumulative) {
+                $points = $prize;
+                break;
+            }
+        }
+
+        try {
+            $tx = \App\Models\PointTransaction::addPoints(
+                $userId,
+                $points,
+                'lucky_wheel',
+                null,
+                'Quay thưởng Lucky Wheel (' . date('Y-m-d H:i:s') . ')'
+            );
+
+            $spinUsed = $userPoint->useLuckyWheelSpin();
+            if (!$spinUsed) {
+                error_log('[EventController::spinLuckyWheel] Failed to deduct spin for user ' . $userId);
+            }
+
+            return $this->json([
+                'error' => false,
+                'message' => "Chúc mừng! Bạn nhận được {$points} điểm.",
+                'data' => [
+                    'points_added' => $points,
+                    'new_balance' => $tx->getBalanceAfter(),
+                    'spins_remaining' => max(0, $availableSpins - 1),
+                ]
+            ]);
+
+        } catch (\Throwable $e) {
+            return $this->json([
+                'error' => true,
+                'message' => 'Lỗi hệ thống: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
      * POST /api/events/{id}/join
      * User tham gia sự kiện
      */

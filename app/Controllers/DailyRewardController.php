@@ -120,6 +120,12 @@ class DailyRewardController extends Controller
                     'Điểm danh ngày ' . $today
                 );
             }
+            try {
+                $userPoint = \App\Models\UserPoint::getOrCreate($userId);
+                $userPoint->addLuckyWheelSpins(1);
+            } catch (\Throwable $e) {
+                error_log('[DailyRewardController::claim] Failed to add lucky wheel spin: ' . $e->getMessage());
+            }   
         } catch (\Throwable $e) {
             error_log('[DailyRewardController::claim] Failed to add points: ' . $e->getMessage());
         }
