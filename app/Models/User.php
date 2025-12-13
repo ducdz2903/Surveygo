@@ -272,4 +272,113 @@ class User
         $stmt = $db->prepare('UPDATE users SET password = :password, updated_at = :updated_at WHERE id = :id');
         $stmt->execute([':password' => $newHashedPassword, ':updated_at' => $now, ':id' => $this->id]);
     }
+
+    /**
+     * Get user statistics including total, monthly growth, and new users
+     * 
+     * @return array Statistics data
+     */
+    public static function getUserStatistics(): array
+    {
+        /** @var PDO $db */
+        $db = Container::get('db');
+
+        // Get total users
+        $totalStmt = $db->query('SELECT COUNT(*) as total FROM users');
+        $totalUsers = (int) $totalStmt->fetch()['total'];
+
+        // Get current month date range
+        $currentMonthStart = date('Y-m-01 00:00:00');
+        $currentMonthEnd = date('Y-m-t 23:59:59');
+
+        // Get previous month date range
+        $previousMonthStart = date('Y-m-01 00:00:00', strtotime('first day of last month'));
+        $previousMonthEnd = date('Y-m-t 23:59:59', strtotime('last day of last month'));
+
+        // Count new users in current month
+        $currentMonthStmt = $db->prepare(
+            'SELECT COUNT(*) as count FROM users WHERE created_at >= :start AND created_at <= :end'
+        );
+        $currentMonthStmt->execute([
+            ':start' => $currentMonthStart,
+            ':end' => $currentMonthEnd,
+        ]);
+        $newUsersThisMonth = (int) $currentMonthStmt->fetch()['count'];
+
+        // Count new users in previous month
+        $previousMonthStmt = $db->prepare(
+            'SELECT COUNT(*) as count FROM users WHERE created_at >= :start AND created_at <= :end'
+        );
+        $previousMonthStmt->execute([
+            ':start' => $previousMonthStart,
+            ':end' => $previousMonthEnd,
+        ]);
+        $newUsersPreviousMonth = (int) $previousMonthStmt->fetch()['count'];
+
+        // Calculate monthly growth percentage
+        $growthPercentage = 0.0;
+        if ($newUsersPreviousMonth > 0) {
+            $growthPercentage = (($newUsersThisMonth - $newUsersPreviousMonth) / $newUsersPreviousMonth) * 100;
+        } elseif ($newUsersThisMonth > 0) {
+            $growthPercentage = 100.0; // If no users last month but have users this month
+        }
+
+        return [
+            'total_users' => $totalUsers,
+            'new_users_this_month' => $newUsersThisMonth,
+            'new_users_previous_month' => $newUsersPreviousMonth,
+            'growth_percentage' => round($growthPercentage, 1),
+            'is_growth_positive' => $growthPercentage >= 0,
+        ];
+    }
+
+    /**
+ * Get top active users by completed surveys count
+ * 
+ * @param int $limit Number of users to return
+ * @return array Array of users with completed_surveys_count and created_surveys_count
+ */
+public static function getTopActiveUsers(int $limit = 5): array
+{
+    /** @var PDO $db */
+    $db = Container::get('db');
+
+    $sql = "
+        SELECT 
+            u.id,
+            u.code,
+            u.name,
+            u.avatar,
+            u.email,
+            u.created_at,
+            COUNT(DISTINCT ss.id) as completed_surveys_count,
+            COUNT(DISTINCT s.id) as created_surveys_count
+        FROM users u
+        LEFT JOIN survey_submissions ss ON u.id = ss.maNguoiDung
+        LEFT JOIN surveys s ON u.id = s.maNguoiTao
+        GROUP BY u.id
+        HAVING completed_surveys_count > 0
+        ORDER BY completed_surveys_count DESC, created_surveys_count DESC
+        LIMIT :limit
+    ";
+
+    $stmt = $db->prepare($sql);
+    $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+    $stmt->execute();
+
+    $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    return array_map(function($row) {
+        return [
+            'id' => (int) $row['id'],
+            'code' => $row['code'],
+            'name' => $row['name'],
+            'avatar' => $row['avatar'],
+            'email' => $row['email'],
+            'created_at' => $row['created_at'],
+            'completed_surveys_count' => (int) $row['completed_surveys_count'],
+            'created_surveys_count' => (int) $row['created_surveys_count'],
+        ];
+    }, $results);
+}
 }

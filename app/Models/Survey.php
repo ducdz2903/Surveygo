@@ -401,4 +401,112 @@ class Survey
     {
         return $this->diemThuong;
     }
+
+    /**
+     * Lấy thống kê khảo sát bao gồm tổng số, tăng trưởng hàng tháng và khảo sát mới
+     * 
+     * @return array Dữ liệu thống kê
+     */
+    public static function getSurveyStatistics(): array
+    {
+        /** @var PDO $db */
+        $db = Container::get('db');
+
+        // Lấy tổng số khảo sát (bao gồm cả khảo sát thường và QuickPoll)
+        $totalStmt = $db->query('SELECT COUNT(*) as total FROM surveys');
+        $totalSurveys = (int) $totalStmt->fetch()['total'];
+
+        // Lấy khoảng thời gian của tháng hiện tại
+        $currentMonthStart = date('Y-m-01 00:00:00');
+        $currentMonthEnd = date('Y-m-t 23:59:59');
+
+        // Lấy khoảng thời gian của tháng trước
+        $previousMonthStart = date('Y-m-01 00:00:00', strtotime('first day of last month'));
+        $previousMonthEnd = date('Y-m-t 23:59:59', strtotime('last day of last month'));
+
+        // Đếm số khảo sát mới trong tháng hiện tại
+        $currentMonthStmt = $db->prepare(
+            'SELECT COUNT(*) as count FROM surveys WHERE created_at >= :start AND created_at <= :end'
+        );
+        $currentMonthStmt->execute([
+            ':start' => $currentMonthStart,
+            ':end' => $currentMonthEnd,
+        ]);
+        $newSurveysThisMonth = (int) $currentMonthStmt->fetch()['count'];
+
+        // Đếm số khảo sát mới trong tháng trước
+        $previousMonthStmt = $db->prepare(
+            'SELECT COUNT(*) as count FROM surveys WHERE created_at >= :start AND created_at <= :end'
+        );
+        $previousMonthStmt->execute([
+            ':start' => $previousMonthStart,
+            ':end' => $previousMonthEnd,
+        ]);
+        $newSurveysPreviousMonth = (int) $previousMonthStmt->fetch()['count'];
+
+        // Tính phần trăm tăng trưởng hàng tháng
+        $growthPercentage = 0.0;
+        if ($newSurveysPreviousMonth > 0) {
+            $growthPercentage = (($newSurveysThisMonth - $newSurveysPreviousMonth) / $newSurveysPreviousMonth) * 100;
+        } elseif ($newSurveysThisMonth > 0) {
+            $growthPercentage = 100.0; // Nếu không có khảo sát tháng trước nhưng có khảo sát tháng này
+        }
+
+        return [
+            'total_surveys' => $totalSurveys,
+            'new_surveys_this_month' => $newSurveysThisMonth,
+            'new_surveys_previous_month' => $newSurveysPreviousMonth,
+            'growth_percentage' => round($growthPercentage, 1),
+            'is_growth_positive' => $growthPercentage >= 0,
+        ];
+    }
+
+    /**
+ * Lấy khảo sát hàng đầu theo số lượng phản hồi với đánh giá trung bình
+ * 
+ * @param int $limit Số lượng khảo sát cần trả về
+ * @return array Mảng các khảo sát với response_count và avg_rating
+ */
+public static function getTopSurveysByResponses(int $limit = 5): array
+{
+    /** @var PDO $db */
+    $db = Container::get('db');
+
+    $sql = "
+        SELECT 
+            s.id,
+            s.maKhaoSat,
+            s.tieuDe,
+            s.moTa,
+            s.trangThai,
+            s.created_at,
+            COUNT(DISTINCT ss.id) as response_count,
+            COALESCE(AVG(f.danhGia), 0) as avg_rating
+        FROM surveys s
+        LEFT JOIN survey_submissions ss ON s.id = ss.maKhaoSat
+        LEFT JOIN feedbacks f ON s.id = f.idKhaoSat
+        GROUP BY s.id
+        ORDER BY response_count DESC
+        LIMIT :limit
+    ";
+
+    $stmt = $db->prepare($sql);
+    $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+    $stmt->execute();
+
+    $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    return array_map(function($row) {
+        return [
+            'id' => (int) $row['id'],
+            'maKhaoSat' => $row['maKhaoSat'],
+            'tieuDe' => $row['tieuDe'],
+            'moTa' => $row['moTa'],
+            'trangThai' => $row['trangThai'],
+            'created_at' => $row['created_at'],
+            'response_count' => (int) $row['response_count'],
+            'avg_rating' => $row['avg_rating'] ? round((float) $row['avg_rating'], 1) : null,
+        ];
+    }, $results);
+}
 }

@@ -63,6 +63,13 @@ class AdminController extends Controller
     {
         $view = new \App\Core\View();
         $data = $this->pageData($request);
+        
+        // Fetch top surveys by responses with average ratings
+        $data['topSurveys'] = \App\Models\Survey::getTopSurveysByResponses(5);
+        
+        // Fetch top active users by survey count
+        $data['topUsers'] = \App\Models\User::getTopActiveUsers(5);
+        
         $content = $view->render('pages/admin/reports/reports', $data);
         return \App\Core\Response::html($view->render('layouts/admin', array_merge($data, ['content' => $content])));
     }
@@ -140,5 +147,113 @@ class AdminController extends Controller
         $data = $this->pageData($request);
         $content = $view->render('pages/admin/redemptions/reward_redemptions', $data);
         return \App\Core\Response::html($view->render('layouts/admin', array_merge($data, ['content' => $content])));
+    }
+
+    /**
+     * API endpoint to get top surveys by response count
+     * GET /api/admin/top-surveys
+     */
+    public function getTopSurveys(Request $request)
+    {
+        try {
+            $limit = (int) ($request->query('limit') ?? 5);
+            $limit = max(1, min(20, $limit)); // Between 1 and 20
+
+            $topSurveys = \App\Models\Survey::getTopSurveysByResponses($limit);
+
+            return \App\Core\Response::json([
+                'success' => true,
+                'data' => $topSurveys,
+            ]);
+        } catch (\Throwable $e) {
+            return \App\Core\Response::json([
+                'success' => false,
+                'message' => 'Failed to load top surveys: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * API endpoint to get user statistics
+     * GET /api/admin/user-stats
+     */
+    public function getUserStats(Request $request)
+    {
+        try {
+            $stats = \App\Models\User::getUserStatistics();
+
+            return \App\Core\Response::json([
+                'success' => true,
+                'data' => $stats,
+            ]);
+        } catch (\Throwable $e) {
+            return \App\Core\Response::json([
+                'success' => false,
+                'message' => 'Failed to load user statistics: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * API endpoint to get survey statistics
+     * GET /api/admin/survey-stats
+     */
+    public function getSurveyStats(Request $request)
+    {
+        try {
+            $stats = \App\Models\Survey::getSurveyStatistics();
+
+            return \App\Core\Response::json([
+                'success' => true,
+                'data' => $stats,
+            ]);
+        } catch (\Throwable $e) {
+            return \App\Core\Response::json([
+                'success' => false,
+                'message' => 'Failed to load survey statistics: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * API endpoint to get response statistics (survey submissions, feedback, contact messages)
+     * GET /api/admin/response-stats
+     */
+    public function getResponseStats(Request $request)
+    {
+        try {
+            $stats = \App\Models\SurveySubmission::getResponseStatistics();
+
+            return \App\Core\Response::json([
+                'success' => true,
+                'data' => $stats,
+            ]);
+        } catch (\Throwable $e) {
+            return \App\Core\Response::json([
+                'success' => false,
+                'message' => 'Failed to load response statistics: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * API endpoint to get event statistics
+     * GET /api/admin/event-stats
+     */
+    public function getEventStats(Request $request)
+    {
+        try {
+            $stats = \App\Models\Event::getEventStatistics();
+
+            return \App\Core\Response::json([
+                'success' => true,
+                'data' => $stats,
+            ]);
+        } catch (\Throwable $e) {
+            return \App\Core\Response::json([
+                'success' => false,
+                'message' => 'Failed to load event statistics: ' . $e->getMessage(),
+            ], 500);
+        }
     }
 }
