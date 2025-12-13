@@ -126,6 +126,8 @@ $router->post('/api/daily-rewards/claim', [DailyRewardController::class, 'claim'
 
 // Users API - solo para admin
 $router->get('/api/users', [App\Controllers\UserController::class, 'index'], [new RoleMiddleware(['admin'])]);
+$router->get('/api/users/profile-stats', [App\Controllers\UserController::class, 'getUserProfileStats'], [new AuthMiddleware()]);
+
 
 // Rewards API
 $router->get('/api/rewards', [RewardController::class, 'apiList']);
@@ -176,6 +178,13 @@ $router->get('/api/admin/activity-logs/entity/:type/:id', [ActivityLogController
 $router->get('/api/admin/activity-logs/action/:action', [ActivityLogController::class, 'getActionLogs'], [new RoleMiddleware(['admin'])]);
 $router->delete('/api/admin/activity-logs/cleanup', [ActivityLogController::class, 'cleanup'], [new RoleMiddleware(['admin'])]);
 $router->get('/admin/activity-logs/view', [ActivityLogController::class, 'viewPage'], [new RoleMiddleware(['admin'])]);
+
+// Admin Dashboard Stats API
+$router->get('/api/admin/top-surveys', [AdminController::class, 'getTopSurveys'], [new RoleMiddleware(['admin'])]);
+$router->get('/api/admin/user-stats', [AdminController::class, 'getUserStats'], [new RoleMiddleware(['admin'])]);
+$router->get('/api/admin/survey-stats', [AdminController::class, 'getSurveyStats'], [new RoleMiddleware(['admin'])]);
+$router->get('/api/admin/response-stats', [AdminController::class, 'getResponseStats'], [new RoleMiddleware(['admin'])]);
+$router->get('/api/admin/event-stats', [AdminController::class, 'getEventStats'], [new RoleMiddleware(['admin'])]);
 
 $request = Request::capture();
 

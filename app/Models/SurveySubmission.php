@@ -248,6 +248,85 @@ class SurveySubmission
     }
 
     /**
+     * Get comprehensive response statistics including survey submissions, feedback, and contact messages
+     * 
+     * @return array Statistics data including totals, monthly counts, and growth percentage
+     */
+    public static function getResponseStatistics(): array
+    {
+        /** @var PDO $db */
+        $db = Container::get('db');
+
+        // Get total survey submissions
+        $totalSubmissionsStmt = $db->query('SELECT COUNT(*) as total FROM survey_submissions');
+        $totalSubmissions = (int) $totalSubmissionsStmt->fetch()['total'];
+
+        // Get total feedback responses
+        $totalFeedbackStmt = $db->query('SELECT COUNT(*) as total FROM feedbacks');
+        $totalFeedback = (int) $totalFeedbackStmt->fetch()['total'];
+
+        // Get total contact messages
+        $totalContactStmt = $db->query('SELECT COUNT(*) as total FROM contact_messages');
+        $totalContact = (int) $totalContactStmt->fetch()['total'];
+
+        // Calculate combined total
+        $totalResponses = $totalSubmissions + $totalFeedback + $totalContact;
+
+        // Get current month date range
+        $currentMonthStart = date('Y-m-01 00:00:00');
+        $currentMonthEnd = date('Y-m-t 23:59:59');
+
+        // Get previous month date range
+        $previousMonthStart = date('Y-m-01 00:00:00', strtotime('first day of last month'));
+        $previousMonthEnd = date('Y-m-t 23:59:59', strtotime('last day of last month'));
+
+        // Count new responses in current month (all three tables combined)
+        $currentMonthSql = '
+            SELECT COUNT(*) as count FROM (
+                SELECT created_at FROM survey_submissions WHERE created_at >= :start AND created_at <= :end
+                UNION ALL
+                SELECT created_at FROM feedbacks WHERE created_at >= :start AND created_at <= :end
+                UNION ALL
+                SELECT created_at FROM contact_messages WHERE created_at >= :start AND created_at <= :end
+            ) AS all_responses
+        ';
+        
+        $currentMonthStmt = $db->prepare($currentMonthSql);
+        $currentMonthStmt->execute([
+            ':start' => $currentMonthStart,
+            ':end' => $currentMonthEnd,
+        ]);
+        $newResponsesThisMonth = (int) $currentMonthStmt->fetch()['count'];
+
+        // Count new responses in previous month
+        $previousMonthStmt = $db->prepare($currentMonthSql);
+        $previousMonthStmt->execute([
+            ':start' => $previousMonthStart,
+            ':end' => $previousMonthEnd,
+        ]);
+        $newResponsesPreviousMonth = (int) $previousMonthStmt->fetch()['count'];
+
+        // Calculate monthly growth percentage
+        $growthPercentage = 0.0;
+        if ($newResponsesPreviousMonth > 0) {
+            $growthPercentage = (($newResponsesThisMonth - $newResponsesPreviousMonth) / $newResponsesPreviousMonth) * 100;
+        } elseif ($newResponsesThisMonth > 0) {
+            $growthPercentage = 100.0; // If no responses last month but have responses this month
+        }
+
+        return [
+            'total_responses' => $totalResponses,
+            'survey_submissions' => $totalSubmissions,
+            'feedbacks' => $totalFeedback,
+            'contact_messages' => $totalContact,
+            'new_responses_this_month' => $newResponsesThisMonth,
+            'new_responses_previous_month' => $newResponsesPreviousMonth,
+            'growth_percentage' => round($growthPercentage, 1),
+            'is_growth_positive' => $growthPercentage >= 0,
+        ];
+    }
+
+    /**
      * Chuyển đổi model thành array
      */
     public function toArray(): array

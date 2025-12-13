@@ -18,6 +18,7 @@
                         <p class="member-since">Thành viên từ 01/01/2025</p>
                     </div>
 
+
                     <div class="user-stats">
                         <div class="stat-item">
                             <i class="fas fa-file-alt"></i>
@@ -35,6 +36,7 @@
                             <span class="stat-label">Đã rút</span>
                         </div>
                     </div>
+
 
                     <nav class="profile-nav nav flex-column nav-pills">
                         <a class="nav-link active" href="#account" data-bs-toggle="tab">
@@ -154,6 +156,70 @@
 <script src="/public/assets/js/toast-helper.js"></script>
 <script>
     const API_BASE = ''; // use relative paths; set to '' so fetch('/api/...') resolves to current origin
+    
+    // Function to load and update user statistics
+    async function loadUserStatistics() {
+        try {
+            const userJson = localStorage.getItem('app.user');
+            if (!userJson) {
+                console.warn('No user data found in localStorage');
+                return;
+            }
+            
+            const user = JSON.parse(userJson);
+            const userId = user.id;
+            
+            // Fetch user statistics from API
+            const response = await fetch(`/api/users/profile-stats?user_id=${userId}`);
+            if (!response.ok) {
+                throw new Error('Failed to fetch user statistics');
+            }
+            
+            const result = await response.json();
+            
+            if (result.success && result.data) {
+                const { completed_surveys, current_points, redemptions_count } = result.data;
+                
+                // Update the statistics in the UI
+                const statItems = document.querySelectorAll('.stat-item');
+                
+                // Update completed surveys (first stat item)
+                if (statItems[0]) {
+                    const surveyValue = statItems[0].querySelector('.stat-value');
+                    if (surveyValue) {
+                        surveyValue.textContent = completed_surveys;
+                    }
+                }
+                
+                // Update current points (second stat item)
+                if (statItems[1]) {
+                    const pointsValue = statItems[1].querySelector('.stat-value');
+                    if (pointsValue) {
+                        // Format points with 'k' suffix if >= 1000
+                        const formattedPoints = current_points >= 1000 
+                            ? `${(current_points / 1000).toFixed(0)}k` 
+                            : current_points.toString();
+                        pointsValue.textContent = formattedPoints;
+                    }
+                }
+                
+                // Update redemptions count (third stat item)
+                if (statItems[2]) {
+                    const redemptionsValue = statItems[2].querySelector('.stat-value');
+                    if (redemptionsValue) {
+                        redemptionsValue.textContent = redemptions_count;
+                    }
+                }
+                
+                console.log('User statistics updated:', result.data);
+            } else {
+                console.error('Invalid response format:', result);
+            }
+        } catch (error) {
+            console.error('Error loading user statistics:', error);
+        }
+    }
+
     // Lấy thông tin user từ localStorage khi trang load
     document.addEventListener('DOMContentLoaded', function () {
         try {
@@ -239,6 +305,9 @@
                         memberSince.textContent = `Thành viên từ ${monthYear}`;
                     }
                 }
+                
+                // Load user statistics (surveys, points, redemptions)
+                loadUserStatistics();
 
                 console.log('Thông tin user đã được cập nhật:', user);
             } else {
@@ -348,6 +417,7 @@
             }
         }
         
+
         const avatarInput = document.getElementById('avatar-upload');
         const avatarImg = document.querySelector('.avatar-img');
         let selectedAvatarData = null; // base64 string cho ảnh đại diện

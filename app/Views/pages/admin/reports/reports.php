@@ -75,21 +75,20 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // Get data from PHP
+        const topSurveys = <?php echo json_encode($topSurveys ?? []); ?>;
+        const topUsers = <?php echo json_encode($topUsers ?? []); ?>;
+
         const reportData = {
-            topSurveys: [
-                { title: "Khảo sát thói quen đọc sách 2024", responses: 1250, rating: 4.8 },
-                { title: "Đánh giá chất lượng dịch vụ Canteen", responses: 980, rating: 4.2 },
-                { title: "Ý kiến về đồng phục mới", responses: 850, rating: 3.9 },
-                { title: "Khảo sát nhu cầu học kỹ năng mềm", responses: 720, rating: 4.5 },
-                { title: "Bình chọn sự kiện cuối năm", responses: 690, rating: 4.7 }
-            ],
-            topUsers: [
-                { name: "Nguyễn Văn An", surveys: 15, responses: 120 },
-                { name: "Trần Thị Bình", surveys: 12, responses: 98 },
-                { name: "Lê Hoàng Cường", surveys: 10, responses: 85 },
-                { name: "Phạm Minh Dung", surveys: 8, responses: 72 },
-                { name: "Hoàng Văn Em", surveys: 8, responses: 65 }
-            ],
+            topSurveys: topSurveys.map(survey => ({
+                title: survey.tieuDe,
+                responses: survey.response_count,
+                rating: survey.avg_rating || 0
+            })),
+            topUsers: topUsers.map(user => ({
+                name: user.name,
+                completedSurveys: user.completed_surveys_count
+            })),
             categories: {
                 labels: ['Giáo dục', 'Công nghệ', 'Đời sống', 'Sức khỏe', 'Giải trí', 'Khác'],
                 data: [35, 25, 20, 15, 10, 5]
@@ -110,46 +109,50 @@
         // hàm tạo giao diện top khảo sát
         const surveysList = document.getElementById('top-surveys-list');
         if(surveysList) {
-            surveysList.innerHTML = reportData.topSurveys.map((s, i) => `
-                <div class="list-group-item border-0 px-0 py-3 d-flex align-items-center">
-                    <div class="fw-bold fs-4 text-muted opacity-50 me-3" style="width: 25px;">${i + 1}</div>
-                    <div class="flex-grow-1">
-                        <div class="fw-bold text-dark mb-1 text-truncate" style="max-width: 300px;">${s.title}</div>
-                        <div class="small text-muted">
-                            <i class="fas fa-poll me-1"></i>${s.responses.toLocaleString()} phản hồi
-                            <span class="mx-2">•</span>
-                            <span class="text-warning"><i class="fas fa-star me-1"></i>${s.rating}</span>
+            if (reportData.topSurveys.length === 0) {
+                surveysList.innerHTML = '<div class="text-center py-4 text-muted">Chưa có dữ liệu</div>';
+            } else {
+                surveysList.innerHTML = reportData.topSurveys.map((s, i) => `
+                    <div class="list-group-item border-0 px-0 py-3 d-flex align-items-center">
+                        <div class="fw-bold fs-4 text-muted opacity-50 me-3" style="width: 25px;">${i + 1}</div>
+                        <div class="flex-grow-1">
+                            <div class="fw-bold text-dark mb-1 text-truncate" style="max-width: 300px;">${s.title}</div>
+                            <div class="small text-muted">
+                                <i class="fas fa-poll me-1"></i>${s.responses.toLocaleString()} phản hồi
+                                <span class="mx-2">•</span>
+                                <span class="text-warning"><i class="fas fa-star me-1"></i>${s.rating.toFixed(1)}</span>
+                            </div>
+                        </div>
+                        <div>
+                            <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3">Top ${i+1}</span>
                         </div>
                     </div>
-                    <div>
-                        <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3">Top ${i+1}</span>
-                    </div>
-                </div>
-            `).join('');
+                `).join('');
+            }
         }
 
         // hàm tạo giao diện top người dùng
         const usersList = document.getElementById('top-users-list');
         if(usersList) {
-            usersList.innerHTML = reportData.topUsers.map((u, i) => `
-                <div class="list-group-item border-0 px-0 py-3 d-flex align-items-center">
-                    <div class="fw-bold fs-4 text-muted opacity-50 me-3" style="width: 25px;">${i + 1}</div>
-                    <div class="me-3">
-                        <div class="rounded-circle text-white d-flex align-items-center justify-content-center fw-bold shadow-sm" 
-                             style="width: 40px; height: 40px; background: ${getAvatarColor(u.name)}">
-                            ${u.name.split(' ').pop()[0]}
+            if (reportData.topUsers.length === 0) {
+                usersList.innerHTML = '<div class="text-center py-4 text-muted">Chưa có dữ liệu</div>';
+            } else {
+                usersList.innerHTML = reportData.topUsers.map((u, i) => `
+                    <div class="list-group-item border-0 px-0 py-3 d-flex align-items-center">
+                        <div class="fw-bold fs-4 text-muted opacity-50 me-3" style="width: 25px;">${i + 1}</div>
+                        <div class="me-3">
+                            <div class="rounded-circle text-white d-flex align-items-center justify-content-center fw-bold shadow-sm" 
+                                 style="width: 40px; height: 40px; background: ${getAvatarColor(u.name)}">
+                                ${u.name.split(' ').pop()[0]}
+                            </div>
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="fw-bold text-dark">${u.name}</div>
+                            <div class="small text-muted">Đã làm ${u.completedSurveys} khảo sát</div>
                         </div>
                     </div>
-                    <div class="flex-grow-1">
-                        <div class="fw-bold text-dark">${u.name}</div>
-                        <div class="small text-muted">Tham gia ${u.responses} lần</div>
-                    </div>
-                    <div class="text-end">
-                        <div class="fw-bold text-primary">${u.surveys}</div>
-                        <div class="small text-muted" style="font-size: 0.7rem;">Khảo sát</div>
-                    </div>
-                </div>
-            `).join('');
+                `).join('');
+            }
         }
 
         // hàm tạo biểu đồ danh mục

@@ -158,7 +158,7 @@ class Event
 
         $ok = $stmt->execute();
         if ($ok) {
-            // refresh object
+            // làm mới đối tượng
             $fresh = self::find($this->id);
             if ($fresh) {
                 $this->tenSuKien = $fresh->tenSuKien;
@@ -182,7 +182,7 @@ class Event
         return $stmt->execute([':id' => $this->id]);
     }
 
-    // Getters
+    // Các phương thức lấy giá trị
     public function getId(): int
     {
         return $this->id;
@@ -231,5 +231,64 @@ class Event
     public function getUpdatedAt(): string
     {
         return $this->updatedAt;
+    }
+
+    /**
+     * Lấy thống kê sự kiện bao gồm tổng số và tăng trưởng hàng tháng
+     * 
+     * @return array Dữ liệu thống kê bao gồm tổng số, số lượng theo tháng và phần trăm tăng trưởng
+     */
+    public static function getEventStatistics(): array
+    {
+        /** @var PDO $db */
+        $db = Container::get('db');
+
+        // Lấy tổng số sự kiện
+        $totalStmt = $db->query('SELECT COUNT(*) as total FROM events');
+        $totalEvents = (int) $totalStmt->fetch()['total'];
+
+        // Lấy khoảng thời gian của tháng hiện tại
+        $currentMonthStart = date('Y-m-01 00:00:00');
+        $currentMonthEnd = date('Y-m-t 23:59:59');
+
+        // Lấy khoảng thời gian của tháng trước
+        $previousMonthStart = date('Y-m-01 00:00:00', strtotime('first day of last month'));
+        $previousMonthEnd = date('Y-m-t 23:59:59', strtotime('last day of last month'));
+
+        // Đếm số sự kiện mới trong tháng hiện tại
+        $currentMonthStmt = $db->prepare(
+            'SELECT COUNT(*) as count FROM events WHERE created_at >= :start AND created_at <= :end'
+        );
+        $currentMonthStmt->execute([
+            ':start' => $currentMonthStart,
+            ':end' => $currentMonthEnd,
+        ]);
+        $newEventsThisMonth = (int) $currentMonthStmt->fetch()['count'];
+
+        // Đếm số sự kiện mới trong tháng trước
+        $previousMonthStmt = $db->prepare(
+            'SELECT COUNT(*) as count FROM events WHERE created_at >= :start AND created_at <= :end'
+        );
+        $previousMonthStmt->execute([
+            ':start' => $previousMonthStart,
+            ':end' => $previousMonthEnd,
+        ]);
+        $newEventsPreviousMonth = (int) $previousMonthStmt->fetch()['count'];
+
+        // Tính phần trăm tăng trưởng hàng tháng
+        $growthPercentage = 0.0;
+        if ($newEventsPreviousMonth > 0) {
+            $growthPercentage = (($newEventsThisMonth - $newEventsPreviousMonth) / $newEventsPreviousMonth) * 100;
+        } elseif ($newEventsThisMonth > 0) {
+            $growthPercentage = 100.0; // Nếu không có sự kiện tháng trước nhưng có sự kiện tháng này
+        }
+
+        return [
+            'total_events' => $totalEvents,
+            'new_events_this_month' => $newEventsThisMonth,
+            'new_events_previous_month' => $newEventsPreviousMonth,
+            'growth_percentage' => round($growthPercentage, 1),
+            'is_growth_positive' => $growthPercentage >= 0,
+        ];
     }
 }
