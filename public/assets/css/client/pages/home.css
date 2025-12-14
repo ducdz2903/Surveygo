@@ -119,6 +119,18 @@
     background: var(--accent-gradient);
 }
 
+.survey-badge.badge-success {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.survey-card.survey-completed {
+    opacity: 0.85;
+}
+
+.survey-card.survey-completed:hover {
+    opacity: 1;
+}
+
 .survey-header {
     margin-bottom: 1rem;
 }

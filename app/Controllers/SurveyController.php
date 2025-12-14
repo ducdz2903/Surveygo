@@ -26,6 +26,7 @@ class SurveyController extends Controller
     {
         $page = (int) ($request->query('page') ?? 1);
         $limit = (int) ($request->query('limit') ?? 10);
+        $userId = $request->query('user_id') ? (int) $request->query('user_id') : null;
 
         $filters = [];
 
@@ -41,6 +42,10 @@ class SurveyController extends Controller
             $filters['danhMuc'] = $danhMuc;
         }
 
+        if ($sortBy = $request->query('sortBy')) {
+            $filters['sortBy'] = $sortBy;
+        }
+
         $qpParam = $request->query('isQuickPoll');
 
         if ($qpParam !== null && $qpParam !== '') {
@@ -49,9 +54,41 @@ class SurveyController extends Controller
 
         $result = Survey::paginate($page, $limit, $filters);
 
+        // Nếu có user_id, kiểm tra từng survey xem user đã submit chưa
+        $surveyData = array_map(fn($s) => $s->toArray(), $result['surveys']);
+        
+        if ($userId) {
+            try {
+                $db = \App\Core\Container::get('db');
+                foreach ($surveyData as &$survey) {
+                    $stmt = $db->prepare(
+                        'SELECT COUNT(*) as count FROM survey_submissions 
+                         WHERE maKhaoSat = :survey_id AND maNguoiDung = :user_id'
+                    );
+                    $stmt->execute([
+                        ':survey_id' => $survey['id'],
+                        ':user_id' => $userId
+                    ]);
+                    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+                    $survey['isCompleted'] = ($row && $row['count'] > 0);
+                }
+            } catch (\Throwable $e) {
+                error_log('[SurveyController::index] Error checking completion status: ' . $e->getMessage());
+                // Nếu có lỗi, set tất cả về false
+                foreach ($surveyData as &$survey) {
+                    $survey['isCompleted'] = false;
+                }
+            }
+        } else {
+            // Nếu không có user_id, set tất cả isCompleted = false
+            foreach ($surveyData as &$survey) {
+                $survey['isCompleted'] = false;
+            }
+        }
+
         return $this->json([
             'error' => false,
-            'data' => array_map(fn($s) => $s->toArray(), $result['surveys']),
+            'data' => $surveyData,
             'meta' => [
                 'total' => $result['total'],
                 'page' => $result['page'],

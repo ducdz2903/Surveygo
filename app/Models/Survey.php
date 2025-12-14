@@ -60,7 +60,7 @@ class Survey
      * 
      * @param int $page Trang hiện tại (bắt đầu từ 1)
      * @param int $limit Số khảo sát trên mỗi trang
-     * @param array $filters Mảng lọc: ['search' => '', 'trangThai' => '', 'danhMuc' => '', 'isQuickPoll' => bool]
+     * @param array $filters Mảng lọc: ['search' => '', 'trangThai' => '', 'danhMuc' => '', 'isQuickPoll' => bool, 'sortBy' => '']
      * @return array ['surveys' => [...], 'total' => int, 'page' => int, 'limit' => int, 'totalPages' => int]
      */
     public static function paginate(int $page = 1, int $limit = 10, array $filters = []): array
@@ -78,35 +78,56 @@ class Survey
         $params = [];
 
         if (!empty($filters['search'])) {
-            $where[] = "(tieuDe LIKE :search OR moTa LIKE :search)";
+            $where[] = "(s.tieuDe LIKE :search OR s.moTa LIKE :search)";
             $params[':search'] = '%' . $filters['search'] . '%';
         }
 
         if (!empty($filters['trangThai'])) {
-            $where[] = "trangThai = :trangThai";
+            $where[] = "s.trangThai = :trangThai";
             $params[':trangThai'] = $filters['trangThai'];
         }
 
         if (!empty($filters['danhMuc'])) {
-            $where[] = "danhMuc = :danhMuc";
+            $where[] = "s.danhMuc = :danhMuc";
             $params[':danhMuc'] = (int) $filters['danhMuc'];
         }
 
         if (isset($filters['isQuickPoll'])) {
-            $where[] = "isQuickPoll = :isQuickPoll";
+            $where[] = "s.isQuickPoll = :isQuickPoll";
             $params[':isQuickPoll'] = intval($filters['isQuickPoll']);
         }
 
         $whereClause = !empty($where) ? 'WHERE ' . implode(' AND ', $where) : '';
 
-        // Get total count
-        $countSql = "SELECT COUNT(*) as total FROM surveys {$whereClause}";
+        // Determine sorting based on sortBy parameter
+        $sortBy = $filters['sortBy'] ?? 'newest';
+        $orderClause = '';
+        $fromClause = 'FROM surveys s';
+        $selectFields = 's.*';
+        $groupBy = '';
+
+        if ($sortBy === 'hot') {
+            // LEFT JOIN with survey_submissions to count DISTINCT users who completed
+            // Sort by number of unique users (highest to lowest)
+            $fromClause = 'FROM surveys s LEFT JOIN survey_submissions ss ON s.id = ss.maKhaoSat';
+            $selectFields = 's.*, COUNT(DISTINCT ss.maNguoiDung) as response_count';
+            $groupBy = 'GROUP BY s.id';
+            $orderClause = 'ORDER BY response_count DESC, s.created_at DESC';
+        } elseif ($sortBy === 'oldest') {
+            $orderClause = 'ORDER BY s.created_at ASC';
+        } else {
+            // Default to newest
+            $orderClause = 'ORDER BY s.created_at DESC';
+        }
+
+        // Get total count (without JOIN for accurate count)
+        $countSql = "SELECT COUNT(DISTINCT s.id) as total FROM surveys s {$whereClause}";
         $countStmt = $db->prepare($countSql);
         $countStmt->execute($params);
         $total = (int) $countStmt->fetch()['total'];
 
         // Get paginated results
-        $sql = "SELECT * FROM surveys {$whereClause} ORDER BY created_at DESC LIMIT :offset, :limit";
+        $sql = "SELECT {$selectFields} {$fromClause} {$whereClause} {$groupBy} {$orderClause} LIMIT :offset, :limit";
         $stmt = $db->prepare($sql);
 
         // Bind params

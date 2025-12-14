@@ -17,9 +17,10 @@
             </div>
             <div class="col-md-3">
                 <select class="form-select" id="status-filter">
-                    <option value="">Tất cả trạng thái</option>
-                    <option value="hoạtĐộng">Hot 🔥</option>
-                    <option value="chờDuyệt">Mới ⭐</option>
+                    <option value="">Tất cả</option>
+                    <option value="hot">Hot 🔥</option>
+                    <option value="new">Mới ⭐</option>
+                    <option value="old">Cũ 📅</option>
                 </select>
             </div>
             <div class="col-md-3">
@@ -50,6 +51,18 @@
     // Load surveys
     async function loadSurveys(page = 1, filters = {}) {
         try {
+            // Lấy user_id từ localStorage
+            const userJson = localStorage.getItem('app.user');
+            let userId = null;
+            if (userJson) {
+                try {
+                    const user = JSON.parse(userJson);
+                    userId = user.id;
+                } catch (e) {
+                    console.warn('Cannot parse user from localStorage');
+                }
+            }
+
             const queryParams = new URLSearchParams({
                 page: page,
                 limit: pageSize,
@@ -57,6 +70,11 @@
                 isQuickPoll: false,
                 ...filters,
             });
+
+            // Thêm user_id vào query params nếu có
+            if (userId) {
+                queryParams.set('user_id', userId);
+            }
 
             const response = await fetch(`/api/surveys?${queryParams}`);
             const result = await response.json();
@@ -91,14 +109,46 @@
         };
 
         container.innerHTML = surveys.map((survey) => {
-            const badge = badgeMap[survey.trangThai] || { class: '', icon: 'fas fa-star', text: 'Mới' };
+            // Kiểm tra nếu user đã hoàn thành survey này
+            let badge = null;
+            let completedCheckmark = '';
+            let buttonText = 'Bắt đầu';
+            let buttonClass = 'btn btn-gradient mt-auto w-100';
+            let buttonIcon = 'fas fa-play';
+            
+            if (survey.isCompleted) {
+                // Đã hoàn thành - hiển thị icon dấu tích ở góc card
+                completedCheckmark = '<i class="fas fa-check-circle" style="position: absolute; top: 15px; right: 15px; font-size: 24px; color: #28a745; z-index: 10;"></i>';
+                buttonText = 'Xem lại';
+                buttonClass = 'btn btn-outline-secondary mt-auto w-100';
+                buttonIcon = 'fas fa-eye';
+            } else {
+                // Chưa hoàn thành - kiểm tra badge
+                // Tính toán thời gian tạo
+                const createdAt = new Date(survey.created_at);
+                const now = new Date();
+                const hoursDiff = (now - createdAt) / (1000 * 60 * 60);
+                const isNew = hoursDiff < 24;
+                
+                // Ưu tiên: Hot > Mới (nếu < 24h) > Không có badge
+                if (survey.trangThai === 'hoạtĐộng') {
+                    badge = { class: 'badge-hot', icon: 'fas fa-fire', text: 'Hot' };
+                } else if (isNew) {
+                    badge = { class: '', icon: 'fas fa-star', text: 'Mới' };
+                }
+                // Nếu không Hot và không Mới (>24h) thì badge = null (không hiển thị)
+            }
+
+            // Chỉ hiển thị badge nếu có
+            const badgeHtml = badge ? `<div class="survey-badge ${badge.class}">
+                                <i class="${badge.icon} me-1"></i>${badge.text}
+                            </div>` : '';
 
             return `
                     <div class="col-lg-4 col-md-6">
-                        <div class="survey-card">
-                            <div class="survey-badge ${badge.class}">
-                                <i class="${badge.icon} me-1"></i>${badge.text}
-                            </div>
+                        <div class="survey-card ${survey.isCompleted ? 'survey-completed' : ''}" style="position: relative;">
+                            ${completedCheckmark}
+                            ${badgeHtml}
                             <div class="survey-header">
                                 <h5 class="survey-title">${survey.tieuDe}</h5>
                                 <div class="survey-meta">
@@ -107,8 +157,8 @@
                                 </div>
                             </div>
                             <p class="survey-desc">${survey.moTa || 'Tham gia khảo sát này để kiếm điểm.'}</p>
-                            <a href="/surveys/guide?id=${survey.id}" class="btn btn-gradient mt-auto w-100">
-                                <i class="fas fa-play me-1"></i>Bắt đầu
+                            <a href="/surveys/guide?id=${survey.id}" class="${buttonClass}">
+                                <i class="${buttonIcon} me-1"></i>${buttonText}
                             </a>
                         </div>
                     </div>
@@ -142,11 +192,24 @@
 
     document.getElementById('status-filter').addEventListener('change', function (e) {
         const filters = { ...currentFilters };
-        if (e.target.value) {
-            filters.trangThai = e.target.value;
-        } else {
-            delete filters.trangThai;
+        const value = e.target.value;
+        
+        // Reset both filters first
+        delete filters.trangThai;
+        delete filters.sortBy;
+        
+        if (value === 'hot') {
+            // Hot: sort by completion count (number of unique users)
+            filters.sortBy = 'hot';
+        } else if (value === 'new') {
+            // New: sort by newest
+            filters.sortBy = 'newest';
+        } else if (value === 'old') {
+            // Old: sort by oldest
+            filters.sortBy = 'oldest';
         }
+        // If value is empty (Tất cả), both filters are already deleted
+        
         loadSurveys(1, filters);
     });
 

@@ -228,11 +228,30 @@
     // Fetch surveys từ API với phân trang & lọc
     async function loadSurveys(page = 1, filters = {}) {
         try {
+            // Lấy user_id từ localStorage để gửi kèm request
+            const userJson = localStorage.getItem('app.user');
+            let userId = null;
+            if (userJson) {
+                try {
+                    const user = JSON.parse(userJson);
+                    userId = user.id;
+                } catch (e) {
+                    console.warn('Cannot parse user from localStorage');
+                }
+            }
+
             const queryParams = new URLSearchParams({
                 page: page,
                 limit: pageSize,
+                trangThai: 'published', // Chỉ hiển thị khảo sát đã công bố
+                sortBy: 'newest', // Sắp xếp theo mới nhất
                 ...filters,
             });
+
+            // Thêm user_id vào query params nếu có
+            if (userId) {
+                queryParams.set('user_id', userId);
+            }
 
             const response = await fetch(`/api/surveys?${queryParams}`);
             const result = await response.json();
@@ -256,11 +275,14 @@
         const container = document.getElementById('surveys-container');
         const countEl = document.getElementById('survey-count');
 
-        // Update count
-        countEl.textContent = `(${meta.total})`;
+        // Lọc ra những khảo sát chưa hoàn thành (không hiển thị khảo sát đã hoàn thành)
+        const incompleteSurveys = surveys.filter(survey => !survey.isCompleted);
+        
+        // Update count với số lượng khảo sát chưa hoàn thành
+        countEl.textContent = `(${incompleteSurveys.length})`;
 
-        if (surveys.length === 0) {
-            container.innerHTML = '<div class="col-12 text-center"><p class="text-muted">Không có khảo sát nào.</p></div>';
+        if (incompleteSurveys.length === 0) {
+            container.innerHTML = '<div class="col-12 text-center"><p class="text-muted">Không có khảo sát mới. Bạn đã hoàn thành tất cả!</p></div>';
             return;
         }
 
@@ -269,7 +291,8 @@
             'chờDuyệt': { class: '', icon: 'fas fa-star', text: 'Mới' },
         };
 
-        let html = surveys.map((survey) => {
+        let html = incompleteSurveys.map((survey) => {
+            // Tất cả surveys ở đây đều chưa hoàn thành
             const badge = badgeMap[survey.trangThai] || { class: '', icon: 'fas fa-star', text: 'Mới' };
 
             return `
