@@ -316,7 +316,7 @@
 </script>
 
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', async () => {
         try {
             const raw = localStorage.getItem('app.user');
             if (!raw) return;
@@ -329,14 +329,71 @@
                 welcomeText.textContent = `Xin chào, ${name}! 👋`;
             }
 
+            // Lấy điểm từ API để đảm bảo dữ liệu chính xác
+            await loadUserPointsFromAPI(user.id);
+        } catch (error) {
+            console.error('Lỗi khi tải thông tin điểm:', error);
+            // Fallback to localStorage if API fails
+            loadUserPointsFromLocalStorage();
+        }
+    });
+
+    // Hàm lấy điểm từ API
+    async function loadUserPointsFromAPI(userId) {
+        if (!userId) {
+            loadUserPointsFromLocalStorage();
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/user-points/balance?user_id=${userId}`, {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            const result = await response.json();
+
+            if (result.success && result.data) {
+                const currentPoints = result.data.balance || 0;
+                const userPointsEl = document.getElementById('user-points');
+                if (userPointsEl) {
+                    userPointsEl.textContent = currentPoints.toLocaleString('vi-VN');
+                }
+
+                // Cập nhật localStorage để đồng bộ
+                const userJson = localStorage.getItem('app.user');
+                if (userJson) {
+                    const user = JSON.parse(userJson);
+                    user.points = currentPoints;
+                    localStorage.setItem('app.user', JSON.stringify(user));
+                }
+            } else {
+                // Fallback nếu API trả về lỗi
+                loadUserPointsFromLocalStorage();
+            }
+        } catch (error) {
+            console.error('Lỗi khi gọi API điểm:', error);
+            loadUserPointsFromLocalStorage();
+        }
+    }
+
+    // Hàm dự phòng lấy điểm từ localStorage
+    function loadUserPointsFromLocalStorage() {
+        try {
+            const raw = localStorage.getItem('app.user');
+            if (!raw) return;
+            const user = JSON.parse(raw);
+            
             if (user.points) {
                 const userPointsEl = document.getElementById('user-points');
                 if (userPointsEl) userPointsEl.textContent = user.points.toLocaleString('vi-VN');
             }
-        } catch (_) {
-            // ignore
+        } catch (error) {
+            console.error('Lỗi khi tải điểm từ localStorage:', error);
         }
-    });
+    }
 </script>
 
 <script>
