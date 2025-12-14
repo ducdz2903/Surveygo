@@ -117,6 +117,17 @@ class HomeController extends Controller
         return \App\Core\Response::html($view->render('layouts/main', array_merge($data, ['content' => $content])));
     }
 
+    public function about(Request $request)
+    {
+        $view = new \App\Core\View();
+        $data = $this->pageData($request);
+        $base = rtrim((string) ($data['baseUrl'] ?? ''), '/');
+        $data['headExtra'] = '<link rel="stylesheet" href="' . $base . '/public/assets/css/client/pages/term-of-use.css">';
+        $content = $view->render('pages/client/about/about', $data);
+        return \App\Core\Response::html($view->render('layouts/main', array_merge($data, ['content' => $content])));
+    }
+
+
     public function contact(Request $request)
     {
         $view = new \App\Core\View();

@@ -47,6 +47,7 @@ $router->get('/daily-rewards', [HomeController::class, 'dailyRewards'], [new Aut
 $router->get('/events', [HomeController::class, 'events'], [new AuthMiddleware()]);
 $router->get('/rewards', [HomeController::class, 'rewards'], [new AuthMiddleware()]);
 $router->get('/contact', [HomeController::class, 'contact']);
+$router->get('/about', [HomeController::class, 'about']);
 $router->get('/terms-of-use', [HomeController::class, 'terms']);
 $router->get('/login', [HomeController::class, 'login']);
 $router->get('/register', [HomeController::class, 'register']);
@@ -106,6 +107,9 @@ $router->delete('/api/contact-messages', [App\Controllers\ContactController::cla
 $router->get('/api/events', [App\Controllers\EventController::class, 'index']);
 $router->post('/api/events', [App\Controllers\EventController::class, 'create'], [new RoleMiddleware(['admin', 'moderator'])]);
 $router->post('/api/events/{id}/join', [App\Controllers\EventController::class, 'join'], [new AuthMiddleware()]);
+$router->post('/api/events/lucky-wheel/spin', [App\Controllers\EventController::class, 'spinLuckyWheel']);
+$router->get('/api/users/points', [App\Controllers\UserController::class, 'getPoints']);
+
 
 // Feedbacks API
 $router->get('/api/feedbacks', [App\Controllers\FeedbackController::class, 'index'], [new AuthMiddleware()]);
