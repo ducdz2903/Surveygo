@@ -8,18 +8,16 @@
             <div class="col-md-6 col-lg-3">
                 <h3>Liên kết nhanh</h3>
                 <ul>
-                    <li><a href="#">Về chúng tôi</a></li>
-                    <li><a href="#">Cách hoạt động</a></li>
-                    <li><a href="#">Câu hỏi thường gặp</a></li>
-                    <li><a href="#">Blog</a></li>
+                    <li><a href="/about#section1">Về chúng tôi</a></li>
+                    <li><a href="/about#section2">Cách hoạt động</a></li>
+                    <li><a href="/about#section3">Câu hỏi thường gặp</a></li>
                 </ul>
             </div>
             <div class="col-md-6 col-lg-3">
                 <h3>Hỗ trợ</h3>
                 <ul>
-                    <li><a href="#">Trung tâm trợ giúp</a></li>
                     <li><a href="/terms-of-use">Điều khoản sử dụng</a></li>
-                    <li><a href="#">Chính sách bảo mật</a></li>
+                    <li><a href="/terms-of-use#section4">Chính sách bảo mật</a></li>
                     <li><a href="/contact">Liên hệ</a></li>
                 </ul>
             </div>

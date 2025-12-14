@@ -27,9 +27,10 @@
             </h2>
             <ul class="note-list">
                 <li>Mỗi ngày bạn có thể điểm danh 1 lần để nhận phần thưởng.</li>
+                <li>Mỗi lần điểm danh bạn sẽ nhận được điểm thưởng + 1 lượt rút thăm may mắn.</li>
                 <li>Bạn chỉ có thể điểm danh khi nhấn vào nút "Điểm danh hôm nay".</li>
                 <li>Chuỗi điểm danh sẽ bị reset nếu bạn bỏ qua hơn 1 ngày.</li>
-                <li>Càng nhiều ngày liên tiếp, phần thưởng càng lớn.</li>
+                <li>Càng nhiều ngày liên tiếp, phần thưởng điểm càng lớn.</li>
             </ul>
         </div>
     </div>
@@ -292,14 +293,15 @@
             window.rewardData.claimedDays.push(window.rewardData.lastClaimed);
 
             const pointsEarned = payload.pointsEarned || 0;
+            const spinsAwarded = payload.luckyWheelSpinsAwarded || 0;
 
             if (claimStatus) {
-                claimStatus.innerHTML = `
-                        <div class="alert alert-success" role="alert">
-                            <i class="fas fa-check-circle me-2"></i>
-                            Chúc mừng! Bạn vừa nhận được <strong>+${pointsEarned} điểm</strong>
-                        </div>
-                    `;
+                let message = `<i class="fas fa-check-circle me-2"></i>Chúc mừng! Bạn vừa nhận được <strong>+${pointsEarned} điểm</strong>`;
+                if (spinsAwarded > 0) {
+                    message += ` và <strong>+${spinsAwarded} lượt quay</strong> lucky wheel!`;
+                }
+                
+                claimStatus.innerHTML = `<div class="alert alert-success" role="alert">${message}</div>`;
             }
 
             setTimeout(() => {
