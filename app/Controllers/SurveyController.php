@@ -52,6 +52,13 @@ class SurveyController extends Controller
             $filters['isQuickPoll'] = (int) filter_var($qpParam, FILTER_VALIDATE_BOOLEAN);
         }
 
+        // Add isCompleted filter if user_id is provided
+        $isCompletedParam = $request->query('isCompleted');
+        if ($isCompletedParam !== null && $isCompletedParam !== '' && $userId) {
+            $filters['isCompleted'] = filter_var($isCompletedParam, FILTER_VALIDATE_BOOLEAN);
+            $filters['user_id'] = $userId;
+        }
+
         $result = Survey::paginate($page, $limit, $filters);
 
         // Nếu có user_id, kiểm tra từng survey xem user đã submit chưa

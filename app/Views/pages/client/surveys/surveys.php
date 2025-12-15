@@ -19,8 +19,8 @@
                 <select class="form-select" id="status-filter">
                     <option value="">Tất cả</option>
                     <option value="hot">Hot 🔥</option>
-                    <option value="new">Mới ⭐</option>
-                    <option value="old">Cũ 📅</option>
+                    <option value="new">Chưa hoàn thành ⏳</option>
+                    <option value="old">Đã hoàn thành ✅</option>
                 </select>
             </div>
             <div class="col-md-3">
@@ -194,21 +194,24 @@
         const filters = { ...currentFilters };
         const value = e.target.value;
         
-        // Reset both filters first
+        // Reset filters first
         delete filters.trangThai;
         delete filters.sortBy;
+        delete filters.isCompleted;
         
         if (value === 'hot') {
             // Hot: sort by completion count (number of unique users)
             filters.sortBy = 'hot';
         } else if (value === 'new') {
-            // New: sort by newest
+            // Chưa hoàn thành: show incomplete surveys, sorted by newest
+            filters.isCompleted = 'false';
             filters.sortBy = 'newest';
         } else if (value === 'old') {
-            // Old: sort by oldest
-            filters.sortBy = 'oldest';
+            // Đã hoàn thành: show completed surveys, sorted by newest
+            filters.isCompleted = 'true';
+            filters.sortBy = 'newest';
         }
-        // If value is empty (Tất cả), both filters are already deleted
+        // If value is empty (Tất cả), all filters are already deleted
         
         loadSurveys(1, filters);
     });

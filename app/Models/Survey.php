@@ -97,6 +97,21 @@ class Survey
             $params[':isQuickPoll'] = intval($filters['isQuickPoll']);
         }
 
+        // Handle isCompleted filter
+        $needsSubmissionsJoin = false;
+        if (isset($filters['isCompleted']) && isset($filters['user_id'])) {
+            $needsSubmissionsJoin = true;
+            $params[':user_id'] = (int) $filters['user_id'];
+            
+            if ($filters['isCompleted']) {
+                // Show only completed: must have a submission for this user
+                $where[] = "ss.maNguoiDung IS NOT NULL";
+            } else {
+                // Show only incomplete: must NOT have a submission for this user
+                $where[] = "ss.maNguoiDung IS NULL";
+            }
+        }
+
         $whereClause = !empty($where) ? 'WHERE ' . implode(' AND ', $where) : '';
 
         // Determine sorting based on sortBy parameter
@@ -120,8 +135,14 @@ class Survey
             $orderClause = 'ORDER BY s.created_at DESC';
         }
 
-        // Get total count (without JOIN for accurate count)
-        $countSql = "SELECT COUNT(DISTINCT s.id) as total FROM surveys s {$whereClause}";
+        // Add LEFT JOIN for isCompleted filter if needed and not already joined
+        if ($needsSubmissionsJoin && $sortBy !== 'hot') {
+            $fromClause = 'FROM surveys s LEFT JOIN survey_submissions ss ON (s.id = ss.maKhaoSat AND ss.maNguoiDung = :user_id)';
+        }
+
+        // Get total count - use the same FROM clause that includes JOINs if needed
+        $countFromClause = $needsSubmissionsJoin ? $fromClause : 'FROM surveys s';
+        $countSql = "SELECT COUNT(DISTINCT s.id) as total {$countFromClause} {$whereClause}";
         $countStmt = $db->prepare($countSql);
         $countStmt->execute($params);
         $total = (int) $countStmt->fetch()['total'];
