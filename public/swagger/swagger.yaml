@@ -1,0 +1,807 @@
+openapi: 3.0.0
+info:
+  title: Tài liệu API SurveyGo
+  version: 1.0.0
+  description: Tài liệu API cho hệ thống SurveyGo
+servers:
+  - url: http://localhost/SurveyGo
+    description: Server cục bộ (Localhost)
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: PHPSESSID
+  schemas:
+    User:
+      type: object
+      properties:
+        id: {type: integer, description: ID người dùng}
+        name: {type: string, description: Tên người dùng}
+        email: {type: string, description: Email}
+        role: {type: string, description: Vai trò (user, admin, moderator)}
+        avatar: {type: string, description: URL ảnh đại diện}
+    Survey:
+      type: object
+      properties:
+        id: {type: integer, description: ID khảo sát}
+        tieuDe: {type: string, description: Tiêu đề khảo sát}
+        moTa: {type: string, description: Mô tả chi tiết}
+        loaiKhaoSat: {type: string, description: Loại khảo sát}
+        trangThai: {type: string, description: Trạng thái (draft, published, ...)}
+        maNguoiTao: {type: integer, description: ID người tạo}
+        created_at: {type: string, format: date-time, description: Thời gian tạo}
+        maSuKien:
+          type: integer
+          nullable: true
+          description: ID sự kiện gắn với khảo sát (events.id), null nếu không thuộc sự kiện nào
+    Question:
+      type: object
+      properties:
+        id: {type: integer, description: ID câu hỏi}
+        noiDungCauHoi: {type: string, description: Nội dung câu hỏi}
+        loaiCauHoi: {type: string, description: Loại câu hỏi (single_choice, multiple_choice, ...)}
+        maKhaoSat: {type: integer, description: ID khảo sát liên quan}
+    Event:
+      type: object
+      properties:
+        id: {type: integer}
+        name: {type: string}
+        description: {type: string}
+        surveys:
+          type: integer
+          description: Số khảo sát gắn với sự kiện (được tính từ surveys.maSuKien = events.id)
+    Reward:
+      type: object
+      properties:
+        id: {type: integer}
+        name: {type: string}
+        points: {type: integer}
+
+security:
+  - cookieAuth: []
+
+paths:
+  # --- AUTH ---
+  /api/register:
+    post:
+      tags: [Auth - Xác thực]
+      summary: Đăng ký người dùng mới
+      description: Tạo tài khoản mới cho người dùng.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, email, password]
+              properties:
+                name: {type: string, description: Tên đầy đủ}
+                email: {type: string, format: email, description: Địa chỉ email}
+                password: {type: string, minLength: 6, description: Mật khẩu (tối thiểu 6 ký tự)}
+                role: {type: string, enum: [user, admin, moderator], description: Vai trò (mặc định là user)}
+        - {name: maSuKien, in: query, schema: {type: integer}, description: Lọc theo sự kiện (ID sự kiện, tham chiếu surveys.maSuKien)}
+      responses:
+        201:
+          description: Đăng ký thành công
+        422:
+          description: Lỗi xác thực dữ liệu
+
+  /api/login:
+    post:
+      tags: [Auth - Xác thực]
+      summary: Đăng nhập
+      description: Đăng nhập vào hệ thống để lấy session.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: {type: string, description: Email đăng nhập}
+                password: {type: string, description: Mật khẩu}
+      responses:
+        200:
+          description: Đăng nhập thành công
+        401:
+          description: Sai thông tin đăng nhập
+
+  /api/logout:
+    post:
+      tags: [Auth - Xác thực]
+      summary: Đăng xuất
+      description: Hủy phiên làm việc hiện tại.
+      responses:
+        200:
+          description: Đăng xuất thành công
+
+  /api/auth/update-profile:
+    post:
+      tags: [Auth - Xác thực]
+      summary: Cập nhật thông tin cá nhân
+      security: [{cookieAuth: []}]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id: {type: integer}
+                name: {type: string}
+                email: {type: string}
+                phone: {type: string}
+                gender: {type: string}
+                avatar: {type: string}
+      responses:
+        200:
+          description: Cập nhật thành công
+
+  /api/auth/change-password:
+    post:
+      tags: [Auth - Xác thực]
+      summary: Đổi mật khẩu
+      security: [{cookieAuth: []}]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [id, current_password, new_password, confirm_password]
+              properties:
+                  id: {type: integer}
+                  current_password: {type: string, description: Mật khẩu hiện tại}
+                  new_password: {type: string, description: Mật khẩu mới}
+                  confirm_password: {type: string, description: Xác nhận mật khẩu mới}
+      responses:
+        200:
+          description: Đổi mật khẩu thành công
+
+  # --- SURVEYS ---
+  /api/surveys:
+    get:
+      tags: [Survey - Khảo sát]
+      summary: Lấy danh sách khảo sát
+      parameters:
+        - {name: page, in: query, schema: {type: integer}, description: Số trang}
+        - {name: limit, in: query, schema: {type: integer}, description: Số lượng mỗi trang}
+        - {name: search, in: query, schema: {type: string}, description: Từ khóa tìm kiếm}
+        - {name: trangThai, in: query, schema: {type: string}, description: Lọc theo trạng thái}
+      responses:
+        200:
+          description: Danh sách khảo sát thành công
+    post:
+      tags: [Survey - Khảo sát]
+      summary: Tạo khảo sát mới
+      security: [{cookieAuth: []}]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Survey'
+      responses:
+        201:
+          description: Tạo khảo sát thành công
+    put:
+      tags: [Survey - Khảo sát]
+      summary: Cập nhật khảo sát
+      security: [{cookieAuth: []}]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/Survey'
+                - type: object
+                  properties:
+                    id: {type: integer, description: Bắt buộc để cập nhật}
+      responses:
+        200:
+          description: Cập nhật thành công
+    delete:
+      tags: [Survey - Khảo sát]
+      summary: Xóa khảo sát
+      security: [{cookieAuth: []}]
+      parameters:
+        - {name: id, in: query, required: true, schema: {type: integer}, description: ID khảo sát cần xóa}
+      responses:
+        200:
+          description: Xóa thành công
+
+  /api/surveys/show:
+    get:
+      tags: [Survey - Khảo sát]
+      summary: Lấy chi tiết khảo sát
+      parameters:
+        - {name: id, in: query, required: true, schema: {type: integer}, description: ID khảo sát}
+      responses:
+        200:
+          description: Thông tin chi tiết khảo sát
+
+  /api/surveys/quick-poll:
+    post:
+      tags: [Survey - Khảo sát]
+      summary: Tạo khảo sát nhanh (Quick Poll)
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title, questionType]
+              properties:
+                title: {type: string, description: Tiêu đề}
+                description: {type: string, description: Mô tả}
+                questionType: {type: string, enum: [single, multiple, text, rating, yesno], description: Loại câu hỏi}
+                options: {type: array, items: {type: string}, description: Các lựa chọn trả lời}
+                maNguoiTao: {type: integer}
+                points: {type: integer, description: Điểm thưởng}
+      responses:
+        201:
+          description: Tạo quick poll thành công
+
+  /api/surveys/publish:
+    post:
+      tags: [Survey - Khảo sát]
+      summary: Công bố khảo sát
+      parameters:
+        - {name: id, in: query, required: true, schema: {type: integer}, description: ID khảo sát}
+      responses:
+        200:
+          description: Công bố thành công
+
+  /api/surveys/approve:
+    post:
+      tags: [Survey - Khảo sát]
+      summary: Phê duyệt / Từ chối khảo sát
+      parameters:
+        - {name: id, in: query, required: true, schema: {type: integer}}
+        - {name: status, in: query, schema: {type: string, enum: [approved, rejected]}, description: Trạng thái mới}
+      responses:
+        200:
+          description: Cập nhật trạng thái thành công
+
+  /api/surveys/attach-question:
+    post:
+      tags: [Survey - Khảo sát]
+      summary: Gắn câu hỏi vào khảo sát
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                maKhaoSat: {type: integer}
+                maCauHoi: {type: integer}
+      responses:
+        200:
+          description: Gắn thành công
+
+  /api/surveys/detach-question:
+    post:
+      tags: [Survey - Khảo sát]
+      summary: Gỡ câu hỏi khỏi khảo sát
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                maKhaoSat: {type: integer}
+                maCauHoi: {type: integer}
+      responses:
+        200:
+          description: Gỡ thành công
+
+  /api/surveys/{id}/submit:
+    post:
+      tags: [Survey - Khảo sát]
+      summary: Nộp bài khảo sát
+      parameters:
+        - {name: id, in: path, required: true, schema: {type: integer}}
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [userId, answers]
+              properties:
+                userId: {type: integer}
+                answers: {type: array, items: {type: object}, description: Danh sách câu trả lời}
+      responses:
+        200:
+          description: Nộp bài thành công
+
+  /api/surveys/{id}/check-submission:
+    get:
+      tags: [Survey - Khảo sát]
+      summary: Kiểm tra trạng thái nộp bài
+      parameters:
+        - {name: id, in: path, required: true, schema: {type: integer}}
+        - {name: userId, in: query, schema: {type: integer}}
+      responses:
+        200:
+          description: Kết quả kiểm tra
+
+  # --- QUESTIONS ---
+  /api/questions:
+    get:
+      tags: [Question - Câu hỏi]
+      summary: Lấy danh sách câu hỏi
+      responses:
+        200:
+          description: Danh sách câu hỏi
+    post:
+      tags: [Question - Câu hỏi]
+      summary: Tạo câu hỏi mới
+      requestBody:
+        content:
+          application/json:
+            schema:
+               $ref: '#/components/schemas/Question'
+      responses:
+        201:
+          description: Tạo thành công
+    put:
+      tags: [Question - Câu hỏi]
+      summary: Cập nhật câu hỏi
+      requestBody:
+        content:
+          application/json:
+            schema:
+               $ref: '#/components/schemas/Question'
+      responses:
+        200:
+          description: Cập nhật thành công
+    delete:
+      tags: [Question - Câu hỏi]
+      summary: Xóa câu hỏi
+      parameters:
+        - {name: id, in: query, schema: {type: integer}}
+      responses:
+        200:
+          description: Xóa thành công
+
+  /api/questions/{id}:
+    delete:
+      tags: [Question - Câu hỏi]
+      summary: Xóa câu hỏi theo ID (Path param)
+      parameters:
+        - {name: id, in: path, schema: {type: integer}}
+      responses:
+        200:
+          description: Xóa thành công
+
+  /api/questions/show:
+    get:
+      tags: [Question - Câu hỏi]
+      summary: Chi tiết câu hỏi
+      parameters:
+        - {name: id, in: query, schema: {type: integer}}
+      responses:
+        200:
+          description: Chi tiết câu hỏi
+
+  /api/questions/by-survey:
+    get:
+      tags: [Question - Câu hỏi]
+      summary: Lấy câu hỏi theo khảo sát
+      parameters:
+        - {name: surveyId, in: query, schema: {type: integer}}
+      responses:
+        200:
+          description: Danh sách câu hỏi
+
+  /api/questions/{id}/answers:
+    get:
+      tags: [Question - Câu hỏi]
+      summary: Lấy danh sách câu trả lời của câu hỏi
+      parameters:
+         - {name: id, in: path, schema: {type: integer}}
+      responses:
+        200:
+         description: Danh sách câu trả lời
+
+  # --- EVENTS ---
+  /api/events:
+    get:
+      tags: [Event - Sự kiện]
+      summary: Lấy danh sách sự kiện
+      responses:
+         200:
+          description: Danh sách sự kiện
+    post:
+      tags: [Event - Sự kiện]
+      summary: Tạo sự kiện mới
+      responses:
+         201:
+          description: Tạo thành công
+    put:
+      tags: [Event - Sự kiện]
+      summary: Cập nhật sự kiện
+      responses:
+         200:
+          description: Cập nhật thành công
+    delete:
+      tags: [Event - Sự kiện]
+      summary: Xóa sự kiện
+      responses:
+         200:
+          description: Xóa thành công
+
+  /api/events/show:
+    get:
+      tags: [Event - Sự kiện]
+      summary: Chi tiết sự kiện
+      parameters:
+        - {name: id, in: query, schema: {type: integer}}
+      responses:
+         200:
+          description: Chi tiết sự kiện
+
+  /api/events/{id}/join:
+    post:
+      tags: [Event - Sự kiện]
+      summary: Tham gia sự kiện
+      parameters:
+         - {name: id, in: path, schema: {type: integer}}
+      responses:
+         200:
+          description: Tham gia thành công
+
+  /api/events/lucky-wheel/spin:
+    post:
+      tags: [Event - Sự kiện]
+      summary: Quay vòng quay may mắn
+      responses:
+         200:
+          description: Kết quả quay thưởng
+
+  # --- REWARDS ---
+  /api/rewards:
+    get:
+      tags: [Reward - Phần thưởng]
+      summary: Lấy danh sách phần thưởng (Công khai)
+      responses:
+         200:
+          description: Danh sách phần thưởng
+
+  /api/rewards/{id}:
+    get:
+      tags: [Reward - Phần thưởng]
+      summary: Chi tiết phần thưởng
+      parameters:
+         - {name: id, in: path, schema: {type: integer}}
+      responses:
+         200:
+          description: Chi tiết
+
+  /api/rewards/filter:
+    get:
+      tags: [Reward - Phần thưởng]
+      summary: Lọc phần thưởng
+      responses:
+         200:
+          description: Danh sách kết quả
+
+  /api/rewards/search:
+    get:
+      tags: [Reward - Phần thưởng]
+      summary: Tìm kiếm phần thưởng
+      responses:
+         200:
+          description: Kết quả tìm kiếm
+
+  /api/rewards/redeem:
+    post:
+      tags: [Reward - Phần thưởng]
+      summary: Đổi thưởng
+      requestBody:
+         content:
+           application/json:
+             schema:
+               type: object
+               properties:
+                 rewardId: {type: integer, description: ID phần thưởng}
+      responses:
+         200:
+          description: Đổi thưởng thành công
+
+  /api/daily-rewards/status:
+    get:
+      tags: [Reward - Phần thưởng]
+      summary: Kiểm tra trạng thái điểm danh hàng ngày
+      responses:
+         200:
+          description: Trạng thái
+
+  /api/daily-rewards/claim:
+    post:
+      tags: [Reward - Phần thưởng]
+      summary: Nhận thưởng hàng ngày
+      responses:
+         200:
+          description: Kết quả nhận thưởng
+
+  # --- REDEMPTIONS (User) ---
+  /api/redemptions/my:
+    get:
+      tags: [Redemption - Đổi quà]
+      summary: Lịch sử đổi quà của tôi
+      responses:
+         200:
+          description: Danh sách lịch sử
+
+  /api/redemptions/detail:
+    get:
+      tags: [Redemption - Đổi quà]
+      summary: Chi tiết đơn đổi quà
+      parameters:
+        - {name: id, in: query, schema: {type: integer}}
+      responses:
+         200:
+          description: Chi tiết
+
+  /api/redemptions/create:
+    post:
+      tags: [Redemption - Đổi quà]
+      summary: Tạo yêu cầu đổi quà
+      responses:
+         200:
+          description: Tạo thành công
+
+  # --- USERS / POINTS ---
+  /api/user-points/balance:
+    get:
+      tags: [User - Người dùng]
+      summary: Lấy số dư điểm
+      responses:
+         200:
+          description: Số dư điểm
+
+  /api/user-points/check:
+    get:
+      tags: [User - Người dùng]
+      summary: Kiểm tra đủ điểm không
+      parameters:
+        - {name: amount, in: query, schema: {type: integer}}
+      responses:
+         200:
+          description: Kết quả
+
+  # --- FEEDBACK ---
+  /api/feedbacks:
+    get:
+      tags: [Feedback - Phản hồi]
+      summary: Lấy danh sách phản hồi
+      responses:
+         200:
+          description: Danh sách
+
+    post:
+      tags: [Feedback - Phản hồi]
+      summary: Gửi phản hồi
+      responses:
+         201:
+          description: Gửi thành công
+    put:
+      tags: [Feedback - Phản hồi]
+      summary: Cập nhật phản hồi
+      responses:
+         200:
+          description: Cập nhật thành công
+    delete:
+      tags: [Feedback - Phản hồi]
+      summary: Xóa phản hồi
+      responses:
+         200:
+          description: Xóa thành công
+
+  /api/feedbacks/show:
+    get:
+      tags: [Feedback - Phản hồi]
+      summary: Chi tiết phản hồi
+      responses:
+         200:
+          description: Chi tiết
+  
+  /api/feedbacks/submit:
+    post:
+      tags: [Feedback - Phản hồi]
+      summary: Gửi phản hồi (Public/User)
+      responses:
+         200:
+          description: Gửi thành công
+
+  # --- CONTACT ---
+  /api/contact-messages:
+    get:
+      tags: [Contact - Liên hệ]
+      summary: Lấy danh sách tin nhắn (Admin)
+      responses:
+         200:
+          description: Danh sách tin nhắn
+    post:
+      tags: [Contact - Liên hệ]
+      summary: Gửi tin nhắn liên hệ
+      responses:
+         200:
+          description: Gửi thành công
+    put:
+      tags: [Contact - Liên hệ]
+      summary: Cập nhật trạng thái tin nhắn
+      responses:
+         200:
+          description: Cập nhật thành công
+    delete:
+      tags: [Contact - Liên hệ]
+      summary: Xóa tin nhắn
+      responses:
+         200:
+          description: Xóa thành công
+
+  /api/contact-messages/show:
+    get:
+      tags: [Contact - Liên hệ]
+      summary: Chi tiết tin nhắn
+      responses:
+         200:
+          description: Chi tiết
+
+  # --- ADMIN ---
+  /api/admin/rewards:
+    get:
+      tags: [Admin - Quản trị]
+      summary: Quản lý danh sách phần thưởng
+      responses:
+         200:
+          description: Danh sách
+    post:
+      tags: [Admin - Quản trị]
+      summary: Tạo phần thưởng mới
+      responses:
+         201:
+          description: Tạo thành công
+
+  /api/admin/rewards/{id}:
+    put:
+      tags: [Admin - Quản trị]
+      summary: Cập nhật phần thưởng
+      parameters:
+         - {name: id, in: path, schema: {type: integer}}
+      responses:
+         200:
+          description: Cập nhật thành công
+
+  /api/admin/rewards/{id}/delete:
+    post:
+      tags: [Admin - Quản trị]
+      summary: Xóa phần thưởng
+      parameters:
+         - {name: id, in: path, schema: {type: integer}}
+      responses:
+         200:
+          description: Xóa thành công
+
+  /api/admin/rewards/{id}/toggle:
+    post:
+      tags: [Admin - Quản trị]
+      summary: Bật/Tắt phần thưởng (Ẩn/Hiện)
+      parameters:
+         - {name: id, in: path, schema: {type: integer}}
+      responses:
+         200:
+          description: Thay đổi trạng thái thành công
+
+  /api/admin/rewards/{id}/stock:
+    post:
+      tags: [Admin - Quản trị]
+      summary: Cập nhật kho (số lượng)
+      parameters:
+         - {name: id, in: path, schema: {type: integer}}
+      responses:
+         200:
+          description: Cập nhật thành công
+
+  /api/admin/redemptions:
+    get:
+      tags: [Admin - Quản trị]
+      summary: Quản lý yêu cầu đổi thưởng
+      responses:
+         200:
+          description: Danh sách yêu cầu
+
+  /api/admin/redemptions/update-status:
+    post:
+      tags: [Admin - Quản trị]
+      summary: Cập nhật trạng thái đổi thưởng
+      responses:
+         200:
+          description: Cập nhật thành công
+
+  /api/admin/redemptions/delete:
+    post:
+      tags: [Admin - Quản trị]
+      summary: Xóa yêu cầu đổi thưởng
+      responses:
+         200:
+          description: Xóa thành công
+
+  /api/admin/redemptions/stats:
+    get:
+      tags: [Admin - Quản trị]
+      summary: Thống kê đổi thưởng
+      responses:
+         200:
+          description: Dữ liệu thống kê
+
+  /api/users:
+    get:
+      tags: [Admin - Quản trị]
+      summary: Quản lý người dùng
+      responses:
+         200:
+          description: Danh sách người dùng
+
+  /api/admin/activity-logs:
+    get:
+      tags: [Admin - Quản trị]
+      summary: Nhật ký hoạt động
+      responses:
+         200:
+          description: Danh sách log
+
+  /api/admin/activity-logs/user/{id}:
+    get:
+      tags: [Admin - Quản trị]
+      summary: Log theo người dùng
+      parameters:
+         - {name: id, in: path, schema: {type: integer}}
+      responses:
+         200:
+          description: Danh sách log
+
+  /api/admin/activity-logs/entity/{type}/{id}:
+    get:
+      tags: [Admin - Quản trị]
+      summary: Log theo đối tượng (Entity)
+      parameters:
+         - {name: type, in: path, schema: {type: string}}
+         - {name: id, in: path, schema: {type: integer}}
+      responses:
+         200:
+          description: Danh sách log
+
+  /api/admin/activity-logs/action/{action}:
+    get:
+      tags: [Admin - Quản trị]
+      summary: Log theo hành động
+      parameters:
+         - {name: action, in: path, schema: {type: string}}
+      responses:
+         200:
+          description: Danh sách log
+
+  /api/admin/activity-logs/cleanup:
+    delete:
+      tags: [Admin - Quản trị]
+      summary: Dọn dẹp nhật ký
+      responses:
+         200:
+          description: Dọn dẹp thành công
+
+  /api/activity-logs/my:
+    get:
+      tags: [Activity - Hoạt động]
+      summary: Nhật ký hoạt động của tôi
+      responses:
+         200:
+          description: Danh sách log
+
+  /api/health:
+    get:
+      tags: [Public - Công khai]
+      summary: Kiểm tra trạng thái hệ thống (Health check)
+      responses:
+        200:
+          description: API đang hoạt động bình thường
