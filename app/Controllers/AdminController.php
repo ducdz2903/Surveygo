@@ -75,6 +75,22 @@ class AdminController extends Controller
         return \App\Core\Response::html($view->render('layouts/admin', array_merge($data, ['content' => $content])));
     }
 
+    public function eventView(Request $request)
+    {
+        $view = new \App\Core\View();
+        $data = $this->pageData($request);
+        $data['eventId'] = (int) ($request->query('id') ?? 0);
+
+        $content = $view->render('pages/admin/events/view', $data);
+
+        return \App\Core\Response::html($view->render('layouts/admin', array_merge($data, [
+            'content' => $content,
+            'title' => 'Chi tiết sự kiện',
+            'headerTitle' => 'Chi tiết sự kiện',
+            'headerIcon' => 'fas fa-calendar-alt',
+        ])));
+    }
+
     public function settings(Request $request)
     {
         $view = new \App\Core\View();

@@ -17,6 +17,7 @@ class Event
     private string $trangThai;
     private int $soNguoiThamGia;
     private int $soKhaoSat;
+    private int $soLuotRutThamMoiLan;
     private ?string $diaDiem;
     private int $maNguoiTao;
     private string $createdAt;
@@ -31,7 +32,15 @@ class Event
         $this->thoiGianKetThuc = $row['thoiGianKetThuc'] ?? null;
         $this->trangThai = $row['trangThai'] ?? 'upcoming';
         $this->soNguoiThamGia = isset($row['soNguoiThamGia']) ? (int) $row['soNguoiThamGia'] : 0;
-        $this->soKhaoSat = isset($row['soKhaoSat']) ? (int) $row['soKhaoSat'] : 0;
+        // Ưu tiên trường đếm động (nếu có alias từ SQL), fallback về cột soKhaoSat
+        if (isset($row['survey_count'])) {
+            $this->soKhaoSat = (int) $row['survey_count'];
+        } elseif (isset($row['soKhaoSat'])) {
+            $this->soKhaoSat = (int) $row['soKhaoSat'];
+        } else {
+            $this->soKhaoSat = 0;
+        }
+        $this->soLuotRutThamMoiLan = isset($row['soLuotRutThamMoiLan']) ? (int) $row['soLuotRutThamMoiLan'] : 0;
         $this->diaDiem = $row['diaDiem'] ?? null;
         $this->maNguoiTao = isset($row['maNguoiTao']) ? (int) $row['maNguoiTao'] : 0;
         $this->createdAt = $row['created_at'] ?? '';
@@ -52,12 +61,14 @@ class Event
         $end = $data['thoiGianKetThuc'] ?? null;
         $trangThai = $data['trangThai'] ?? 'upcoming';
         $soNguoi = (int) ($data['soNguoiThamGia'] ?? 0);
-        $soKhaoSat = (int) ($data['soKhaoSat'] ?? 0);
+        // soKhaoSat hiện được tính động từ bảng surveys, không cần lưu tay
+        $soKhaoSat = 0;
+        $soLuotRutThamMoiLan = (int) ($data['soLuotRutThamMoiLan'] ?? 0);
         $diaDiem = $data['diaDiem'] ?? null;
         $maNguoiTao = (int) ($data['maNguoiTao'] ?? 0);
 
-        $sql = 'INSERT INTO events (maSuKien, tenSuKien, thoiGianBatDau, thoiGianKetThuc, trangThai, soNguoiThamGia, soKhaoSat, diaDiem, maNguoiTao, created_at, updated_at)
-                VALUES (:ma, :ten, :start, :end, :trangThai, :songuoi, :sokhaosat, :diadiem, :maNguoiTao, NOW(), NOW())';
+        $sql = 'INSERT INTO events (maSuKien, tenSuKien, thoiGianBatDau, thoiGianKetThuc, trangThai, soNguoiThamGia, soKhaoSat, soLuotRutThamMoiLan, diaDiem, maNguoiTao, created_at, updated_at)
+                VALUES (:ma, :ten, :start, :end, :trangThai, :songuoi, :sokhaosat, :soLuotRutThamMoiLan, :diadiem, :maNguoiTao, NOW(), NOW())';
 
         $stmt = $db->prepare($sql);
         $stmt->bindValue(':ma', $ma);
@@ -67,6 +78,7 @@ class Event
         $stmt->bindValue(':trangThai', $trangThai);
         $stmt->bindValue(':songuoi', $soNguoi, PDO::PARAM_INT);
         $stmt->bindValue(':sokhaosat', $soKhaoSat, PDO::PARAM_INT);
+        $stmt->bindValue(':soLuotRutThamMoiLan', $soLuotRutThamMoiLan, PDO::PARAM_INT);
         $stmt->bindValue(':diadiem', $diaDiem);
         $stmt->bindValue(':maNguoiTao', $maNguoiTao, PDO::PARAM_INT);
 
@@ -83,8 +95,14 @@ class Event
         /** @var PDO $db */
         $db = Container::get('db');
 
-        $stmt = $db->prepare('SELECT * FROM events WHERE id = :id LIMIT 1');
-        $stmt->execute([':id' => $id]);
+        $sql = 'SELECT e.*, 
+                       (SELECT COUNT(*) FROM surveys s WHERE s.maSuKien = e.id) AS survey_count
+                FROM events e
+                WHERE e.id = :id
+                LIMIT 1';
+        $stmt = $db->prepare($sql);
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+        $stmt->execute();
         $row = $stmt->fetch();
         return $row ? new self($row) : null;
     }
@@ -117,7 +135,13 @@ class Event
         $countStmt->execute($params);
         $total = (int) $countStmt->fetch()['total'];
 
-        $sql = "SELECT * FROM events {$whereSql} ORDER BY created_at DESC LIMIT :offset, :limit";
+        // Đếm số khảo sát gắn với mỗi sự kiện dựa trên surveys.maSuKien
+        $sql = "SELECT e.*, 
+                       (SELECT COUNT(*) FROM surveys s WHERE s.maSuKien = e.id) AS survey_count
+                FROM events e
+                {$whereSql}
+                ORDER BY e.created_at DESC
+                LIMIT :offset, :limit";
         $stmt = $db->prepare($sql);
         foreach ($params as $k => $v) {
             $stmt->bindValue($k, $v);
@@ -144,7 +168,17 @@ class Event
         /** @var PDO $db */
         $db = Container::get('db');
 
-        $sql = 'UPDATE events SET tenSuKien = :ten, thoiGianBatDau = :start, thoiGianKetThuc = :end, trangThai = :trangThai, soNguoiThamGia = :songuoi, soKhaoSat = :sokhaosat, diaDiem = :diadiem, updated_at = NOW() WHERE id = :id';
+        // soKhaoSat được tính động từ bảng surveys, không cập nhật trực tiếp nữa
+        $sql = 'UPDATE events 
+                SET tenSuKien = :ten,
+                    thoiGianBatDau = :start,
+                    thoiGianKetThuc = :end,
+                    trangThai = :trangThai,
+                    soNguoiThamGia = :songuoi,
+                    soLuotRutThamMoiLan = :soLuotRutThamMoiLan,
+                    diaDiem = :diadiem,
+                    updated_at = NOW()
+                WHERE id = :id';
 
         $stmt = $db->prepare($sql);
         $stmt->bindValue(':ten', $data['tenSuKien'] ?? $this->tenSuKien);
@@ -152,7 +186,11 @@ class Event
         $stmt->bindValue(':end', $data['thoiGianKetThuc'] ?? $this->thoiGianKetThuc);
         $stmt->bindValue(':trangThai', $data['trangThai'] ?? $this->trangThai);
         $stmt->bindValue(':songuoi', isset($data['soNguoiThamGia']) ? (int) $data['soNguoiThamGia'] : $this->soNguoiThamGia, PDO::PARAM_INT);
-        $stmt->bindValue(':sokhaosat', isset($data['soKhaoSat']) ? (int) $data['soKhaoSat'] : $this->soKhaoSat, PDO::PARAM_INT);
+        $stmt->bindValue(
+            ':soLuotRutThamMoiLan',
+            isset($data['soLuotRutThamMoiLan']) ? (int) $data['soLuotRutThamMoiLan'] : $this->soLuotRutThamMoiLan,
+            PDO::PARAM_INT
+        );
         $stmt->bindValue(':diadiem', $data['diaDiem'] ?? $this->diaDiem);
         $stmt->bindValue(':id', $this->id, PDO::PARAM_INT);
 
@@ -167,6 +205,7 @@ class Event
                 $this->trangThai = $fresh->trangThai;
                 $this->soNguoiThamGia = $fresh->soNguoiThamGia;
                 $this->soKhaoSat = $fresh->soKhaoSat;
+                $this->soLuotRutThamMoiLan = $fresh->soLuotRutThamMoiLan;
                 $this->diaDiem = $fresh->diaDiem;
                 $this->updatedAt = $fresh->updatedAt;
             }
@@ -214,6 +253,10 @@ class Event
     public function getSoKhaoSat(): int
     {
         return $this->soKhaoSat;
+    }
+    public function getSoLuotRutThamMoiLan(): int
+    {
+        return $this->soLuotRutThamMoiLan;
     }
     public function getDiaDiem(): ?string
     {

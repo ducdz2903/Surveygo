@@ -97,6 +97,11 @@ class Survey
             $params[':isQuickPoll'] = intval($filters['isQuickPoll']);
         }
 
+        if (!empty($filters['maSuKien'])) {
+            $where[] = "maSuKien = :maSuKien";
+            $params[':maSuKien'] = (int) $filters['maSuKien'];
+        }
+
         $whereClause = !empty($where) ? 'WHERE ' . implode(' AND ', $where) : '';
 
         // Get total count

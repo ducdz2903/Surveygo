@@ -64,6 +64,7 @@ $router->get('/admin/users', [AdminController::class, 'users'], [new RoleMiddlew
 $router->get('/admin/questions', [AdminController::class, 'questions'], [new RoleMiddleware(['admin'])]);
 $router->get('/admin/reports', [AdminController::class, 'reports'], [new RoleMiddleware(['admin'])]);
 $router->get('/admin/events', [AdminController::class, 'events'], [new RoleMiddleware(['admin'])]);
+$router->get('/admin/events/view', [AdminController::class, 'eventView'], [new RoleMiddleware(['admin'])]);
 $router->get('/admin/settings', [AdminController::class, 'settings'], [new RoleMiddleware(['admin'])]);
 $router->get('/admin/feedbacks', [AdminController::class, 'feedbacks'], [new RoleMiddleware(['admin'])]);
 $router->get('/admin/contact-messages', [AdminController::class, 'contactMessages'], [new RoleMiddleware(['admin'])]);

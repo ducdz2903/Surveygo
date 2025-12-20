@@ -188,6 +188,20 @@ class EventController extends Controller
             ], 404);
         }
 
+        $awardedSpins = 0;
+
+        // Award lucky wheel spins configured for this event (if any)
+        try {
+            $spinsPerJoin = $event->getSoLuotRutThamMoiLan();
+            if ($spinsPerJoin > 0) {
+                $userPoint = \App\Models\UserPoint::getOrCreate((int) $userId);
+                $userPoint->addLuckyWheelSpins($spinsPerJoin);
+                $awardedSpins = $spinsPerJoin;
+            }
+        } catch (\Throwable $e) {
+            error_log('[EventController::join] Failed to award lucky wheel spins: ' . $e->getMessage());
+        }
+
         // Log activity
         try {
             ActivityLogHelper::logParticipatedEvent($userId, $eventId);
@@ -201,6 +215,7 @@ class EventController extends Controller
             'data' => [
                 'eventId' => $eventId,
                 'eventName' => $event->getTenSuKien(),
+                'spinsAwarded' => $awardedSpins,
             ],
         ], 201);
     }
@@ -231,9 +246,11 @@ class EventController extends Controller
         $data['soNguoiThamGia'] = isset($data['soNguoiThamGia'])
             ? (int) $data['soNguoiThamGia']
             : (isset($data['participants']) ? (int) $data['participants'] : 0);
-        $data['soKhaoSat'] = isset($data['soKhaoSat'])
-            ? (int) $data['soKhaoSat']
-            : (isset($data['surveys']) ? (int) $data['surveys'] : 0);
+        // soKhaoSat hiện được tính động từ bảng surveys (maSuKien = events.id)
+        // nên bỏ qua mọi giá trị gửi từ client nếu có.
+        $data['soLuotRutThamMoiLan'] = isset($data['soLuotRutThamMoiLan'])
+            ? (int) $data['soLuotRutThamMoiLan']
+            : (isset($data['luckyWheelSpinsPerJoin']) ? (int) $data['luckyWheelSpinsPerJoin'] : 0);
 
         $rawCreator = $data['maNguoiTao'] ?? $data['creatorId'] ?? $data['creator_id'] ?? null;
         if ($rawCreator === null || $rawCreator === '') {
@@ -303,6 +320,21 @@ class EventController extends Controller
         }
 
         $data = $request->input();
+
+        if (!array_key_exists('soLuotRutThamMoiLan', $data) && array_key_exists('luckyWheelSpinsPerJoin', $data)) {
+            $data['soLuotRutThamMoiLan'] = (int) $data['luckyWheelSpinsPerJoin'];
+        }
+
+        if (array_key_exists('soLuotRutThamMoiLan', $data)) {
+            $data['soLuotRutThamMoiLan'] = (int) $data['soLuotRutThamMoiLan'];
+
+            if ($event->getTrangThai() !== 'upcoming') {
+                return $this->json([
+                    'error' => true,
+                    'message' => 'Chỉ được thay đổi số lượt rút thăm khi sự kiện đang ở trạng thái upcoming.',
+                ], 422);
+            }
+        }
 
         $errors = $this->validateEventUpdate($data);
         if (!empty($errors)) {
@@ -383,6 +415,7 @@ class EventController extends Controller
             'creator' => $creatorName,
             'created_at' => $e->getCreatedAt() ?? null,
             'updated_at' => $e->getUpdatedAt() ?? null,
+            'luckyWheelSpinsPerJoin' => $e->getSoLuotRutThamMoiLan(),
         ];
     }
 
@@ -442,4 +475,3 @@ class EventController extends Controller
         return $errors;
     }
 }
-

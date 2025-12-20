@@ -41,6 +41,10 @@ class SurveyController extends Controller
             $filters['danhMuc'] = $danhMuc;
         }
 
+        if ($maSuKien = $request->query('maSuKien')) {
+            $filters['maSuKien'] = (int) $maSuKien;
+        }
+
         $qpParam = $request->query('isQuickPoll');
 
         if ($qpParam !== null && $qpParam !== '') {

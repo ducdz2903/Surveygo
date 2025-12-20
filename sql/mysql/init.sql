@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS events (
   trangThai ENUM('upcoming','ongoing','completed') NOT NULL DEFAULT 'upcoming',
   soNguoiThamGia INT UNSIGNED NOT NULL DEFAULT 0,
   soKhaoSat INT UNSIGNED NOT NULL DEFAULT 0,
+  soLuotRutThamMoiLan INT UNSIGNED NOT NULL DEFAULT 0,
   diaDiem VARCHAR(255) DEFAULT NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -624,5 +625,4 @@ INSERT IGNORE INTO survey_question_map (idKhaoSat, idCauHoi, created_at, updated
   (14,20,NOW(),NOW()),
   (15,21,NOW(),NOW()),
   (16,22,NOW(),NOW());
-
 
