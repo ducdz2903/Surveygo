@@ -22,9 +22,9 @@
                     <div class="col-md-3">
                         <select class="form-select bg-light" id="status-filter" style="border-radius: 8px;">
                             <option value="">Tất cả</option>
-                            <option value="hoạtĐộng">Hot 🔥</option>
-                            <option value="pending">Mới ⭐</option>
-                            <option value="chờDuyệt">Chờ duyệt ⏳</option>
+                            <option value="hot">Hot 🔥</option>
+                            <option value="new">Chưa hoàn thành ⏳</option>
+                            <option value="old">Đã hoàn thành ✅</option>
                         </select>
                     </div>
                     <div class="col-md-4 d-flex gap-2">
@@ -124,21 +124,32 @@
     const BASE = (typeof BASE_URL !== 'undefined') ? BASE_URL : '';
     const pageSize = 6;
     let currentPage = 1;
+    let currentFilters = {};
 
     // Load quick polls
     async function loadQuickPolls(page = 1, filters = {}) {
+        // Lấy user_id từ localStorage
+        const userJson = localStorage.getItem('app.user');
+        let userId = null;
+        if (userJson) {
+            try {
+                const user = JSON.parse(userJson);
+                userId = user.id;
+            } catch (e) {
+                console.warn('Cannot parse user from localStorage');
+            }
+        }
+
         const params = new URLSearchParams({
             page: page,
             limit: pageSize,
             isQuickPoll: true,
+            ...filters,
         });
 
-        if (filters.search) {
-            params.append('search', filters.search);
-        }
-
-        if (filters.status) {
-            params.append('trangThai', filters.status);
+        // Thêm user_id vào query params nếu có
+        if (userId) {
+            params.append('user_id', userId);
         }
 
         try {
@@ -153,6 +164,7 @@
             }
 
             currentPage = result.meta.page;
+            currentFilters = filters;
             renderQuickPolls(result.data, result.meta);
         } catch (error) {
             console.error('Error:', error);
@@ -174,19 +186,51 @@
         const badgeMap = {
             'hoạtĐộng': { class: 'badge-hot', icon: 'fas fa-fire', text: 'Hot' },
             'pending': { class: '', icon: 'fas fa-star', text: 'Mới' },
-            'chờDuyệt': { class: '', icon: 'fas fa-star', text: 'Mới' },
         };
 
         container.innerHTML = surveys.map(survey => {
-            const badge = badgeMap[survey.trangThai] || { class: '', icon: 'fas fa-star', text: 'Mới' };
+            // Kiểm tra nếu user đã hoàn thành quickpoll này
+            let badge = null;
+            let completedCheckmark = '';
+            let buttonText = 'Bắt đầu';
+            let buttonClass = 'btn btn-gradient mt-auto w-100';
+            let buttonIcon = 'fas fa-play';
+            
+            if (survey.isCompleted) {
+                // Đã hoàn thành - hiển thị icon dấu tích ở góc card
+                completedCheckmark = '<i class="fas fa-check-circle" style="position: absolute; top: 15px; right: 15px; font-size: 24px; color: #28a745; z-index: 10;"></i>';
+                buttonText = 'Xem lại';
+                buttonClass = 'btn btn-outline-secondary mt-auto w-100';
+                buttonIcon = 'fas fa-eye';
+            } else {
+                // Chưa hoàn thành - kiểm tra badge
+                // Tính toán thời gian tạo
+                const createdAt = new Date(survey.created_at);
+                const now = new Date();
+                const hoursDiff = (now - createdAt) / (1000 * 60 * 60);
+                const isNew = hoursDiff < 24;
+                
+                // Ưu tiên: Hot > Mới (nếu < 24h) > Không có badge
+                if (survey.trangThai === 'hoạtĐộng') {
+                    badge = { class: 'badge-hot', icon: 'fas fa-fire', text: 'Hot' };
+                } else if (isNew) {
+                    badge = { class: '', icon: 'fas fa-star', text: 'Mới' };
+                }
+                // Nếu không Hot và không Mới (>24h) thì badge = null (không hiển thị)
+            }
+            
+            // Chỉ hiển thị badge nếu có
+            const badgeHtml = badge ? `<div class="survey-badge ${badge.class}">
+                                <i class="${badge.icon} me-1"></i>${badge.text}
+                            </div>` : '';
+            
             const timeEstimate = survey.thoiLuongDuTinh || 1;
 
             return `
                     <div class="col-lg-4 col-md-6">
-                        <div class="survey-card">
-                            <div class="survey-badge ${badge.class}">
-                                <i class="${badge.icon} me-1"></i>${badge.text}
-                            </div>
+                        <div class="survey-card ${survey.isCompleted ? 'survey-completed' : ''}" style="position: relative;">
+                            ${completedCheckmark}
+                            ${badgeHtml}
                             <div class="survey-header">
                                 <h5 class="survey-title">${survey.tieuDe}</h5>
                                 <div class="survey-meta">
@@ -195,8 +239,8 @@
                                 </div>
                             </div>
                             <p class="survey-desc">${survey.moTa || 'Trả lời nhanh 1 câu hỏi để kiếm điểm!'}</p>
-                            <button class="btn btn-gradient mt-auto w-100" onclick="startPoll(${survey.id})">
-                                <i class="fas fa-play me-1"></i>Bắt đầu
+                            <button class="${buttonClass}" onclick="startPoll(${survey.id})">
+                                <i class="${buttonIcon} me-1"></i>${buttonText}
                             </button>
                         </div>
                     </div>
@@ -266,10 +310,16 @@
 
     // Get current filters
     function getFilters() {
-        return {
-            search: document.getElementById('search-input').value,
-            status: document.getElementById('status-filter').value,
-        };
+        const filters = { ...currentFilters };
+        const searchInput = document.getElementById('search-input').value;
+        
+        if (searchInput.trim()) {
+            filters.search = searchInput.trim();
+        } else {
+            delete filters.search;
+        }
+        
+        return filters;
     }
 
     // Start a poll - redirect to survey guide page
@@ -281,12 +331,40 @@
     document.addEventListener('DOMContentLoaded', function () {
         loadQuickPolls();
 
-        document.getElementById('search-input').addEventListener('keyup', function () {
-            loadQuickPolls(1, getFilters());
+        document.getElementById('search-input').addEventListener('input', function (e) {
+            const filters = { ...currentFilters };
+            if (e.target.value.trim()) {
+                filters.search = e.target.value.trim();
+            } else {
+                delete filters.search;
+            }
+            loadQuickPolls(1, filters);
         });
 
-        document.getElementById('status-filter').addEventListener('change', function () {
-            loadQuickPolls(1, getFilters());
+        document.getElementById('status-filter').addEventListener('change', function (e) {
+            const filters = { ...currentFilters };
+            const value = e.target.value;
+            
+            // Reset filters first
+            delete filters.trangThai;
+            delete filters.sortBy;
+            delete filters.isCompleted;
+            
+            if (value === 'hot') {
+                // Hot: sort by completion count (number of unique users)
+                filters.sortBy = 'hot';
+            } else if (value === 'new') {
+                // Chưa hoàn thành: show incomplete polls, sorted by newest
+                filters.isCompleted = 'false';
+                filters.sortBy = 'newest';
+            } else if (value === 'old') {
+                // Đã hoàn thành: show completed polls, sorted by newest
+                filters.isCompleted = 'true';
+                filters.sortBy = 'newest';
+            }
+            // If value is empty (Tất cả), all filters are already deleted
+            
+            loadQuickPolls(1, filters);
         });
 
         document.getElementById('btn-reset-filters').addEventListener('click', function () {

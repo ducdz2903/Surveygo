@@ -90,6 +90,61 @@ class UserPointController extends Controller
     }
 
     /**
+     * Lấy thống kê điểm theo khoảng thời gian 3 tiếng trong 24 giờ qua
+     */
+    public function getHourlyStats()
+    {
+        $this->checkAjax();
+        $user = $this->getCurrentUser();
+        
+        if (!$user) {
+            return Response::json([
+                'error' => true,
+                'message' => 'Unauthorized'
+            ], 401);
+        }
+
+        try {
+            // Lấy tất cả transactions trong 24 giờ qua
+            $db = \App\Core\Container::get('db');
+            
+            $statement = $db->prepare(
+                'SELECT amount, created_at 
+                 FROM point_transactions 
+                 WHERE user_id = :user_id 
+                   AND created_at >= DATE_SUB(NOW(), INTERVAL 24 HOUR)
+                 ORDER BY created_at ASC'
+            );
+            
+            $statement->execute([':user_id' => $user['id']]);
+            $transactions = $statement->fetchAll();
+            
+            // Khởi tạo mảng 8 khoảng thời gian (mỗi khoảng 3 tiếng)
+            $hourlyData = array_fill(0, 8, 0);
+            
+            // Nhóm dữ liệu theo khoảng thời gian
+            foreach ($transactions as $tx) {
+                $timestamp = strtotime($tx['created_at']);
+                $hour = (int) date('H', $timestamp);
+                
+                // Xác định khoảng thời gian (0-3h = index 0, 3-6h = index 1, ...)
+                $intervalIndex = (int) floor($hour / 3);
+                $hourlyData[$intervalIndex] += (int) $tx['amount'];
+            }
+            
+            return Response::json([
+                'success' => true,
+                'data' => $hourlyData
+            ]);
+        } catch (\Exception $e) {
+            return Response::json([
+                'error' => true,
+                'message' => $e->getMessage()
+            ], 400);
+        }
+    }
+
+    /**
      * Helper methods
      */
     private function checkAjax()
