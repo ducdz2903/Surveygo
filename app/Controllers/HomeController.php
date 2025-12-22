@@ -28,11 +28,16 @@ class HomeController extends Controller
         $base = rtrim((string) ($data['baseUrl'] ?? ''), '/');
         $data['headExtra'] = '<link rel="stylesheet" href="' . $base . '/public/assets/css/client/pages/home.css">';
         
-        // Get recent activities for current user
+        // Get recent activities for current user (guarded in case DB table missing)
         $userId = $_SESSION['user_id'] ?? null;
         if ($userId) {
-            $activityLog = new ActivityLog();
-            $data['recentActivities'] = $activityLog->getByUserId($userId, 5, 0);
+            try {
+                $activityLog = new ActivityLog();
+                $data['recentActivities'] = $activityLog->getByUserId($userId, 5, 0);
+            } catch (\Throwable $e) {
+                error_log('ActivityLog error: ' . $e->getMessage());
+                $data['recentActivities'] = [];
+            }
         } else {
             $data['recentActivities'] = [];
         }

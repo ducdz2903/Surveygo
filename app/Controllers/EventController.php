@@ -240,7 +240,20 @@ class EventController extends Controller
         return $this->json([
             'error' => false,
             'message' => 'Sự kiện được tạo thành công.',
-            'data' => $event->toArray(),
+            'data' => [
+                'id' => $event->getId(),
+                'code' => $event->getMaSuKien(),
+                'title' => $event->getTenSuKien(),
+                'location' => $event->getDiaDiem(),
+                'startDate' => $event->getThoiGianBatDau(),
+                'endDate' => $event->getThoiGianKetThuc(),
+                'status' => $event->getTrangThai(),
+                'participants' => $event->getSoNguoiThamGia(),
+                'surveys' => $event->getSoKhaoSat(),
+                'creatorId' => $event->getMaNguoiTao(),
+                'created_at' => $event->getCreatedAt() ?? null,
+                'updated_at' => $event->getUpdatedAt() ?? null,
+            ],
         ], 201);
     }
 }

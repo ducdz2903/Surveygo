@@ -94,7 +94,7 @@ class Request
         return $this->uri;
     }
 
-    public function query(string $key = null, $default = null)
+    public function query(?string $key = null, $default = null)
     {
         if ($key === null) {
             return $this->query;
@@ -103,7 +103,7 @@ class Request
         return $this->query[$key] ?? $default;
     }
 
-    public function input(string $key = null, $default = null)
+    public function input(?string $key = null, $default = null)
     {
         $payload = $this->isJson() ? $this->json() : $this->body;
 

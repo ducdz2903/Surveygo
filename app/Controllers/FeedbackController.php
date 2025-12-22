@@ -23,6 +23,12 @@ class FeedbackController extends Controller
         if ($ma = $request->query('ma')) {
             $filters['ma'] = $ma;
         }
+        if ($rating = $request->query('rating')) {
+            $filters['rating'] = $rating;
+        }
+        if ($idKhaoSat = $request->query('idKhaoSat')) {
+            $filters['idKhaoSat'] = $idKhaoSat;
+        }
 
         $result = Feedback::paginate($page, $limit, $filters);
 
@@ -41,7 +47,7 @@ class FeedbackController extends Controller
     // GET /api/feedbacks/show?id=:id
     public function show(Request $request)
     {
-        $id = $request->query('id') ?? $request->input('id');
+        $id = $request->getAttribute('id') ?? $request->query('id') ?? $request->input('id');
         if (!$id || !is_numeric($id)) {
             return $this->json(['error' => true, 'message' => 'ID không hợp lệ'], 422);
         }
@@ -86,7 +92,7 @@ class FeedbackController extends Controller
     // PUT /api/feedbacks?id=:id
     public function update(Request $request)
     {
-        $id = $request->query('id') ?? $request->input('id');
+        $id = $request->getAttribute('id') ?? $request->query('id') ?? $request->input('id');
         if (!$id || !is_numeric($id)) {
             return $this->json(['error' => true, 'message' => 'ID không hợp lệ'], 422);
         }
@@ -116,7 +122,7 @@ class FeedbackController extends Controller
     // DELETE /api/feedbacks?id=:id
     public function delete(Request $request)
     {
-        $id = $request->query('id') ?? $request->input('id');
+        $id = $request->getAttribute('id') ?? $request->query('id') ?? $request->input('id');
         if (!$id || !is_numeric($id)) {
             return $this->json(['error' => true, 'message' => 'ID không hợp lệ'], 422);
         }
