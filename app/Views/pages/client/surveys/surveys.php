@@ -87,7 +87,7 @@
             return;
         }
 
-        select.innerHTML = '<option value=\"\">T\u1ea5t c\u1ea3 s\u1ef1 ki\u1ec7n</option>';
+        select.innerHTML = '<option value=\"\">T\u1ea5t c\u1ea3 s\u1ef1 ki\u1ec7n đã tham gia</option>';
 
         try {
             const params = new URLSearchParams({ page: 1, limit: 50 });
@@ -95,7 +95,10 @@
                 headers: { 'Accept': 'application/json' }
             });
             const json = await response.json().catch(() => ({}));
-            const events = Array.isArray(json.data) ? json.data : (Array.isArray(json) ? json : []);
+            const allEvents = Array.isArray(json.data) ? json.data : (Array.isArray(json) ? json : []);
+
+            // Chỉ hiển thị các sự kiện người dùng đã tham gia
+            const events = allEvents.filter(ev => ev.hasJoined === true);
 
             events.forEach(ev => {
                 const opt = document.createElement('option');

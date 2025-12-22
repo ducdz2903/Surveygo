@@ -80,8 +80,6 @@ paths:
                 email: {type: string, format: email, description: Địa chỉ email}
                 password: {type: string, minLength: 6, description: Mật khẩu (tối thiểu 6 ký tự)}
                 role: {type: string, enum: [user, admin, moderator], description: Vai trò (mặc định là user)}
-        - {name: maSuKien, in: query, schema: {type: integer}, description: Lọc theo sự kiện (ID sự kiện, tham chiếu surveys.maSuKien)}
-        - {name: maSuKien, in: query, schema: {type: integer}, description: L ¯?c theo s ¯ñ ki ¯Øn (ID s ¯ñ ki ¯Øn, tham chi §¨u surveys.maSuKien)}
       responses:
         201:
           description: Đăng ký thành công
