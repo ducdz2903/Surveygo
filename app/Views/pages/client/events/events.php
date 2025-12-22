@@ -169,6 +169,65 @@ $userData = [
             return base ? (base + p) : p;
         };
 
+        // Danh sách ảnh sự kiện từ thư viện Asset/event
+        const eventImages = [
+            'pexels-abbykihano-431722.jpg',
+            'pexels-alex-andrews-271121-1983046.jpg',
+            'pexels-alxs-919734.jpg',
+            'pexels-annamw-1047442.jpg',
+            'pexels-apasaric-2078071.jpg',
+            'pexels-arts-1164985.jpg',
+            'pexels-asadphoto-169190.jpg',
+            'pexels-asadphoto-169198.jpg',
+            'pexels-asphotography-226737.jpg',
+            'pexels-bertellifotografia-2608512.jpg',
+            'pexels-bertellifotografia-2608517.jpg',
+            'pexels-caleboquendo-3023317.jpg',
+            'pexels-designecologist-2526105.jpg',
+            'pexels-emma-bauso-1183828-2253831.jpg',
+            'pexels-expect-best-79873-1243337.jpg',
+            'pexels-fu-zhichao-176355-587741.jpg',
+            'pexels-icsa-833425-1708912.jpg',
+            'pexels-icsa-833425-1709003.jpg',
+            'pexels-jibarofoto-2774556.jpg',
+            'pexels-jmark-301987.jpg',
+            'pexels-joshsorenson-976866.jpg',
+            'pexels-lorentzworks-668137.jpg',
+            'pexels-marc-schulte-656598-2952834.jpg',
+            'pexels-mark-angelo-sampan-738078-1587927.jpg',
+            'pexels-mat-brown-150387-1395964.jpg',
+            'pexels-mat-brown-150387-1395967.jpg',
+            'pexels-maumascaro-801863.jpg',
+            'pexels-melissa-220267-698907.jpg',
+            'pexels-mikky-k-158844-625644.jpg',
+            'pexels-minan1398-1157557.jpg',
+            'pexels-nietjuhart-796606.jpg',
+            'pexels-olly-787961.jpg',
+            'pexels-picjumbo-com-55570-196652.jpg',
+            'pexels-pixabay-159213.jpg',
+            'pexels-pixabay-433452.jpg',
+            'pexels-pixabay-50675.jpg',
+            'pexels-salooart-16408.jpg',
+            'pexels-tae-fuller-331517-1616113.jpg',
+            'pexels-teddy-2263436.jpg',
+            'pexels-thatguycraig000-2306277.jpg',
+            'pexels-thatguycraig000-2306281.jpg',
+            'pexels-wendywei-1190297.jpg',
+            'pexels-wendywei-1540338.jpg',
+            'pexels-wendywei-1677710.jpg',
+            'pexels-wolfgang-1002140-2747446.jpg',
+            'pexels-wolfgang-1002140-2747449.jpg',
+            'pexels-ywanphoto-57980.jpg',
+            'pexels-zhuhehuai-716276.jpg'
+        ];
+
+        // Hàm lấy ảnh cho event dựa trên ID để không trùng lặp
+        function getEventImage(eventId) {
+            const index = (eventId - 1) % eventImages.length;
+            const imageName = eventImages[index];
+            return (baseUrl || '') + '/Asset/event/' + imageName;
+        }
+
         document.addEventListener('DOMContentLoaded', function () {
             const eventsContainer = document.getElementById('events-feed-list');
 
@@ -285,7 +344,7 @@ $userData = [
                     return `
                         <div class="event-card-feed mb-3" data-event-id="${ev.id}">
                             <div class="event-card-img"
-                                 style="background-image: linear-gradient(135deg, #6366f1, #22c55e);">
+                                 style="background-image: url('${getEventImage(ev.id)}'); background-size: cover; background-position: center;">
                             </div>
                             <div class="event-card-content">
                                 <span class="event-date d-block mb-1">
