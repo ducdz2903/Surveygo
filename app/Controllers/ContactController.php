@@ -41,7 +41,7 @@ class ContactController extends Controller
     // GET /api/contact-messages/show?id=:id
     public function show(Request $request)
     {
-        $id = $request->query('id') ?? $request->input('id');
+        $id = $request->getAttribute('id') ?? $request->query('id') ?? $request->input('id');
         if (!$id || !is_numeric($id)) {
             return $this->json(['error' => true, 'message' => 'ID không hợp lệ'], 422);
         }
@@ -86,7 +86,7 @@ class ContactController extends Controller
     // PUT /api/contact-messages?id=:id
     public function update(Request $request)
     {
-        $id = $request->query('id') ?? $request->input('id');
+        $id = $request->getAttribute('id') ?? $request->query('id') ?? $request->input('id');
         if (!$id || !is_numeric($id)) {
             return $this->json(['error' => true, 'message' => 'ID không hợp lệ'], 422);
         }
@@ -109,7 +109,7 @@ class ContactController extends Controller
     // DELETE /api/contact-messages?id=:id
     public function delete(Request $request)
     {
-        $id = $request->query('id') ?? $request->input('id');
+        $id = $request->getAttribute('id') ?? $request->query('id') ?? $request->input('id');
         if (!$id || !is_numeric($id)) {
             return $this->json(['error' => true, 'message' => 'ID không hợp lệ'], 422);
         }
