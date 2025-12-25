@@ -83,7 +83,6 @@
                             <option value="single" selected>Chọn 1</option>
                             <option value="multiple">Chọn nhiều</option>
                             <option value="rating">Đánh giá sao</option>
-                            <option value="yesno">Có/Không</option>
                             <option value="text">Nhập chữ</option>
                         </select>
                     </div>
@@ -92,18 +91,18 @@
                         <div id="optionsContainer">
                             <div class="input-group mb-2">
                                 <input type="text" class="form-control" placeholder="Lựa chọn 1" required style="border-radius: 10px 0 0 10px;">
-                                <button class="btn btn-outline-danger" type="button" onclick="removeOption(this)" style="border-radius: 0 10px 10px 0;">Xóa</button>
+                                <button class="btn btn-outline-danger btn-remove-option" type="button" style="border-radius: 0 10px 10px 0;">Xóa</button>
                             </div>
                             <div class="input-group mb-2">
                                 <input type="text" class="form-control" placeholder="Lựa chọn 2" required style="border-radius: 10px 0 0 10px;">
-                                <button class="btn btn-outline-danger" type="button" onclick="removeOption(this)" style="border-radius: 0 10px 10px 0;">Xóa</button>
+                                <button class="btn btn-outline-danger btn-remove-option" type="button" style="border-radius: 0 10px 10px 0;">Xóa</button>
                             </div>
                             <div class="input-group mb-2">
                                 <input type="text" class="form-control" placeholder="Lựa chọn 3" required style="border-radius: 10px 0 0 10px;">
-                                <button class="btn btn-outline-danger" type="button" onclick="removeOption(this)" style="border-radius: 0 10px 10px 0;">Xóa</button>
+                                <button class="btn btn-outline-danger btn-remove-option" type="button" style="border-radius: 0 10px 10px 0;">Xóa</button>
                             </div>
                         </div>
-                        <button type="button" class="btn btn-outline-primary btn-sm" onclick="addOption()" style="border-radius: 20px;">Thêm lựa chọn</button>
+                        <button type="button" class="btn btn-outline-primary btn-sm" id="btn-add-option" style="border-radius: 20px;">Thêm lựa chọn</button>
                     </div>
                     <div class="mb-3" id="answerPreview" style="display: none;">
                         <label class="form-label fw-semibold">Xem trước câu trả lời</label>
@@ -115,7 +114,7 @@
             </div>
             <div class="modal-footer border-0 bg-light" style="border-radius: 0 0 20px 20px;">
                 <button type="button" class="btn btn-outline-secondary-accent" data-bs-dismiss="modal" style="border-radius: 25px;">Hủy</button>
-                <button type="button" class="btn btn-primary-gradient" onclick="saveQuickPoll()" style="border-radius: 25px;">Lưu Quick Poll</button>
+                <button type="button" class="btn btn-primary-gradient" id="btn-save-quick-poll" style="border-radius: 25px;">Lưu Quick Poll</button>
             </div>
         </div>
     </div>
@@ -420,18 +419,6 @@
                     </div>
                 `;
                 break;
-            case 'yesno':
-                html = `
-                    <div class="text-center preview-yesno">
-                        <p class="mb-3 fw-semibold">Chọn câu trả lời:</p>
-                        <div class="d-flex justify-content-center gap-3">
-                            <button class="btn btn-outline-success btn-lg" disabled style="cursor: not-allowed;">Có</button>
-                            <button class="btn btn-outline-danger btn-lg" disabled style="cursor: not-allowed;">Không</button>
-                        </div>
-                        <small class="text-muted mt-2 d-block">Các nút này chỉ để xem trước, không thể nhấn</small>
-                    </div>
-                `;
-                break;
             case 'text':
                 html = `
                     <div class="preview-text">
@@ -456,7 +443,7 @@
         newOption.className = 'input-group mb-2';
         newOption.innerHTML = `
             <input type="text" class="form-control" placeholder="Lựa chọn ${optionCount}" required>
-            <button class="btn btn-outline-danger" type="button" onclick="removeOption(this)">Xóa</button>
+            <button class="btn btn-outline-danger btn-remove-option" type="button">Xóa</button>
         `;
         container.appendChild(newOption);
     }
@@ -480,15 +467,15 @@
         container.innerHTML = `
             <div class="input-group mb-2">
                 <input type="text" class="form-control" placeholder="Lựa chọn 1" required>
-                <button class="btn btn-outline-danger" type="button" onclick="removeOption(this)">Xóa</button>
+                <button class="btn btn-outline-danger btn-remove-option" type="button">Xóa</button>
             </div>
             <div class="input-group mb-2">
                 <input type="text" class="form-control" placeholder="Lựa chọn 2" required>
-                <button class="btn btn-outline-danger" type="button" onclick="removeOption(this)">Xóa</button>
+                <button class="btn btn-outline-danger btn-remove-option" type="button">Xóa</button>
             </div>
             <div class="input-group mb-2">
                 <input type="text" class="form-control" placeholder="Lựa chọn 3" required>
-                <button class="btn btn-outline-danger" type="button" onclick="removeOption(this)">Xóa</button>
+                <button class="btn btn-outline-danger btn-remove-option" type="button">Xóa</button>
             </div>
         `;
     }
@@ -568,9 +555,34 @@
             alert('Lỗi kết nối tới máy chủ. Vui lòng thử lại.');
             
             // Restore button state
-            const saveButton = document.querySelector('button[onclick="saveQuickPoll()"]');
+            const saveButton = document.getElementById('btn-save-quick-poll');
             saveButton.disabled = false;
             saveButton.innerHTML = 'Lưu Quick Poll';
         }
     }
+
+    // Event Listeners - Modern approach using addEventListener
+    document.addEventListener('DOMContentLoaded', function() {
+        // Save Quick Poll button
+        const saveButton = document.getElementById('btn-save-quick-poll');
+        if (saveButton) {
+            saveButton.addEventListener('click', saveQuickPoll);
+        }
+
+        // Add Option button
+        const addButton = document.getElementById('btn-add-option');
+        if (addButton) {
+            addButton.addEventListener('click', addOption);
+        }
+
+        // Remove Option buttons - using event delegation
+        const optionsContainer = document.getElementById('optionsContainer');
+        if (optionsContainer) {
+            optionsContainer.addEventListener('click', function(e) {
+                if (e.target.classList.contains('btn-remove-option')) {
+                    removeOption(e.target);
+                }
+            });
+        }
+    });
 </script>
