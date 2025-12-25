@@ -8,6 +8,7 @@ return [
         'env' => 'localhost',
         'debug' => true,
         'base_url' => '',
+        "check_payment_url" => "http://localhost:8002",
     ],
     'db' => [
         'driver' => 'mysql',
@@ -18,4 +19,5 @@ return [
         'password' => '',
         'charset' => 'utf8mb4',
     ],
+    'purchase_url' => 'http://localhost:8000',
 ];
