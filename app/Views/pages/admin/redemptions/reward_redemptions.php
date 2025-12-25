@@ -13,8 +13,10 @@
                 <div class="col-lg-3">
                     <label class="form-label fw-bold small text-uppercase text-muted">Tìm kiếm</label>
                     <div class="input-group input-group-sm">
-                        <span class="input-group-text bg-light border-end-0"><i class="fas fa-search text-muted"></i></span>
-                        <input type="text" id="filter-search" class="form-control border-start-0 ps-0" placeholder="Tên hoặc email...">
+                        <span class="input-group-text bg-light border-end-0"><i
+                                class="fas fa-search text-muted"></i></span>
+                        <input type="text" id="filter-search" class="form-control border-start-0 ps-0"
+                            placeholder="Tên hoặc email...">
                     </div>
                 </div>
                 <div class="col-lg-3">
@@ -101,7 +103,8 @@
                 </div>
                 <div class="row g-3 mt-3 pt-3 border-top">
                     <div class="col-12">
-                        <label class="form-label fw-bold small text-uppercase text-muted mb-2">Cập nhật trạng thái</label>
+                        <label class="form-label fw-bold small text-uppercase text-muted mb-2">Cập nhật trạng
+                            thái</label>
                         <select class="form-select" id="status-select">
                             <option value="">-- Chọn trạng thái --</option>
                             <option value="pending">Chờ xử lý</option>
@@ -157,7 +160,7 @@
         'physical': 'Quà Tặng'
     };
 
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         loadRedemptions(1);
 
         document.getElementById('filter-status').addEventListener('change', () => {
@@ -223,31 +226,31 @@
                 'X-Requested-With': 'XMLHttpRequest'
             }
         })
-        .then(response => response.json())
-        .then(json => {
-            const data = json.data || [];
-            const pagination = json.pagination || { current_page: 1, pages: 1, total: 0 };
+            .then(response => response.json())
+            .then(json => {
+                const data = json.data || [];
+                const pagination = json.pagination || { current_page: 1, pages: 1, total: 0 };
 
-            if (data.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="9" class="text-center py-5 text-muted">Không tìm thấy yêu cầu nào.</td></tr>`;
-            } else {
-                tbody.innerHTML = data.map(r => renderRedemptionRow(r)).join('');
-            }
+                if (data.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="9" class="text-center py-5 text-muted">Không tìm thấy yêu cầu nào.</td></tr>`;
+                } else {
+                    tbody.innerHTML = data.map(r => renderRedemptionRow(r)).join('');
+                }
 
-            renderPagination(pagination);
-            document.getElementById('total-redemptions').textContent = pagination.total || 0;
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            tbody.innerHTML = `<tr><td colspan="9" class="text-center py-5 text-danger">Lỗi tải dữ liệu</td></tr>`;
-        });
+                renderPagination(pagination);
+                document.getElementById('total-redemptions').textContent = pagination.total || 0;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                tbody.innerHTML = `<tr><td colspan="9" class="text-center py-5 text-danger">Lỗi tải dữ liệu</td></tr>`;
+            });
     }
 
     function renderRedemptionRow(redemption) {
         const date = new Date(redemption.created_at);
-        const dateStr = date.toLocaleDateString('vi-VN', { 
-            year: 'numeric', 
-            month: '2-digit', 
+        const dateStr = date.toLocaleDateString('vi-VN', {
+            year: 'numeric',
+            month: '2-digit',
             day: '2-digit'
         });
 
@@ -273,10 +276,10 @@
                 <td>${redemption.reward_name || '-'}</td>
                 <td><strong>${redemption.point_cost ? redemption.point_cost.toLocaleString('vi-VN') : '-'}</strong></td>
                 <td>
-                    ${redemption.type === 'physical' ? 
-                        (redemption.reward_name || '-') : 
-                        (redemption.value ? redemption.value.toLocaleString('vi-VN') + ' đ' : '-')
-                    }
+                    ${redemption.type === 'physical' ?
+                (redemption.reward_name || '-') :
+                (redemption.value ? redemption.value.toLocaleString('vi-VN') + ' đ' : '-')
+            }
                 </td>
                 <td><span class="badge ${typeBadge}">${typeLabel}</span></td>
                 <td><span class="badge ${statusBadge}">${statusLabel}</span></td>
@@ -292,7 +295,7 @@
 
     function renderPagination(pagination) {
         const container = document.getElementById('redemptions-pagination');
-        
+
         if (!pagination || pagination.pages <= 1) {
             container.innerHTML = '';
             return;
@@ -300,7 +303,7 @@
 
         const currentPage = pagination.current_page;
         const totalPages = pagination.pages;
-        
+
         let html = '<ul class="pagination pagination-sm mb-0">';
 
         html += `<li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
@@ -352,7 +355,7 @@
 
     function showRedemptionDetail(redemptionId) {
         selectedRedemptionId = redemptionId;
-        
+
         // Find redemption in current page data
         const tbody = document.getElementById('redemptions-table-body');
         const rows = tbody.querySelectorAll('tr');
@@ -364,13 +367,13 @@
                 'X-Requested-With': 'XMLHttpRequest'
             }
         })
-        .then(response => response.json())
-        .then(json => {
-            const allRedemptions = json.data || [];
-            redemptionData = allRedemptions.find(r => r.id == redemptionId);
+            .then(response => response.json())
+            .then(json => {
+                const allRedemptions = json.data || [];
+                redemptionData = allRedemptions.find(r => r.id == redemptionId);
 
-            if (redemptionData) {
-                const detailHtml = `
+                if (redemptionData) {
+                    const detailHtml = `
                     <div class="col-12">
                         <div class="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom">
                             <div class="user-avatar" style="width: 48px; height: 48px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display:flex; align-items:center; justify-content:center; color:#fff; font-weight:600; border-radius:50%; font-size: 1rem;">
@@ -402,10 +405,10 @@
                                 <div class="col-md-6">
                                     <small class="text-muted d-block mb-1">Giá trị</small>
                                     <strong>
-                                        ${redemptionData.type === 'physical' ? 
-                                            (redemptionData.reward_name || '-') : 
-                                            (redemptionData.value ? redemptionData.value.toLocaleString('vi-VN') + ' đ' : '-')
-                                        }
+                                        ${redemptionData.type === 'physical' ?
+                            (redemptionData.reward_name || '-') :
+                            (redemptionData.value ? redemptionData.value.toLocaleString('vi-VN') + ' đ' : '-')
+                        }
                                     </strong>
                                 </div>
                             </div>
@@ -425,19 +428,26 @@
                     <div class="col-12">
                         <h6 class="text-muted small text-uppercase mb-3">Thông tin ngân hàng</h6>
                         <div class="p-3 bg-light rounded mb-3">
-                            <div class="row g-2">
-                                ${redemptionData.bank_name ? `
-                                <div class="col-md-6">
+                            <div class="row g-3">
+                                <div class="col-md-4">
                                     <small class="text-muted d-block">Ngân hàng</small>
-                                    <strong>${redemptionData.bank_name}</strong>
+                                    <strong>${redemptionData.bank_name || '-'}</strong>
                                 </div>
-                                ` : ''}
-                                ${redemptionData.account_number ? `
-                                <div class="col-md-6">
+                                <div class="col-md-4">
                                     <small class="text-muted d-block">Số tài khoản</small>
-                                    <strong>${redemptionData.account_number}</strong>
+                                    <strong>${redemptionData.account_number || '-'}</strong>
                                 </div>
-                                ` : ''}
+                                <div class="col-md-4">
+                                    <small class="text-muted d-block">
+                                        Chủ tài khoản 
+                                        <i class="fas fa-search text-info ms-1" role="button" id="verify-account-icon" 
+                                           onclick="verifyBankAccount('${redemptionData.bank_name || ''}', '${redemptionData.account_number}')" 
+                                           title="Xác minh tài khoản" style="cursor: pointer;"></i>
+                                    </small>
+                                    <div id="verify-account-result">
+                                        <span class="text-muted">-</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -470,16 +480,16 @@
                     </div>
                 `;
 
-                document.getElementById('detail-content').innerHTML = detailHtml;
-                document.getElementById('status-select').value = redemptionData.status || '';
+                    document.getElementById('detail-content').innerHTML = detailHtml;
+                    document.getElementById('status-select').value = redemptionData.status || '';
 
-                const modal = new bootstrap.Modal(document.getElementById('redemptionDetailModal'));
-                modal.show();
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-        });
+                    const modal = new bootstrap.Modal(document.getElementById('redemptionDetailModal'));
+                    modal.show();
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
     }
 
     function updateRedemptionStatus() {
@@ -501,21 +511,21 @@
                 status: newStatus
             })
         })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                showToast('success', 'Cập nhật trạng thái thành công');
-                const modal = bootstrap.Modal.getInstance(document.getElementById('redemptionDetailModal'));
-                modal.hide();
-                loadRedemptions(currentPage);
-            } else {
-                showToast('error', data.message || 'Lỗi cập nhật trạng thái');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            showToast('error', 'Lỗi: ' + error.message);
-        });
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast('success', 'Cập nhật trạng thái thành công');
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('redemptionDetailModal'));
+                    modal.hide();
+                    loadRedemptions(currentPage);
+                } else {
+                    showToast('error', data.message || 'Lỗi cập nhật trạng thái');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showToast('error', 'Lỗi: ' + error.message);
+            });
     }
 
     function getInitials(name) {

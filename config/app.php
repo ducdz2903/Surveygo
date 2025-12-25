@@ -8,7 +8,6 @@ return [
         'env' => 'localhost',
         'debug' => true,
         'base_url' => '',
-        "check_payment_url" => "http://localhost:8002",
     ],
     'db' => [
         'driver' => 'mysql',

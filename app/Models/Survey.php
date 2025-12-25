@@ -100,81 +100,82 @@ class Survey
         if (!empty($filters['maSuKien'])) {
             $where[] = "maSuKien = :maSuKien";
             $params[':maSuKien'] = (int) $filters['maSuKien'];
-        // Handle isCompleted filter
-        $needsSubmissionsJoin = false;
-        if (isset($filters['isCompleted']) && isset($filters['user_id'])) {
-            $needsSubmissionsJoin = true;
-            $params[':user_id'] = (int) $filters['user_id'];
-            
-            if ($filters['isCompleted']) {
-                // Show only completed: must have a submission for this user
-                $where[] = "ss.maNguoiDung IS NOT NULL";
-            } else {
-                // Show only incomplete: must NOT have a submission for this user
-                $where[] = "ss.maNguoiDung IS NULL";
+            // Handle isCompleted filter
+            $needsSubmissionsJoin = false;
+            if (isset($filters['isCompleted']) && isset($filters['user_id'])) {
+                $needsSubmissionsJoin = true;
+                $params[':user_id'] = (int) $filters['user_id'];
+
+                if ($filters['isCompleted']) {
+                    // Show only completed: must have a submission for this user
+                    $where[] = "ss.maNguoiDung IS NOT NULL";
+                } else {
+                    // Show only incomplete: must NOT have a submission for this user
+                    $where[] = "ss.maNguoiDung IS NULL";
+                }
             }
+
+            $whereClause = !empty($where) ? 'WHERE ' . implode(' AND ', $where) : '';
+
+            // Determine sorting based on sortBy parameter
+            $sortBy = $filters['sortBy'] ?? 'newest';
+            $orderClause = '';
+            $fromClause = 'FROM surveys s';
+            $selectFields = 's.*';
+            $groupBy = '';
+
+            if ($sortBy === 'hot') {
+                // LEFT JOIN with survey_submissions to count DISTINCT users who completed
+                // Sort by number of unique users (highest to lowest)
+                $fromClause = 'FROM surveys s LEFT JOIN survey_submissions ss ON s.id = ss.maKhaoSat';
+                $selectFields = 's.*, COUNT(DISTINCT ss.maNguoiDung) as response_count';
+                $groupBy = 'GROUP BY s.id';
+                $orderClause = 'ORDER BY response_count DESC, s.created_at DESC';
+            } elseif ($sortBy === 'oldest') {
+                $orderClause = 'ORDER BY s.created_at ASC';
+            } else {
+                // Default to newest
+                $orderClause = 'ORDER BY s.created_at DESC';
+            }
+
+            // Add LEFT JOIN for isCompleted filter if needed and not already joined
+            if ($needsSubmissionsJoin && $sortBy !== 'hot') {
+                $fromClause = 'FROM surveys s LEFT JOIN survey_submissions ss ON (s.id = ss.maKhaoSat AND ss.maNguoiDung = :user_id)';
+            }
+
+            // Get total count - use the same FROM clause that includes JOINs if needed
+            $countFromClause = $needsSubmissionsJoin ? $fromClause : 'FROM surveys s';
+            $countSql = "SELECT COUNT(DISTINCT s.id) as total {$countFromClause} {$whereClause}";
+            $countStmt = $db->prepare($countSql);
+            $countStmt->execute($params);
+            $total = (int) $countStmt->fetch()['total'];
+
+            // Get paginated results
+            $sql = "SELECT {$selectFields} {$fromClause} {$whereClause} {$groupBy} {$orderClause} LIMIT :offset, :limit";
+            $stmt = $db->prepare($sql);
+
+            // Bind params
+            foreach ($params as $key => $value) {
+                $stmt->bindValue($key, $value);
+            }
+            $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+            $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+
+            $stmt->execute();
+            $rows = $stmt->fetchAll();
+
+            $surveys = array_map(fn($row) => new self($row), $rows);
+
+            $totalPages = (int) ceil($total / $limit);
+
+            return [
+                'surveys' => $surveys,
+                'total' => $total,
+                'page' => $page,
+                'limit' => $limit,
+                'totalPages' => $totalPages,
+            ];
         }
-
-        $whereClause = !empty($where) ? 'WHERE ' . implode(' AND ', $where) : '';
-
-        // Determine sorting based on sortBy parameter
-        $sortBy = $filters['sortBy'] ?? 'newest';
-        $orderClause = '';
-        $fromClause = 'FROM surveys s';
-        $selectFields = 's.*';
-        $groupBy = '';
-
-        if ($sortBy === 'hot') {
-            // LEFT JOIN with survey_submissions to count DISTINCT users who completed
-            // Sort by number of unique users (highest to lowest)
-            $fromClause = 'FROM surveys s LEFT JOIN survey_submissions ss ON s.id = ss.maKhaoSat';
-            $selectFields = 's.*, COUNT(DISTINCT ss.maNguoiDung) as response_count';
-            $groupBy = 'GROUP BY s.id';
-            $orderClause = 'ORDER BY response_count DESC, s.created_at DESC';
-        } elseif ($sortBy === 'oldest') {
-            $orderClause = 'ORDER BY s.created_at ASC';
-        } else {
-            // Default to newest
-            $orderClause = 'ORDER BY s.created_at DESC';
-        }
-
-        // Add LEFT JOIN for isCompleted filter if needed and not already joined
-        if ($needsSubmissionsJoin && $sortBy !== 'hot') {
-            $fromClause = 'FROM surveys s LEFT JOIN survey_submissions ss ON (s.id = ss.maKhaoSat AND ss.maNguoiDung = :user_id)';
-        }
-
-        // Get total count - use the same FROM clause that includes JOINs if needed
-        $countFromClause = $needsSubmissionsJoin ? $fromClause : 'FROM surveys s';
-        $countSql = "SELECT COUNT(DISTINCT s.id) as total {$countFromClause} {$whereClause}";
-        $countStmt = $db->prepare($countSql);
-        $countStmt->execute($params);
-        $total = (int) $countStmt->fetch()['total'];
-
-        // Get paginated results
-        $sql = "SELECT {$selectFields} {$fromClause} {$whereClause} {$groupBy} {$orderClause} LIMIT :offset, :limit";
-        $stmt = $db->prepare($sql);
-
-        // Bind params
-        foreach ($params as $key => $value) {
-            $stmt->bindValue($key, $value);
-        }
-        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
-        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
-
-        $stmt->execute();
-        $rows = $stmt->fetchAll();
-
-        $surveys = array_map(fn($row) => new self($row), $rows);
-
-        $totalPages = (int) ceil($total / $limit);
-
-        return [
-            'surveys' => $surveys,
-            'total' => $total,
-            'page' => $page,
-            'limit' => $limit,
-            'totalPages' => $totalPages,
-        ];
     }
 
     /**
@@ -508,17 +509,17 @@ class Survey
     }
 
     /**
- * Lấy khảo sát hàng đầu theo số lượng phản hồi với đánh giá trung bình
- * 
- * @param int $limit Số lượng khảo sát cần trả về
- * @return array Mảng các khảo sát với response_count và avg_rating
- */
-public static function getTopSurveysByResponses(int $limit = 5): array
-{
-    /** @var PDO $db */
-    $db = Container::get('db');
+     * Lấy khảo sát hàng đầu theo số lượng phản hồi với đánh giá trung bình
+     * 
+     * @param int $limit Số lượng khảo sát cần trả về
+     * @return array Mảng các khảo sát với response_count và avg_rating
+     */
+    public static function getTopSurveysByResponses(int $limit = 5): array
+    {
+        /** @var PDO $db */
+        $db = Container::get('db');
 
-    $sql = "
+        $sql = "
         SELECT 
             s.id,
             s.maKhaoSat,
@@ -536,23 +537,23 @@ public static function getTopSurveysByResponses(int $limit = 5): array
         LIMIT :limit
     ";
 
-    $stmt = $db->prepare($sql);
-    $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
-    $stmt->execute();
+        $stmt = $db->prepare($sql);
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->execute();
 
-    $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    return array_map(function($row) {
-        return [
-            'id' => (int) $row['id'],
-            'maKhaoSat' => $row['maKhaoSat'],
-            'tieuDe' => $row['tieuDe'],
-            'moTa' => $row['moTa'],
-            'trangThai' => $row['trangThai'],
-            'created_at' => $row['created_at'],
-            'response_count' => (int) $row['response_count'],
-            'avg_rating' => $row['avg_rating'] ? round((float) $row['avg_rating'], 1) : null,
-        ];
-    }, $results);
-}
+        return array_map(function ($row) {
+            return [
+                'id' => (int) $row['id'],
+                'maKhaoSat' => $row['maKhaoSat'],
+                'tieuDe' => $row['tieuDe'],
+                'moTa' => $row['moTa'],
+                'trangThai' => $row['trangThai'],
+                'created_at' => $row['created_at'],
+                'response_count' => (int) $row['response_count'],
+                'avg_rating' => $row['avg_rating'] ? round((float) $row['avg_rating'], 1) : null,
+            ];
+        }, $results);
+    }
 }
