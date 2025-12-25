@@ -16,8 +16,7 @@ use App\Core\Response;
 use App\Core\Router;
 use App\Middlewares\AuthMiddleware;
 use App\Middlewares\RoleMiddleware;
-use App\Middlewares\GuestMiddleware;
-use App\Helpers\ActivityLogHelper;
+use App\Controllers\BankController;
 
 $router = new Router();
 
@@ -184,6 +183,17 @@ $router->get('/api/admin/activity-logs/entity/:type/:id', [ActivityLogController
 $router->get('/api/admin/activity-logs/action/:action', [ActivityLogController::class, 'getActionLogs'], [new RoleMiddleware(['admin'])]);
 $router->delete('/api/admin/activity-logs/cleanup', [ActivityLogController::class, 'cleanup'], [new RoleMiddleware(['admin'])]);
 $router->get('/admin/activity-logs/view', [ActivityLogController::class, 'viewPage'], [new RoleMiddleware(['admin'])]);
+
+// Bank Verification API - solo para admin
+$router->post('/api/bank/verify-account', [BankController::class, 'verifyAccount'], [new RoleMiddleware(['admin'])]);
+$router->post('/api/bank/submit-transfer', [BankController::class, 'submitTransfer'], [new RoleMiddleware(['admin'])]);
+
+// Admin Dashboard Stats API
+$router->get('/api/admin/top-surveys', [AdminController::class, 'getTopSurveys'], [new RoleMiddleware(['admin'])]);
+$router->get('/api/admin/user-stasts', [AdminController::class, 'getUserStats'], [new RoleMiddleware(['admin'])]);
+$router->get('/api/admin/survey-stats', [AdminController::class, 'getSurveyStats'], [new RoleMiddleware(['admin'])]);
+$router->get('/api/admin/response-stats', [AdminController::class, 'getResponseStats'], [new RoleMiddleware(['admin'])]);
+$router->get('/api/admin/event-stats', [AdminController::class, 'getEventStats'], [new RoleMiddleware(['admin'])]);
 
 $request = Request::capture();
 

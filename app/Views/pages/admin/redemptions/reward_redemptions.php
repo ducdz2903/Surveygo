@@ -446,14 +446,26 @@
                     <div class="col-12">
                         <h6 class="text-muted small text-uppercase mb-3">Trạng thái</h6>
                         <div class="row g-2">
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <small class="text-muted d-block mb-1">Hiện tại</small>
                                 <span class="badge ${StatusBadges[redemptionData.status] || 'bg-secondary'}">${StatusLabels[redemptionData.status] || redemptionData.status}</span>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <small class="text-muted d-block mb-1">Ngày yêu cầu</small>
                                 <strong>${new Date(redemptionData.created_at).toLocaleDateString('vi-VN')}</strong>
                             </div>
+                            ${redemptionData.type === 'cash' && redemptionData.account_number ? `
+                            <div class="col-md-4">
+                                <small class="text-muted d-block mb-1">Chuyển khoản</small>
+                                <div id="transfer-status">
+                                    <span class="text-warning"><i>Chưa hoàn thành</i></span>
+                                </div>
+                                <button class="btn btn-sm btn-success mt-2" id="submit-transfer-btn" 
+                                    onclick="submitBankTransfer('${redemptionData.bank_name || ''}', '${redemptionData.account_number}', ${redemptionData.id})">
+                                    <i class="fas fa-paper-plane me-1"></i>Thực hiện CK
+                                </button>
+                            </div>
+                            ` : ''}
                         </div>
                     </div>
                 `;
@@ -508,6 +520,139 @@
 
     function getInitials(name) {
         return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    }
+
+    // Hàm xác minh tài khoản ngân hàng
+    async function verifyBankAccount(bankName, accountNumber) {
+        const resultDiv = document.getElementById('verify-account-result');
+        const verifyIcon = document.getElementById('verify-account-icon');
+
+        // Hiển thị loading
+        verifyIcon.className = 'fas fa-spinner fa-spin text-info ms-1';
+        verifyIcon.style.cursor = 'default';
+        verifyIcon.onclick = null;
+        resultDiv.innerHTML = '<span class="text-muted"><i>Đang xác minh...</i></span>';
+
+        // Chuẩn hóa label_text từ bank_name
+        const labelText = bankName ? bankName.toLowerCase() : 'vcb';
+
+        try {
+            const response = await fetch('/api/bank/verify-account', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({
+                    url_id: null,
+                    label_text: labelText,
+                    number: accountNumber,
+                    headless: true,
+                    timeout_ms: 30000
+                })
+            });
+
+            const data = await response.json();
+
+            // Kiểm tra nếu có accName thì thành công
+            if (data.accName && !data.error) {
+                resultDiv.innerHTML = `<strong class="text-success">${data.accName}</strong>`;
+                verifyIcon.className = 'fas fa-check-circle text-success ms-1';
+            }
+            // Kiểm tra nếu có error hoặc message (bao gồm cả http_code 400, 500, etc.)
+            else if (data.error === true || data.message) {
+                const errorMsg = data.message || 'Lỗi không xác định';
+                resultDiv.innerHTML = `<small class="text-danger"><i class="fas fa-exclamation-circle me-1"></i>${errorMsg}</small>`;
+                verifyIcon.className = 'fas fa-times-circle text-danger ms-1';
+            }
+            // Trường hợp không có accName và không có error
+            else {
+                resultDiv.innerHTML = `<small class="text-warning"><i class="fas fa-question-circle me-1"></i>Không tìm thấy</small>`;
+                verifyIcon.className = 'fas fa-question-circle text-warning ms-1';
+            }
+        } catch (error) {
+            console.error('Error verifying account:', error);
+            resultDiv.innerHTML = `<small class="text-danger"><i class="fas fa-times-circle me-1"></i>Lỗi: ${error.message}</small>`;
+            verifyIcon.className = 'fas fa-times-circle text-danger ms-1';
+        } finally {
+            verifyIcon.style.cursor = 'pointer';
+            verifyIcon.onclick = function () { verifyBankAccount(bankName, accountNumber); };
+        }
+    }
+
+    // Hàm thực hiện chuyển khoản tự động
+    async function submitBankTransfer(bankName, accountNumber, redemptionId) {
+        const transferStatusDiv = document.getElementById('transfer-status');
+        const submitBtn = document.getElementById('submit-transfer-btn');
+
+        if (!confirm('Bạn có chắc chắn muốn thực hiện chuyển khoản tự động?')) {
+            return;
+        }
+
+        // Hiển thị loading
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Đang xử lý...';
+        transferStatusDiv.innerHTML = '<span class="text-info"><i>Đang thực hiện...</i></span>';
+
+        // Chuẩn hóa label_text từ bank_name
+        const labelText = bankName ? bankName.toLowerCase() : '';
+
+        try {
+            const response = await fetch('/api/bank/submit-transfer', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({
+                    url_id: null,
+                    label_text: labelText,
+                    number: accountNumber,
+                    headless: true,
+                    timeout_ms: 30000
+                })
+            });
+
+            const data = await response.json();
+
+            // Kiểm tra nếu thành công
+            if (data.success === true) {
+                transferStatusDiv.innerHTML = '<span class="text-success"><strong><i class="fas fa-check-circle me-1"></i>Đã hoàn thành</strong></span>';
+                submitBtn.innerHTML = '<i class="fas fa-check me-1"></i>Đã thực hiện';
+                submitBtn.disabled = true;
+                submitBtn.classList.remove('btn-success');
+                submitBtn.classList.add('btn-secondary');
+
+                // Tự động chuyển status dropdown về 'completed'
+                const statusSelect = document.getElementById('status-select');
+                if (statusSelect) {
+                    statusSelect.value = 'completed';
+                }
+
+                showToast('success', 'Chuyển khoản thành công! Vui lòng xác nhận cập nhật trạng thái.');
+            }
+            // Kiểm tra nếu có error
+            else if (data.error === true || data.message) {
+                const errorMsg = data.message || 'Lỗi không xác định';
+                transferStatusDiv.innerHTML = `<small class="text-danger"><i class="fas fa-exclamation-circle me-1"></i>${errorMsg}</small>`;
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-paper-plane me-1"></i>Thực hiện CK';
+                showToast('error', errorMsg);
+            }
+            // Trường hợp khác
+            else {
+                transferStatusDiv.innerHTML = '<small class="text-warning"><i class="fas fa-question-circle me-1"></i>Không thành công</small>';
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-paper-plane me-1"></i>Thực hiện CK';
+                showToast('warning', 'Không thể thực hiện chuyển khoản');
+            }
+        } catch (error) {
+            console.error('Error submitting transfer:', error);
+            transferStatusDiv.innerHTML = `<small class="text-danger"><i class="fas fa-times-circle me-1"></i>Lỗi: ${error.message}</small>`;
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-paper-plane me-1"></i>Thực hiện CK';
+            showToast('error', 'Lỗi: ' + error.message);
+        }
     }
 </script>
 
