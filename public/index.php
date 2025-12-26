@@ -198,6 +198,8 @@ $router->post('/api/redemptions/create', [RewardRedemptionController::class, 'cr
 // Reward Redemptions API (Admin)
 $router->get('/api/admin/redemptions', [RewardRedemptionController::class, 'apiList'], [new RoleMiddleware(['admin'])]);
 $router->post('/api/admin/redemptions/update-status', [RewardRedemptionController::class, 'updateStatus'], [new RoleMiddleware(['admin'])]);
+$router->post('/api/admin/redemptions/save-account-name', [RewardRedemptionController::class, 'saveAccountName'], [new RoleMiddleware(['admin'])]);
+$router->post('/api/admin/redemptions/save-transfer-status', [RewardRedemptionController::class, 'saveTransferStatus'], [new RoleMiddleware(['admin'])]);
 $router->post('/api/admin/redemptions/delete', [RewardRedemptionController::class, 'delete'], [new RoleMiddleware(['admin'])]);
 $router->get('/api/admin/redemptions/stats', [RewardRedemptionController::class, 'stats'], [new RoleMiddleware(['admin'])]);
 

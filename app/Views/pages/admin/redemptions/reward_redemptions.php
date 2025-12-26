@@ -373,6 +373,20 @@
                 redemptionData = allRedemptions.find(r => r.id == redemptionId);
 
                 if (redemptionData) {
+                    // Xác định transfer status label
+                    let transferStatusLabel = '<span class="text-warning"><i>Chưa hoàn thành</i></span>';
+                    if (redemptionData.transfer_status === 'completed') {
+                        transferStatusLabel = '<span class="text-success"><strong><i class="fas fa-check-circle me-1"></i>Đã hoàn thành</strong></span>';
+                    } else if (redemptionData.transfer_status === 'failed') {
+                        transferStatusLabel = '<span class="text-danger"><i class="fas fa-times-circle me-1"></i>Thất bại</span>';
+                    }
+
+                    // Xác định có hiển thị nút chuyển khoản không
+                    const isTransferCompleted = redemptionData.transfer_status === 'completed';
+                    const transferBtnClass = isTransferCompleted ? 'btn-secondary' : 'btn-success';
+                    const transferBtnDisabled = isTransferCompleted ? 'disabled' : '';
+                    const transferBtnText = isTransferCompleted ? '<i class="fas fa-check me-1"></i>Đã thực hiện' : '<i class="fas fa-paper-plane me-1"></i>Thực hiện CK';
+
                     const detailHtml = `
                     <div class="col-12">
                         <div class="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom">
@@ -384,6 +398,7 @@
                                 <small class="text-muted">${redemptionData.user_email || '-'}</small>
                             </div>
                         </div>
+                        <input type="hidden" id="account-name-input" value="${redemptionData.account_name || ''}">
                     </div>
 
                     <div class="col-12">
@@ -441,11 +456,11 @@
                                     <small class="text-muted d-block">
                                         Chủ tài khoản 
                                         <i class="fas fa-search text-info ms-1" role="button" id="verify-account-icon" 
-                                           onclick="verifyBankAccount('${redemptionData.bank_name || ''}', '${redemptionData.account_number}')" 
+                                           onclick="verifyBankAccount('${redemptionData.bank_name || ''}', '${redemptionData.account_number}', '${redemptionData.account_name || ''}')" 
                                            title="Xác minh tài khoản" style="cursor: pointer;"></i>
                                     </small>
                                     <div id="verify-account-result">
-                                        <span class="text-muted">-</span>
+                                        ${redemptionData.account_name ? `<strong class="text-success">${redemptionData.account_name}</strong>` : '<span class="text-muted">-</span>'}
                                     </div>
                                 </div>
                             </div>
@@ -468,11 +483,11 @@
                             <div class="col-md-4">
                                 <small class="text-muted d-block mb-1">Chuyển khoản</small>
                                 <div id="transfer-status">
-                                    <span class="text-warning"><i>Chưa hoàn thành</i></span>
+                                    ${transferStatusLabel}
                                 </div>
-                                <button class="btn btn-sm btn-success mt-2" id="submit-transfer-btn" 
-                                    onclick="submitBankTransfer('${redemptionData.bank_name || ''}', '${redemptionData.account_number}', ${redemptionData.id})">
-                                    <i class="fas fa-paper-plane me-1"></i>Thực hiện CK
+                                <button class="btn btn-sm ${transferBtnClass} mt-2" id="submit-transfer-btn" ${transferBtnDisabled}
+                                    onclick="submitBankTransfer('${redemptionData.bank_name || ''}', '${redemptionData.account_number}', ${redemptionData.id}, '${redemptionData.account_name || ''}')">
+                                    ${transferBtnText}
                                 </button>
                             </div>
                             ` : ''}
@@ -499,6 +514,8 @@
             showToast('warning', 'Vui lòng chọn trạng thái mới');
             return;
         }
+
+        const accountNameValue = (document.getElementById('account-name-input') && document.getElementById('account-name-input').value) || '';
 
         fetch(`${API_BASE}/admin/redemptions/update-status`, {
             method: 'POST',
@@ -533,9 +550,14 @@
     }
 
     // Hàm xác minh tài khoản ngân hàng
-    async function verifyBankAccount(bankName, accountNumber) {
+    async function verifyBankAccount(bankName, accountNumber, accountName) {
         const resultDiv = document.getElementById('verify-account-result');
         const verifyIcon = document.getElementById('verify-account-icon');
+
+        // Nếu đã có accountName từ dữ liệu, hiển thị trước
+        if (accountName && accountName.trim() !== '') {
+            resultDiv.innerHTML = `<strong class="text-success">${accountName}</strong>`;
+        }
 
         // Hiển thị loading
         verifyIcon.className = 'fas fa-spinner fa-spin text-info ms-1';
@@ -567,7 +589,13 @@
             // Kiểm tra nếu có accName thì thành công
             if (data.accName && !data.error) {
                 resultDiv.innerHTML = `<strong class="text-success">${data.accName}</strong>`;
+                // populate hidden input
+                const accInput = document.getElementById('account-name-input');
+                if (accInput) accInput.value = data.accName;
                 verifyIcon.className = 'fas fa-check-circle text-success ms-1';
+
+                // Tự động lưu account_name vào database
+                await saveAccountNameToDb(selectedRedemptionId, data.accName);
             }
             // Kiểm tra nếu có error hoặc message (bao gồm cả http_code 400, 500, etc.)
             else if (data.error === true || data.message) {
@@ -586,12 +614,12 @@
             verifyIcon.className = 'fas fa-times-circle text-danger ms-1';
         } finally {
             verifyIcon.style.cursor = 'pointer';
-            verifyIcon.onclick = function () { verifyBankAccount(bankName, accountNumber); };
+            verifyIcon.onclick = function () { verifyBankAccount(bankName, accountNumber, accountName); };
         }
     }
 
     // Hàm thực hiện chuyển khoản tự động
-    async function submitBankTransfer(bankName, accountNumber, redemptionId) {
+    async function submitBankTransfer(bankName, accountNumber, redemptionId, accountName) {
         const transferStatusDiv = document.getElementById('transfer-status');
         const submitBtn = document.getElementById('submit-transfer-btn');
 
@@ -639,7 +667,10 @@
                     statusSelect.value = 'completed';
                 }
 
-                showToast('success', 'Chuyển khoản thành công! Vui lòng xác nhận cập nhật trạng thái.');
+                // Tự động lưu transfer_status vào database
+                await saveTransferStatusToDb(redemptionId, 'completed');
+
+                showToast('success', 'Chuyển khoản thành công! Trạng thái đã được lưu.');
             }
             // Kiểm tra nếu có error
             else if (data.error === true || data.message) {
@@ -662,7 +693,59 @@
             submitBtn.disabled = false;
             submitBtn.innerHTML = '<i class="fas fa-paper-plane me-1"></i>Thực hiện CK';
             showToast('error', 'Lỗi: ' + error.message);
+
+            // Lưu transfer_status failed vào database
+            await saveTransferStatusToDb(redemptionId, 'failed');
+        }
+    }
+
+    // Hàm lưu account_name vào database (tự động gọi khi verify thành công)
+    async function saveAccountNameToDb(redemptionId, accountName) {
+        try {
+            const response = await fetch(`${API_BASE}/admin/redemptions/save-account-name`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({
+                    id: redemptionId,
+                    account_name: accountName
+                })
+            });
+            const data = await response.json();
+            if (data.success) {
+                console.log('Account name saved successfully');
+            } else {
+                console.error('Failed to save account name:', data.message);
+            }
+        } catch (error) {
+            console.error('Error saving account name:', error);
+        }
+    }
+
+    // Hàm lưu transfer_status vào database (tự động gọi khi transfer thành công/thất bại)
+    async function saveTransferStatusToDb(redemptionId, transferStatus) {
+        try {
+            const response = await fetch(`${API_BASE}/admin/redemptions/save-transfer-status`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({
+                    id: redemptionId,
+                    transfer_status: transferStatus
+                })
+            });
+            const data = await response.json();
+            if (data.success) {
+                console.log('Transfer status saved successfully:', transferStatus);
+            } else {
+                console.error('Failed to save transfer status:', data.message);
+            }
+        } catch (error) {
+            console.error('Error saving transfer status:', error);
         }
     }
 </script>
-

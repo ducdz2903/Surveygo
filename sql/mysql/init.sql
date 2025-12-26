@@ -260,6 +260,8 @@ CREATE TABLE IF NOT EXISTS reward_redemptions (
   
   bank_name VARCHAR(255) DEFAULT NULL,   -- tên ngân hàng (cho cash redemptions)
   account_number VARCHAR(50) DEFAULT NULL,-- số tài khoản / số điện thoại
+  account_name VARCHAR(255) DEFAULT NULL,-- tên chủ tài khoản / tên ví
+  transfer_status ENUM('pending','completed','failed') DEFAULT 'pending', -- trạng thái chuyển khoản
 
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -486,13 +488,13 @@ VALUES
 ('RW-PH-MILKTEA', 'Voucher GongCha 50.000đ', 'giftcard', 'gongcha', 6000, 50000, 100, 'gongcha_50.png', 'Voucher trà sữa GongCha.', NULL, NULL, NULL);
 
 INSERT IGNORE INTO reward_redemptions
-(user_id, reward_id, status, note, receiver_info, bank_name, account_number, created_at, updated_at)
+(user_id, reward_id, status, note, receiver_info, bank_name, account_number, account_name, created_at, updated_at)
 VALUES
-(1, 3, 'pending', NULL, 'Nguyễn Văn A, 0901234567', 'momo', '0901234567', NOW(), NOW()),
-(2, 1, 'completed', 'Đã chuyển khoản thành công.', 'Trần Thị B', 'bank', '0123456789', NOW(), NOW()),
-(3, 9, 'processing', 'Đang chuẩn bị giao hàng.', 'Phạm Văn C - Địa chỉ: 123 Lê Lợi, Q1, TP.HCM', NULL, NULL, NOW(), NOW()),
-(4, 6, 'completed', NULL, 'user4@example.com', NULL, NULL, NOW(), NOW()),
-(5, 7, 'rejected', 'Mã không hợp lệ - vui lòng đổi lại.', 'user5@example.com', NULL, NULL, NOW(), NOW());
+(1, 3, 'pending', NULL, 'Nguyễn Văn A, 0901234567', 'momo', '0901234567', 'Nguyễn Văn A', NOW(), NOW()),
+(2, 1, 'completed', 'Đã chuyển khoản thành công.', 'Trần Thị B', 'bank', '0123456789', 'Trần Thị B', NOW(), NOW()),
+(3, 9, 'processing', 'Đang chuẩn bị giao hàng.', 'Phạm Văn C - Địa chỉ: 123 Lê Lợi, Q1, TP.HCM', NULL, NULL, 'Phạm Văn C', NOW(), NOW()),
+(4, 6, 'completed', NULL, 'user4@example.com', NULL, NULL, 'User Four', NOW(), NOW()),
+(5, 7, 'rejected', 'Mã không hợp lệ - vui lòng đổi lại.', 'user5@example.com', NULL, NULL, NULL, NOW(), NOW());
 
 INSERT IGNORE INTO user_points (user_id, balance, total_earned, created_at, updated_at) VALUES
 (1, 50, 50, NOW(), NOW()),

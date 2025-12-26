@@ -45,8 +45,8 @@ class RewardRedemptionController extends Controller
         }
 
         // Lấy page từ query hoặc input
-        $page = (int)($request->input('page') ?? $request->query('page') ?? 1);
-        $limit = (int)($request->input('limit') ?? $request->query('limit') ?? 10);
+        $page = (int) ($request->input('page') ?? $request->query('page') ?? 1);
+        $limit = (int) ($request->input('limit') ?? $request->query('limit') ?? 10);
         $offset = ($page - 1) * $limit;
 
         $redemptions = $this->redemptionModel->getByUserId($userId, $limit, $offset);
@@ -70,7 +70,7 @@ class RewardRedemptionController extends Controller
     public function detail(Request $request)
     {
         $userId = $this->getCurrentUser($request);
-        $id = (int)$request->input('id');
+        $id = (int) $request->input('id');
 
         if (!$userId || !$id) {
             return Response::json(['success' => false, 'message' => 'Invalid request'], 400);
@@ -101,7 +101,7 @@ class RewardRedemptionController extends Controller
             return Response::json(['success' => false, 'message' => 'Unauthorized'], 401);
         }
 
-        $rewardId = (int)($request->input('reward_id') ?? 0);
+        $rewardId = (int) ($request->input('reward_id') ?? 0);
         $receiverInfo = $request->input('receiver_info');
         $bankName = $request->input('bank_name');
         $accountNumber = $request->input('account_number');
@@ -163,7 +163,7 @@ class RewardRedemptionController extends Controller
             // Log activity
             try {
                 error_log('[RewardRedemptionController::create] Attempting to log redemption - userId: ' . $userId . ', redemptionId: ' . $redemptionId . ', rewardId: ' . $rewardId);
-                ActivityLogHelper::logRewardRedeemed((int)$userId, (int)$redemptionId, (int)$rewardId);
+                ActivityLogHelper::logRewardRedeemed((int) $userId, (int) $redemptionId, (int) $rewardId);
                 error_log('[RewardRedemptionController::create] Activity logged successfully');
             } catch (\Throwable $e) {
                 error_log('[RewardRedemptionController::create] Failed to log activity: ' . $e->getMessage());
@@ -185,11 +185,68 @@ class RewardRedemptionController extends Controller
     }
 
     /**
-     * Cập nhật status redemption (admin)
+     * Lưu tên chủ tài khoản (tự động gọi khi verify thành công)
+     */
+    public function saveAccountName(Request $request)
+    {
+        $id = (int) ($request->input('id') ?? 0);
+        $accountName = $request->input('account_name') ?? '';
+
+        if (!$id) {
+            return Response::json(['success' => false, 'message' => 'Invalid request - ID required'], 400);
+        }
+
+        $redemption = $this->redemptionModel->getById($id);
+        if (!$redemption) {
+            return Response::json(['success' => false, 'message' => 'Redemption not found'], 404);
+        }
+
+        $result = $this->redemptionModel->updateAccountName($id, $accountName);
+
+        if ($result) {
+            return Response::json(['success' => true, 'message' => 'Account name saved successfully']);
+        }
+
+        return Response::json(['success' => false, 'message' => 'Failed to save account name'], 500);
+    }
+
+    /**
+     * Lưu trạng thái chuyển khoản (tự động gọi khi transfer thành công)
+     */
+    public function saveTransferStatus(Request $request)
+    {
+        $id = (int) ($request->input('id') ?? 0);
+        $transferStatus = $request->input('transfer_status') ?? 'pending';
+
+        if (!$id) {
+            return Response::json(['success' => false, 'message' => 'Invalid request - ID required'], 400);
+        }
+
+        $validStatuses = ['pending', 'completed', 'failed'];
+        if (!in_array($transferStatus, $validStatuses)) {
+            return Response::json(['success' => false, 'message' => 'Invalid transfer status'], 400);
+        }
+
+        $redemption = $this->redemptionModel->getById($id);
+        if (!$redemption) {
+            return Response::json(['success' => false, 'message' => 'Redemption not found'], 404);
+        }
+
+        $result = $this->redemptionModel->updateTransferStatus($id, $transferStatus);
+
+        if ($result) {
+            return Response::json(['success' => true, 'message' => 'Transfer status saved successfully']);
+        }
+
+        return Response::json(['success' => false, 'message' => 'Failed to save transfer status'], 500);
+    }
+
+    /**
+     * Cập nhật status redemption (admin) - chỉ cập nhật status, không cập nhật account_name nữa
      */
     public function updateStatus(Request $request)
     {
-        $id = (int)($request->input('id') ?? 0);
+        $id = (int) ($request->input('id') ?? 0);
         $status = $request->input('status');
         $note = $request->input('note');
 
@@ -244,7 +301,7 @@ class RewardRedemptionController extends Controller
     public function delete()
     {
         $request = new Request();
-        $id = (int)($request->post('id') ?? 0);
+        $id = (int) ($request->post('id') ?? 0);
 
         if (!$id) {
             return Response::json(['success' => false, 'message' => 'Invalid request'], 400);
@@ -295,7 +352,7 @@ class RewardRedemptionController extends Controller
      */
     public function apiList(Request $request)
     {
-        $page = (int)($request->query('page') ?? 1);
+        $page = (int) ($request->query('page') ?? 1);
         $status = $request->query('status');
         $type = $request->query('type');
         $search = $request->query('search');
@@ -304,10 +361,14 @@ class RewardRedemptionController extends Controller
         $offset = ($page - 1) * $limit;
 
         $filters = [];
-        if ($status) $filters['status'] = $status;
-        if ($type) $filters['type'] = $type;
-        if ($search) $filters['search'] = $search;
-        if ($userId) $filters['user_id'] = $userId;
+        if ($status)
+            $filters['status'] = $status;
+        if ($type)
+            $filters['type'] = $type;
+        if ($search)
+            $filters['search'] = $search;
+        if ($userId)
+            $filters['user_id'] = $userId;
 
         $redemptions = $this->redemptionModel->getAll($limit, $offset, $filters);
         $total = $this->redemptionModel->count($filters);
@@ -335,9 +396,12 @@ class RewardRedemptionController extends Controller
         $dateTo = $request->get('date_to');
 
         $filters = [];
-        if ($userId) $filters['user_id'] = $userId;
-        if ($dateFrom) $filters['date_from'] = $dateFrom;
-        if ($dateTo) $filters['date_to'] = $dateTo;
+        if ($userId)
+            $filters['user_id'] = $userId;
+        if ($dateFrom)
+            $filters['date_from'] = $dateFrom;
+        if ($dateTo)
+            $filters['date_to'] = $dateTo;
 
         $stats = $this->redemptionModel->getStats($filters);
 
@@ -357,13 +421,13 @@ class RewardRedemptionController extends Controller
         // Cách 2: Từ request input/body (POST/JSON)
         $userId = $request->input('user_id');
         if ($userId) {
-            return (int)$userId;
+            return (int) $userId;
         }
 
         // Cách 3: Từ query parameter (GET)
         $userId = $request->query('user_id');
         if ($userId) {
-            return (int)$userId;
+            return (int) $userId;
         }
 
         return null;

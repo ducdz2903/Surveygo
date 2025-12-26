@@ -11,7 +11,7 @@ class RewardRedemption
 {
     private $db;
     private $table = 'reward_redemptions';
-    
+
     // Properties để lưu trữ dữ liệu redemption
     private $id;
     private $userId;
@@ -21,6 +21,7 @@ class RewardRedemption
     private $receiverInfo;
     private $bankName;
     private $accountNumber;
+    private $accountName;
     private $createdAt;
     private $updatedAt;
 
@@ -39,7 +40,7 @@ class RewardRedemption
                   LEFT JOIN rewards r ON rr.reward_id = r.id
                   WHERE rr.user_id = ? 
                   ORDER BY rr.created_at DESC";
-        
+
         if ($limit) {
             $query .= " LIMIT {$limit} OFFSET {$offset}";
         }
@@ -74,6 +75,8 @@ class RewardRedemption
                     rr.receiver_info, 
                     rr.bank_name, 
                     rr.account_number, 
+                    rr.account_name,
+                    rr.transfer_status,
                     rr.created_at, 
                     rr.updated_at,
                     u.name as user_name,
@@ -121,10 +124,14 @@ class RewardRedemption
             $params[] = "%{$filters['search']}%";
             $params[] = "%{$filters['search']}%";
         }
-        if (isset($filters['status'])) $params[] = $filters['status'];
-        if (isset($filters['type'])) $params[] = $filters['type'];
-        if (isset($filters['user_id'])) $params[] = $filters['user_id'];
-        if (isset($filters['reward_id'])) $params[] = $filters['reward_id'];
+        if (isset($filters['status']))
+            $params[] = $filters['status'];
+        if (isset($filters['type']))
+            $params[] = $filters['type'];
+        if (isset($filters['user_id']))
+            $params[] = $filters['user_id'];
+        if (isset($filters['reward_id']))
+            $params[] = $filters['reward_id'];
 
         $stmt = $this->db->prepare($query);
         $stmt->execute($params);
@@ -138,24 +145,43 @@ class RewardRedemption
     {
         $query = "INSERT INTO {$this->table} (user_id, reward_id, status, receiver_info, note, bank_name, account_number, created_at, updated_at) 
                   VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW())";
-        
+
         $stmt = $this->db->prepare($query);
         $result = $stmt->execute([$userId, $rewardId, $status, $receiverInfo, $note, $bankName, $accountNumber]);
-        
+
         if ($result) {
             return $this->db->lastInsertId();
         }
-        
+
         return false;
     }
+    /** 
+     * Cập nhật accountName
+     */
+    public function updateAccountName($id, $accountName)
+    {
+        $query = "UPDATE {$this->table} SET account_name = ?, updated_at = NOW() WHERE id = ?";
 
+        $stmt = $this->db->prepare($query);
+        return $stmt->execute([$accountName, $id]);
+    }
+    /**
+     * Cập nhật transfer_status
+     */
+    public function updateTransferStatus($id, $transferStatus)
+    {
+        $query = "UPDATE {$this->table} SET transfer_status = ?, updated_at = NOW() WHERE id = ?";
+
+        $stmt = $this->db->prepare($query);
+        return $stmt->execute([$transferStatus, $id]);
+    }
     /**
      * Cập nhật status của redemption
      */
     public function updateStatus($id, $status, $note = null)
     {
         $query = "UPDATE {$this->table} SET status = ?, note = ?, updated_at = NOW() WHERE id = ?";
-        
+
         $stmt = $this->db->prepare($query);
         return $stmt->execute([$status, $note, $id]);
     }
@@ -166,7 +192,7 @@ class RewardRedemption
     public function updateReceiverInfo($id, $receiverInfo)
     {
         $query = "UPDATE {$this->table} SET receiver_info = ?, updated_at = NOW() WHERE id = ?";
-        
+
         $stmt = $this->db->prepare($query);
         return $stmt->execute([$receiverInfo, $id]);
     }
@@ -216,15 +242,19 @@ class RewardRedemption
             $params[] = "%{$filters['search']}%";
             $params[] = "%{$filters['search']}%";
         }
-        if (isset($filters['status'])) $params[] = $filters['status'];
-        if (isset($filters['type'])) $params[] = $filters['type'];
-        if (isset($filters['user_id'])) $params[] = $filters['user_id'];
-        if (isset($filters['reward_id'])) $params[] = $filters['reward_id'];
+        if (isset($filters['status']))
+            $params[] = $filters['status'];
+        if (isset($filters['type']))
+            $params[] = $filters['type'];
+        if (isset($filters['user_id']))
+            $params[] = $filters['user_id'];
+        if (isset($filters['reward_id']))
+            $params[] = $filters['reward_id'];
 
         $stmt = $this->db->prepare($query);
         $stmt->execute($params);
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
-        
+
         return $result['total'] ?? 0;
     }
 
@@ -234,7 +264,7 @@ class RewardRedemption
     public function getByStatus($status, $limit = null, $offset = 0)
     {
         $query = "SELECT * FROM {$this->table} WHERE status = ? ORDER BY created_at DESC";
-        
+
         if ($limit) {
             $query .= " LIMIT {$limit} OFFSET {$offset}";
         }
@@ -250,7 +280,7 @@ class RewardRedemption
     public function getLatestByUserId($userId)
     {
         $query = "SELECT * FROM {$this->table} WHERE user_id = ? ORDER BY created_at DESC LIMIT 1";
-        
+
         $stmt = $this->db->prepare($query);
         $stmt->execute([$userId]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
@@ -263,11 +293,11 @@ class RewardRedemption
     {
         $query = "SELECT COUNT(*) as total FROM {$this->table} 
                   WHERE user_id = ? AND reward_id = ? AND status = ?";
-        
+
         $stmt = $this->db->prepare($query);
         $stmt->execute([$userId, $rewardId, $status]);
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
-        
+
         return $result['total'] > 0;
     }
 
@@ -306,44 +336,133 @@ class RewardRedemption
     }
 
     // ====== Getters ======
-    public function getId() { return $this->id; }
-    public function getUserId() { return $this->userId; }
-    public function getRewardId() { return $this->rewardId; }
-    public function getStatus() { return $this->status; }
-    public function getNote() { return $this->note; }
-    public function getReceiverInfo() { return $this->receiverInfo; }
-    public function getBankName() { return $this->bankName; }
-    public function getAccountNumber() { return $this->accountNumber; }
-    public function getCreatedAt() { return $this->createdAt; }
-    public function getUpdatedAt() { return $this->updatedAt; }
+    public function getId()
+    {
+        return $this->id;
+    }
+    public function getUserId()
+    {
+        return $this->userId;
+    }
+    public function getRewardId()
+    {
+        return $this->rewardId;
+    }
+    public function getStatus()
+    {
+        return $this->status;
+    }
+    public function getNote()
+    {
+        return $this->note;
+    }
+    public function getReceiverInfo()
+    {
+        return $this->receiverInfo;
+    }
+    public function getBankName()
+    {
+        return $this->bankName;
+    }
+    public function getAccountNumber()
+    {
+        return $this->accountNumber;
+    }
+    public function getAccountName()
+    {
+        return $this->accountName;
+    }
+    public function getCreatedAt()
+    {
+        return $this->createdAt;
+    }
+    public function getUpdatedAt()
+    {
+        return $this->updatedAt;
+    }
 
     // ====== Setters ======
-    public function setId($id) { $this->id = $id; return $this; }
-    public function setUserId($userId) { $this->userId = $userId; return $this; }
-    public function setRewardId($rewardId) { $this->rewardId = $rewardId; return $this; }
-    public function setStatus($status) { $this->status = $status; return $this; }
-    public function setNote($note) { $this->note = $note; return $this; }
-    public function setReceiverInfo($receiverInfo) { $this->receiverInfo = $receiverInfo; return $this; }
-    public function setBankName($bankName) { $this->bankName = $bankName; return $this; }
-    public function setAccountNumber($accountNumber) { $this->accountNumber = $accountNumber; return $this; }
-    public function setCreatedAt($createdAt) { $this->createdAt = $createdAt; return $this; }
-    public function setUpdatedAt($updatedAt) { $this->updatedAt = $updatedAt; return $this; }
+    public function setId($id)
+    {
+        $this->id = $id;
+        return $this;
+    }
+    public function setUserId($userId)
+    {
+        $this->userId = $userId;
+        return $this;
+    }
+    public function setRewardId($rewardId)
+    {
+        $this->rewardId = $rewardId;
+        return $this;
+    }
+    public function setStatus($status)
+    {
+        $this->status = $status;
+        return $this;
+    }
+    public function setNote($note)
+    {
+        $this->note = $note;
+        return $this;
+    }
+    public function setReceiverInfo($receiverInfo)
+    {
+        $this->receiverInfo = $receiverInfo;
+        return $this;
+    }
+    public function setBankName($bankName)
+    {
+        $this->bankName = $bankName;
+        return $this;
+    }
+    public function setAccountNumber($accountNumber)
+    {
+        $this->accountNumber = $accountNumber;
+        return $this;
+    }
+    public function setAccountName($accountName)
+    {
+        $this->accountName = $accountName;
+        return $this;
+    }
+    public function setCreatedAt($createdAt)
+    {
+        $this->createdAt = $createdAt;
+        return $this;
+    }
+    public function setUpdatedAt($updatedAt)
+    {
+        $this->updatedAt = $updatedAt;
+        return $this;
+    }
 
     /**
      * Tạo object từ array database
      */
     public function fromArray($data)
     {
-        if (isset($data['id'])) $this->id = $data['id'];
-        if (isset($data['user_id'])) $this->userId = $data['user_id'];
-        if (isset($data['reward_id'])) $this->rewardId = $data['reward_id'];
-        if (isset($data['status'])) $this->status = $data['status'];
-        if (isset($data['note'])) $this->note = $data['note'];
-        if (isset($data['receiver_info'])) $this->receiverInfo = $data['receiver_info'];
-        if (isset($data['bank_name'])) $this->bankName = $data['bank_name'];
-        if (isset($data['account_number'])) $this->accountNumber = $data['account_number'];
-        if (isset($data['created_at'])) $this->createdAt = $data['created_at'];
-        if (isset($data['updated_at'])) $this->updatedAt = $data['updated_at'];
+        if (isset($data['id']))
+            $this->id = $data['id'];
+        if (isset($data['user_id']))
+            $this->userId = $data['user_id'];
+        if (isset($data['reward_id']))
+            $this->rewardId = $data['reward_id'];
+        if (isset($data['status']))
+            $this->status = $data['status'];
+        if (isset($data['note']))
+            $this->note = $data['note'];
+        if (isset($data['receiver_info']))
+            $this->receiverInfo = $data['receiver_info'];
+        if (isset($data['bank_name']))
+            $this->bankName = $data['bank_name'];
+        if (isset($data['account_number']))
+            $this->accountNumber = $data['account_number'];
+        if (isset($data['created_at']))
+            $this->createdAt = $data['created_at'];
+        if (isset($data['updated_at']))
+            $this->updatedAt = $data['updated_at'];
         return $this;
     }
 
