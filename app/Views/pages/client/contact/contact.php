@@ -20,6 +20,7 @@
                     <p class="form-subtitle">Vui lòng điền đầy đủ thông tin để chúng tôi có thể liên hệ lại với bạn
                         sớm nhất.</p>
                     <form id="contactForm" class="contact-form">
+                        <div id="contactErrors" class="alert alert-danger" style="display: none;"></div>
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <div class="form-group">
@@ -157,19 +158,79 @@
         const successMessage = document.getElementById('successMessage');
 
         if (form) {
-            form.addEventListener('submit', function (e) {
-                e.preventDefault();
+            const errorsEl = document.getElementById('contactErrors');
+            const submitBtn = form.querySelector('button[type="submit"]');
 
-                // lấy dữ liệu
-                const formData = {
-                    fullName: document.getElementById('fullName').value,
-                    email: document.getElementById('email').value,
-                    phone: document.getElementById('phone').value,
-                    subject: document.getElementById('subject').value,
-                    message: document.getElementById('message').value
+            function showErrors(messages) {
+                if (!errorsEl) return;
+                if (!messages || messages.length === 0) {
+                    errorsEl.style.display = 'none';
+                    errorsEl.innerHTML = '';
+                    return;
+                }
+                errorsEl.style.display = 'block';
+                errorsEl.innerHTML = '<ul class="mb-0">' + messages.map(m => '<li>' + m + '</li>').join('') + '</ul>';
+            }
+
+            form.addEventListener('submit', async function (e) {
+                e.preventDefault();
+                showErrors([]);
+
+                const payload = {
+                    hoTen: document.getElementById('fullName').value.trim(),
+                    email: document.getElementById('email').value.trim(),
+                    soDienThoai: document.getElementById('phone').value.trim() || null,
+                    chuDe: document.getElementById('subject').value || '',
+                    tinNhan: document.getElementById('message').value.trim(),
                 };
 
-                form.reset();
+                const originalBtnHtml = submitBtn ? submitBtn.innerHTML : null;
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span>Đang gửi...';
+                }
+
+                try {
+                    const res = await fetch('/api/contact-messages', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                        body: JSON.stringify(payload),
+                    });
+
+                    const json = await res.json().catch(() => ({}));
+
+                    if (!res.ok || json.error) {
+                        // Show validation errors if present
+                        if (json && json.errors && typeof json.errors === 'object') {
+                            const list = [];
+                            for (const k in json.errors) {
+                                if (Object.prototype.hasOwnProperty.call(json.errors, k)) {
+                                    list.push(json.errors[k]);
+                                }
+                            }
+                            showErrors(list);
+                        } else {
+                            const msg = (json && json.message) ? json.message : ('Lỗi server (' + res.status + ')');
+                            showErrors([msg]);
+                        }
+                        if (window.showToast) showToast('error', 'Gửi không thành công.');
+                        return;
+                    }
+
+                    form.reset();
+                    if (successMessage) successMessage.style.display = 'block';
+                    showErrors([]);
+                    if (window.showToast) showToast('success', 'Gửi liên hệ thành công.');
+                } catch (err) {
+                    console.error(err);
+                    showErrors(['Không thể gửi liên hệ: ' + err.message]);
+                    if (window.showToast) showToast('error', 'Không thể gửi liên hệ: ' + err.message);
+                } finally {
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        if (originalBtnHtml !== null) submitBtn.innerHTML = originalBtnHtml;
+                    }
+                }
             });
         }
     });

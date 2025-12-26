@@ -80,8 +80,18 @@ class Feedback
         }
 
         if (!empty($filter['search'])) {
-            $where[] = '(ma LIKE :search OR tenNguoiDung LIKE :search)';
+            $where[] = '(ma LIKE :search OR tenNguoiDung LIKE :search OR binhLuan LIKE :search)';
             $params[':search'] = '%' . $filter['search'] . '%';
+        }
+
+        if (isset($filter['rating']) && $filter['rating'] !== '') {
+            $where[] = 'danhGia = :rating';
+            $params[':rating'] = (int) $filter['rating'];
+        }
+
+        if (isset($filter['idKhaoSat']) && $filter['idKhaoSat'] !== '') {
+            $where[] = 'idKhaoSat = :idKhaoSat';
+            $params[':idKhaoSat'] = (int) $filter['idKhaoSat'];
         }
 
         $whereSql = $where ? 'WHERE ' . implode(' AND ', $where) : '';

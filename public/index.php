@@ -120,10 +120,20 @@ $router->post('/api/feedbacks/submit', [App\Controllers\FeedbackController::clas
 $router->put('/api/feedbacks', [App\Controllers\FeedbackController::class, 'update'], [new RoleMiddleware(['admin'])]);
 $router->delete('/api/feedbacks', [App\Controllers\FeedbackController::class, 'delete'], [new RoleMiddleware(['admin'])]);
 
+// RESTful endpoints for individual feedback items
+$router->get('/api/feedbacks/{id}', [App\Controllers\FeedbackController::class, 'show'], [new AuthMiddleware()]);
+$router->put('/api/feedbacks/{id}', [App\Controllers\FeedbackController::class, 'update'], [new RoleMiddleware(['admin'])]);
+$router->delete('/api/feedbacks/{id}', [App\Controllers\FeedbackController::class, 'delete'], [new RoleMiddleware(['admin'])]);
+
 // Contact messages API - solo para admin
 $router->get('/api/contact-messages', [App\Controllers\ContactController::class, 'index'], [new RoleMiddleware(['admin'])]);
 $router->get('/api/contact-messages/show', [App\Controllers\ContactController::class, 'show'], [new RoleMiddleware(['admin'])]);
 $router->post('/api/contact-messages', [App\Controllers\ContactController::class, 'create']);
+
+// RESTful endpoints for individual contact messages
+$router->get('/api/contact-messages/{id}', [App\Controllers\ContactController::class, 'show'], [new RoleMiddleware(['admin'])]);
+$router->put('/api/contact-messages/{id}', [App\Controllers\ContactController::class, 'update'], [new RoleMiddleware(['admin'])]);
+$router->delete('/api/contact-messages/{id}', [App\Controllers\ContactController::class, 'delete'], [new RoleMiddleware(['admin'])]);
 
 // Daily rewards API
 $router->get('/api/daily-rewards/status', [DailyRewardController::class, 'status'], [new AuthMiddleware()]);
