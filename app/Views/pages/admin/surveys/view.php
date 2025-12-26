@@ -22,7 +22,8 @@ $__mk = static function (string $base, string $path): string {
             <div>
                 <p class="text-uppercase small text-muted mb-1">Chi tiết khảo sát</p>
                 <h4 class="mb-0" id="survey-title">Đang tải...</h4>
-                <div class="text-muted small" id="survey-meta">#<?= htmlspecialchars((string) $surveyId, ENT_QUOTES, 'UTF-8') ?></div>
+                <div class="text-muted small" id="survey-meta">
+                    #<?= htmlspecialchars((string) $surveyId, ENT_QUOTES, 'UTF-8') ?></div>
             </div>
         </div>
         <div class="d-flex gap-2">
@@ -44,9 +45,11 @@ $__mk = static function (string $base, string $path): string {
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-start mb-3">
                         <div>
-                            <div id="survey-status" class="badge bg-secondary-subtle text-secondary border mb-2">Chưa rõ</div>
+                            <div id="survey-status" class="badge bg-secondary-subtle text-secondary border mb-2">Chưa rõ
+                            </div>
                             <p class="text-muted small mb-1">Mã khảo sát</p>
-                            <div class="fw-semibold" id="survey-code">#<?= htmlspecialchars((string) $surveyId, ENT_QUOTES, 'UTF-8') ?></div>
+                            <div class="fw-semibold" id="survey-code">
+                                #<?= htmlspecialchars((string) $surveyId, ENT_QUOTES, 'UTF-8') ?></div>
                         </div>
                         <div class="text-end">
                             <div class="text-muted small">Cập nhật</div>
@@ -55,8 +58,10 @@ $__mk = static function (string $base, string $path): string {
                     </div>
                     <p class="text-muted" id="survey-desc">Đang tải thông tin khảo sát...</p>
                     <div class="d-flex flex-wrap gap-3 small">
-                        <span><i class="fas fa-list-ol me-2 text-primary"></i><span id="survey-question-count">0</span> câu hỏi</span>
-                        <span><i class="fas fa-layer-group me-2 text-secondary"></i><span id="survey-category">-</span></span>
+                        <span><i class="fas fa-list-ol me-2 text-primary"></i><span id="survey-question-count">0</span>
+                            câu hỏi</span>
+                        <span><i class="fas fa-layer-group me-2 text-secondary"></i><span
+                                id="survey-category">-</span></span>
                         <span><i class="fas fa-clock me-2 text-secondary"></i><span id="survey-created">-</span></span>
                     </div>
                 </div>
@@ -113,7 +118,8 @@ $__mk = static function (string $base, string $path): string {
                     <input type="hidden" id="question-id">
                     <div class="mb-3">
                         <label class="form-label fw-bold">Nội dung câu hỏi <span class="text-danger">*</span></label>
-                        <textarea class="form-control" id="question-content" rows="2" placeholder="Nhập nội dung câu hỏi..." required></textarea>
+                        <textarea class="form-control" id="question-content" rows="2"
+                            placeholder="Nhập nội dung câu hỏi..." required></textarea>
                     </div>
                     <div class="row mb-3">
                         <div class="col-md-6">
@@ -187,7 +193,8 @@ $__mk = static function (string $base, string $path): string {
                         </tbody>
                     </table>
                 </div>
-                <p class="text-muted small mt-2 mb-0">Chọn câu hỏi đã có để thêm nhanh vào khảo sát này (nội dung sẽ được sao chép).</p>
+                <p class="text-muted small mt-2 mb-0">Chọn câu hỏi đã có để thêm nhanh vào khảo sát này (nội dung sẽ
+                    được sao chép).</p>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Đóng</button>
@@ -442,7 +449,7 @@ $__mk = static function (string $base, string $path): string {
         document.getElementById('survey-code').textContent = data.maKhaoSat || data.ma_khao_sat || ('#' + surveyId);
         document.getElementById('survey-created').textContent = formatDate(data.created_at || data.createdAt);
         document.getElementById('survey-updated').textContent = formatDate(data.updated_at || data.updatedAt || data.created_at || data.createdAt);
-        document.getElementById('survey-category').textContent = data.danhMuc || 'Chưa rõ';
+        document.getElementById('survey-category').textContent = data.loaiKhaoSat || 'Chưa rõ';
         document.getElementById('survey-question-count').textContent = (data.questionCount ?? (data.questions ? data.questions.length : 0)) || 0;
 
         const statusEl = document.getElementById('survey-status');
@@ -531,7 +538,7 @@ $__mk = static function (string $base, string $path): string {
         questionsCache = list;
         const tbody = document.getElementById('questions-body');
         if (!list || list.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4" class="text-center py-4 text-muted"><i class="fas fa-inbox me-2"></i>Chưa có câu hỏi nào trong khảo sát này.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="4" class="text-center py-4 text-muted"><i class="fas fa-inbox me-2"></i>Chưa có câu hỏi nào trong khảo sát này.</td></tr>`;
             document.getElementById('survey-question-count').textContent = 0;
             return;
         }
@@ -548,6 +555,9 @@ $__mk = static function (string $base, string $path): string {
                 <td>${typeBadge(q.loaiCauHoi)}</td>
                 <td class="text-end pe-3">
                     <div class="btn-group btn-group-sm">
+                        <button class="btn btn-light text-success" type="button" onclick="viewQuestionResponses(${q.id})" title="Xem câu trả lời">
+                            <i class="fa-regular fa-comment-dots"></i>
+                        </button>
                         <button class="btn btn-light text-primary" type="button" onclick="openQuestionModal(${q.id})" title="Sửa">
                             <i class="fas fa-edit"></i>
                         </button>
@@ -559,6 +569,7 @@ $__mk = static function (string $base, string $path): string {
             </tr>
         `).join('');
     }
+
 
     function setLoadingState() {
         const tbody = document.getElementById('questions-body');
@@ -748,6 +759,10 @@ $__mk = static function (string $base, string $path): string {
                 }
             }
         });
+    }
+
+    function viewQuestionResponses(questionId) {
+        window.location.href = apiUrl(`/admin/surveys/question-responses?surveyId=${surveyId}&questionId=${questionId}`);
     }
 
     function statusBadge(status) {

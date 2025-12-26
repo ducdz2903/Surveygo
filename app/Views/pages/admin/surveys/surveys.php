@@ -259,8 +259,8 @@
                             ${AdminHelpers.getStatusText(s.trangThai || 'draft')}
                         </span>
                     </td>
-                    <td class="text-center"><span class="text-dark">0</span></td>
-                    <td class="text-center"><span class="text-dark">0</span></td>
+                    <td class="text-center"><span class="text-dark">${s.questionCount ?? 0}</span></td>
+                    <td class="text-center"><span class="text-dark">${s.responseCount ?? 0}</span></td>
                     <td><small class="text-muted">${AdminHelpers.formatDate(s.created_at || s.createdAt)}</small></td>
                     <td class="text-end pe-4">
                         <div class="btn-group">

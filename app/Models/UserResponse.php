@@ -95,6 +95,33 @@ class UserResponse
     }
 
     /**
+     * Lấy tất cả câu trả lời cho một câu hỏi kèm thông tin user
+     * 
+     * @param int $questionId
+     * @return array Raw array data with user info (not model instances)
+     */
+    public static function findByQuestionWithUser(int $questionId): array
+    {
+        /** @var PDO $db */
+        $db = Container::get('db');
+
+        $statement = $db->prepare(
+            'SELECT ur.*, 
+                    u.name as userName, 
+                    u.email as userEmail, 
+                    u.avatar as userAvatar,
+                    u.code as userCode
+             FROM user_responses ur
+             LEFT JOIN users u ON ur.maNguoiDung = u.id
+             WHERE ur.maCauHoi = :questionId
+             ORDER BY ur.created_at DESC'
+        );
+        $statement->execute([':questionId' => $questionId]);
+
+        return $statement->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
      * Tạo câu trả lời mới
      * 
      * Hỗ trợ 2 loại:

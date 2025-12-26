@@ -42,6 +42,23 @@ class AdminController extends Controller
         ])));
     }
 
+    public function questionResponses(Request $request)
+    {
+        $view = new \App\Core\View();
+        $data = $this->pageData($request);
+        $data['surveyId'] = (int) ($request->query('surveyId') ?? 0);
+        $data['questionId'] = (int) ($request->query('questionId') ?? 0);
+
+        $content = $view->render('pages/admin/surveys/question-responses', $data);
+
+        return \App\Core\Response::html($view->render('layouts/admin', array_merge($data, [
+            'content' => $content,
+            'title' => 'Câu trả lời của câu hỏi',
+            'headerTitle' => 'Câu trả lời của câu hỏi',
+            'headerIcon' => 'fas fa-comments',
+        ])));
+    }
+
     public function users(Request $request)
     {
         $view = new \App\Core\View();
@@ -63,13 +80,13 @@ class AdminController extends Controller
     {
         $view = new \App\Core\View();
         $data = $this->pageData($request);
-        
+
         // Fetch top surveys by responses with average ratings
         $data['topSurveys'] = \App\Models\Survey::getTopSurveysByResponses(5);
-        
+
         // Fetch top active users by survey count
         $data['topUsers'] = \App\Models\User::getTopActiveUsers(5);
-        
+
         $content = $view->render('pages/admin/reports/reports', $data);
         return \App\Core\Response::html($view->render('layouts/admin', array_merge($data, ['content' => $content])));
     }

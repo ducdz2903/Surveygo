@@ -72,34 +72,51 @@ class SurveyController extends Controller
         // Nếu có user_id, kiểm tra từng survey xem user đã submit chưa
         $surveyData = array_map(fn($s) => $s->toArray(), $result['surveys']);
 
-        if ($userId) {
-            try {
-                $db = \App\Core\Container::get('db');
-                foreach ($surveyData as &$survey) {
-                    $stmt = $db->prepare(
+        // Fetch question count and response count for each survey
+        try {
+            $db = \App\Core\Container::get('db');
+            foreach ($surveyData as &$survey) {
+                // Get question count
+                $qStmt = $db->prepare(
+                    'SELECT COUNT(*) as count FROM survey_question_map WHERE idKhaoSat = :survey_id'
+                );
+                $qStmt->execute([':survey_id' => $survey['id']]);
+                $qRow = $qStmt->fetch(PDO::FETCH_ASSOC);
+                $survey['questionCount'] = (int) ($qRow['count'] ?? 0);
+
+                // Get response count (unique submissions)
+                $rStmt = $db->prepare(
+                    'SELECT COUNT(*) as count FROM survey_submissions WHERE maKhaoSat = :survey_id'
+                );
+                $rStmt->execute([':survey_id' => $survey['id']]);
+                $rRow = $rStmt->fetch(PDO::FETCH_ASSOC);
+                $survey['responseCount'] = (int) ($rRow['count'] ?? 0);
+
+                // Check if user completed (only if userId provided)
+                if ($userId) {
+                    $cStmt = $db->prepare(
                         'SELECT COUNT(*) as count FROM survey_submissions 
                          WHERE maKhaoSat = :survey_id AND maNguoiDung = :user_id'
                     );
-                    $stmt->execute([
+                    $cStmt->execute([
                         ':survey_id' => $survey['id'],
                         ':user_id' => $userId
                     ]);
-                    $row = $stmt->fetch(PDO::FETCH_ASSOC);
-                    $survey['isCompleted'] = ($row && $row['count'] > 0);
-                }
-            } catch (\Throwable $e) {
-                error_log('[SurveyController::index] Error checking completion status: ' . $e->getMessage());
-                // Nếu có lỗi, set tất cả về false
-                foreach ($surveyData as &$survey) {
+                    $cRow = $cStmt->fetch(PDO::FETCH_ASSOC);
+                    $survey['isCompleted'] = ($cRow && $cRow['count'] > 0);
+                } else {
                     $survey['isCompleted'] = false;
                 }
             }
-        } else {
-            // Nếu không có user_id, set tất cả isCompleted = false
+        } catch (\Throwable $e) {
+            error_log('[SurveyController::index] Error fetching counts: ' . $e->getMessage());
             foreach ($surveyData as &$survey) {
+                $survey['questionCount'] = 0;
+                $survey['responseCount'] = 0;
                 $survey['isCompleted'] = false;
             }
         }
+
 
         return $this->json([
             'error' => false,
@@ -1028,5 +1045,61 @@ class SurveyController extends Controller
                 'message' => $e->getMessage()
             ], 400);
         }
+    }
+
+    /**
+     * GET /api/surveys/question-responses
+     * Lấy danh sách câu trả lời cho một câu hỏi kèm thông tin user
+     */
+    public function getQuestionResponses(Request $request)
+    {
+        $questionId = (int) ($request->query('questionId') ?? 0);
+        $surveyId = (int) ($request->query('surveyId') ?? 0);
+
+        if (!$questionId) {
+            return $this->json([
+                'error' => true,
+                'message' => 'questionId là bắt buộc.',
+            ], 422);
+        }
+
+        // Lấy thông tin câu hỏi
+        $question = Question::find($questionId);
+        if (!$question) {
+            return $this->json([
+                'error' => true,
+                'message' => 'Câu hỏi không tồn tại.',
+            ], 404);
+        }
+
+        // Lấy các options của câu hỏi (nếu là choice question)
+        $answers = Answer::findByQuestion($questionId);
+
+        // Lấy danh sách responses kèm thông tin user
+        $responses = UserResponse::findByQuestionWithUser($questionId);
+
+        // Lấy thông tin survey nếu có surveyId
+        $surveyData = null;
+        if ($surveyId) {
+            $survey = Survey::find($surveyId);
+            if ($survey) {
+                $surveyData = [
+                    'id' => $survey->getId(),
+                    'tieuDe' => $survey->getTieuDe(),
+                    'maKhaoSat' => $survey->getMaKhaoSat(),
+                ];
+            }
+        }
+
+        return $this->json([
+            'error' => false,
+            'data' => [
+                'question' => $question->toArray(),
+                'answers' => array_map(fn($a) => $a->toArray(), $answers),
+                'responses' => $responses,
+                'survey' => $surveyData,
+                'totalResponses' => count($responses),
+            ],
+        ]);
     }
 }

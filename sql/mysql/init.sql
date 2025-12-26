@@ -645,26 +645,86 @@ INSERT IGNORE INTO survey_question_map (idKhaoSat, idCauHoi, created_at, updated
   (16,22,NOW(),NOW());
 
 -- dữ liệu cho bảng user_responses
+-- Format: single_choice = "answerId", multiple_choice = "[id1,id2]", text = "nội dung", rating = "số"
 INSERT IGNORE INTO user_responses (maCauHoi, maNguoiDung, maKhaoSat, noiDungTraLoi, created_at, updated_at) VALUES
-  (1, 1, 1, 'Câu trả lời 1', NOW(), NOW()),
-  (2, 2, 2, 'Câu trả lời 2', NOW(), NOW()),
-  (3, 3, 3, 'Câu trả lời 3', NOW(), NOW()),
-  (4, 4, 4, 'Câu trả lời 4', NOW(), NOW()),
-  (5, 5, 5, 'Câu trả lời 5', NOW(), NOW()),
-  (6, 6, 6, 'Câu trả lời 6', NOW(), NOW()),
-  (7, 7, 7, 'Câu trả lời 7', NOW(), NOW()),
-  (8, 8, 8, 'Câu trả lời 8', NOW(), NOW()),
-  (9, 9, 9, 'Câu trả lời 9', NOW(), NOW()),
-  (10, 10, 10, 'Câu trả lời 10', NOW(), NOW()),
-  (11, 11, 11, 'Câu trả lời 11', NOW(), NOW()),
-  (12, 12, 12, 'Câu trả lời 12', NOW(), NOW()),
-  (13, 13, 13, 'Câu trả lời 13', NOW(), NOW()),
-  (14, 14, 14, 'Câu trả lời 14', NOW(), NOW()),
-  (15, 15, 15, 'Câu trả lời 15', NOW(), NOW()),
-  (16, 16, 16, 'Câu trả lời 16', NOW(), NOW()),
-  (17, 17, 17, 'Câu trả lời 17', NOW(), NOW()),
-  (18, 18, 18, 'Câu trả lời 18', NOW(), NOW()),
-  (19, 19, 19, 'Câu trả lời 19', NOW(), NOW()),
-  (20, 20, 20, 'Câu trả lời 20', NOW(), NOW()),
-  (21, 21, 21, 'Câu trả lời 21', NOW(), NOW()),
-  (22, 22, 22, 'Câu trả lời 22', NOW(), NOW());
+  -- Survey 1: Khảo sát về thói quen đọc sách (questions 1,2)
+  -- Question 1 (multiple_choice): Thời gian đọc sách - answers 1-4
+  (1, 1, 1, '[1,3]', NOW(), NOW()),         -- User 1 chọn: Buổi sáng, Buổi tối
+  (1, 4, 1, '[2,4]', NOW(), NOW()),         -- User 4 chọn: Buổi chiều, Trước khi ngủ
+  (1, 5, 1, '[3]', NOW(), NOW()),           -- User 5 chọn: Buổi tối
+  -- Question 2 (single_choice): Thể loại sách - answers 5-8
+  (2, 1, 1, '5', NOW(), NOW()),             -- User 1 chọn: Tiểu thuyết
+  (2, 4, 1, '7', NOW(), NOW()),             -- User 4 chọn: Sách khoa học
+  (2, 5, 1, '6', NOW(), NOW()),             -- User 5 chọn: Tự truyện
+  
+  -- Survey 2: Khảo sát về sức khỏe cộng đồng (questions 3,4)
+  -- Question 3 (text): Kiểm tra sức khỏe
+  (3, 2, 2, 'Tôi kiểm tra sức khỏe định kỳ 6 tháng một lần tại bệnh viện.', NOW(), NOW()),
+  (3, 6, 2, 'Thỉnh thoảng, khoảng 1 năm 1 lần.', NOW(), NOW()),
+  -- Question 4 (multiple_choice): Thói quen tập thể dục - answers 9-12
+  (4, 2, 2, '[9,10]', NOW(), NOW()),        -- Có, rất đều đặn + Thỉnh thoảng
+  (4, 6, 2, '[11]', NOW(), NOW()),          -- Hiếm khi tập
+  
+  -- Survey 3: Khảo sát về trang web thương mại (questions 5,6)
+  -- Question 5 (single_choice): Mua sắm trực tuyến - answers 13-16
+  (5, 7, 3, '14', NOW(), NOW()),            -- Hàng tuần
+  (5, 8, 3, '15', NOW(), NOW()),            -- Hàng tháng
+  -- Question 6 (multiple_choice): Nhóm sản phẩm - answers 17-20
+  (6, 7, 3, '[17,18]', NOW(), NOW()),       -- Quần áo, Điện tử
+  (6, 8, 3, '[17,19,20]', NOW(), NOW()),    -- Quần áo, Sách, Mỹ phẩm
+  
+  -- Survey 4: Khảo sát về ứng dụng di động (questions 7,8)
+  -- Question 7 (text): Ứng dụng sử dụng nhiều nhất
+  (7, 9, 4, 'Facebook, Zalo, và TikTok là các ứng dụng tôi dùng nhiều nhất.', NOW(), NOW()),
+  (7, 10, 4, 'Spotify để nghe nhạc và YouTube để xem video.', NOW(), NOW()),
+  -- Question 8 (single_choice): Đánh giá chất lượng - answers 21-24
+  (8, 9, 4, '21', NOW(), NOW()),            -- Rất tốt
+  (8, 10, 4, '22', NOW(), NOW()),           -- Tốt
+  
+  -- Survey 5: Khảo sát về dịch vụ khách hàng (questions 9,10)
+  -- Question 9 (text): Dịch vụ cần cải thiện
+  (9, 11, 5, 'Thời gian phản hồi quá lâu, cần cải thiện tốc độ hỗ trợ.', NOW(), NOW()),
+  -- Question 10 (multiple_choice): Kênh liên hệ - answers 25-28
+  (10, 11, 5, '[25,27]', NOW(), NOW()),     -- Chat/Zalo, Điện thoại
+  (10, 12, 5, '[26,28]', NOW(), NOW()),     -- Email, Mạng xã hội
+  
+  -- Survey 6: Khảo sát về giáo dục trực tuyến (questions 11,12)
+  -- Question 11 (single_choice): Khóa học quan tâm - answers 29-32
+  (11, 13, 6, '29', NOW(), NOW()),          -- Lập trình
+  (11, 14, 6, '31', NOW(), NOW()),          -- Tiếp thị số
+  -- Question 12 (multiple_choice): Hình thức học - answers 33-36
+  (12, 13, 6, '[33,36]', NOW(), NOW()),     -- Video, Dự án thực tế
+  (12, 14, 6, '[34,35]', NOW(), NOW()),     -- Bài giảng trực tiếp, Tài liệu chữ
+  
+  -- Survey 7: Quick poll - Mức độ hài lòng (question 13)
+  -- Question 13 (single_choice) - answers 37-40
+  (13, 1, 7, '37', NOW(), NOW()),           -- Rất hài lòng
+  (13, 2, 7, '38', NOW(), NOW()),           -- Hài lòng
+  (13, 3, 7, '39', NOW(), NOW()),           -- Bình thường
+  
+  -- Survey 8: Quick poll - Cà phê (question 14)
+  -- Question 14 (single_choice) - answers 41-44
+  (14, 4, 8, '41', NOW(), NOW()),           -- Mỗi ngày
+  (14, 5, 8, '42', NOW(), NOW()),           -- 2-3 lần/tuần
+  
+  -- Survey 13: Year End Party (question 19)
+  -- Question 19 (single_choice) - answers 61-63
+  (19, 1, 13, '61', NOW(), NOW()),          -- Trong nhà
+  (19, 2, 13, '62', NOW(), NOW()),          -- Ngoài trời
+  (19, 3, 13, '63', NOW(), NOW()),          -- Resort ngoại ô
+  
+  -- Survey 14: Dark Mode feedback (question 20)
+  -- Question 20 (single_choice) - answers 64-67
+  (20, 4, 14, '64', NOW(), NOW()),          -- Rất đẹp 5/5
+  (20, 5, 14, '65', NOW(), NOW()),          -- Ổn 4/5
+  
+  -- Survey 15: Bữa trưa (question 21)
+  -- Question 21 (multiple_choice) - answers 68-72
+  (21, 6, 15, '[68,71]', NOW(), NOW()),     -- Cơm tấm, Gà rán
+  (21, 7, 15, '[69,70]', NOW(), NOW()),     -- Bún bò Huế, Pizza
+  
+  -- Survey 16: Góp ý ẩn danh (question 22)
+  -- Question 22 (text)
+  (22, 8, 16, 'Phòng họp thường xuyên bị đặt trùng lịch, gây khó khăn cho công việc.', NOW(), NOW()),
+  (22, 9, 16, 'Điều hòa trong văn phòng quá lạnh, mong được điều chỉnh nhiệt độ.', NOW(), NOW());
+
