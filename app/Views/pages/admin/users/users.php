@@ -127,7 +127,6 @@
                             <select class="form-select" id="create-role">
                                 <option value="user" selected>Người dùng (User)</option>
                                 <option value="moderator">Kiểm duyệt viên (Moderator)</option>
-                                <option value="admin">Quản trị viên (Admin)</option>
                             </select>
                         </div>
                     </form>
@@ -187,7 +186,7 @@
                         </select>
                     </div>
 
-                    <div class="row g-3">
+                    <div class="row g-3 mb-3">
                         <div class="col-6">
                             <label for="edit-points" class="form-label">Điểm số</label>
                             <input type="number" class="form-control" id="edit-points" min="0">
@@ -196,6 +195,11 @@
                             <label for="edit-spins" class="form-label">Lượt quay</label>
                             <input type="number" class="form-control" id="edit-spins" min="0">
                         </div>
+                    </div>
+
+                    <div class="mb-3 d-none" id="admin-confirm-container">
+                        <label for="admin-confirm-password" class="form-label text-danger fw-bold">Xác nhận mật khẩu Admin</label>
+                        <input type="password" class="form-control border-danger" id="admin-confirm-password" placeholder="Nhập mật khẩu admin của bạn để thực hiện hành động này">
                     </div>
                 </form>
             </div>
@@ -579,6 +583,49 @@
                 
                 document.getElementById('edit-points').value = points.balance;
                 document.getElementById('edit-spins').value = points.lucky_wheel_spins;
+
+                // Reset admin password confirmation
+                const adminPassInput = document.getElementById('admin-confirm-password');
+                const adminPassContainer = document.getElementById('admin-confirm-container');
+                adminPassInput.value = '';
+                adminPassContainer.classList.add('d-none');
+                
+                // Store initial values
+                document.getElementById('edit-role').dataset.initialRole = user.role;
+                document.getElementById('edit-points').dataset.initialPoints = points.balance;
+                document.getElementById('edit-spins').dataset.initialSpins = points.lucky_wheel_spins;
+
+                // Function to check if we need admin password
+                function checkAdminAuthRequirement() {
+                    const roleSelect = document.getElementById('edit-role');
+                    const pointsInput = document.getElementById('edit-points');
+                    const spinsInput = document.getElementById('edit-spins');
+                    
+                    const newRole = roleSelect.value;
+                    const initialRole = roleSelect.dataset.initialRole;
+                    
+                    const newPoints = parseInt(pointsInput.value) || 0;
+                    const initialPoints = parseInt(pointsInput.dataset.initialPoints) || 0;
+                    
+                    const newSpins = parseInt(spinsInput.value) || 0;
+                    const initialSpins = parseInt(spinsInput.dataset.initialSpins) || 0;
+                    
+                    const isPromotingToAdmin = (newRole === 'admin' && initialRole !== 'admin');
+                    const isChangingPoints = (newPoints !== initialPoints);
+                    const isChangingSpins = (newSpins !== initialSpins);
+                    
+                    if (isPromotingToAdmin || isChangingPoints || isChangingSpins) {
+                        adminPassContainer.classList.remove('d-none');
+                        // Label is generic now, no need to change text dynamically
+                    } else {
+                        adminPassContainer.classList.add('d-none');
+                    }
+                }
+
+                // Attach listeners
+                document.getElementById('edit-role').onchange = checkAdminAuthRequirement;
+                document.getElementById('edit-points').oninput = checkAdminAuthRequirement;
+                document.getElementById('edit-spins').oninput = checkAdminAuthRequirement;
                 
                 // Mở modal
                 const modal = new bootstrap.Modal(document.getElementById('editUserModal'));
@@ -648,6 +695,7 @@
             const role = document.getElementById('edit-role').value;
             const points = document.getElementById('edit-points').value;
             const spins = document.getElementById('edit-spins').value;
+            const adminPassword = document.getElementById('admin-confirm-password').value;
             
             // Validation
             if (!name) {
@@ -669,7 +717,8 @@
                         gender: gender,
                         role: role,
                         points: points ? parseInt(points) : 0,
-                        spins: spins ? parseInt(spins) : 0
+                        spins: spins ? parseInt(spins) : 0,
+                        admin_password: adminPassword
                     })
                 });
                 

@@ -208,6 +208,14 @@ class UserController extends Controller
             ], 400);
         }
 
+        // Không cho phép tạo tài khoản với quyền Admin
+        if ($role === 'admin') {
+            return $this->json([
+                'error' => true,
+                'message' => 'Không được phép tạo tài khoản với quyền Quản trị viên'
+            ], 403);
+        }
+
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             return $this->json([
                 'error' => true,
@@ -304,6 +312,25 @@ class UserController extends Controller
                 'message' => 'Bạn không thể thay đổi vai trò của chính mình'
             ], 403);
         }
+
+        // Nếu nâng quyền lên Admin, yêu cầu xác nhận mật khẩu của người đang thao tác
+        if ($role === 'admin' && $user->getRole() !== 'admin') {
+            $adminPassword = $request->input('admin_password');
+            if (empty($adminPassword)) {
+                return $this->json([
+                    'error' => true,
+                    'message' => 'Vui lòng nhập mật khẩu của bạn để xác nhận cấp quyền Admin'
+                ], 400);
+            }
+
+            $currentUser = User::findById($currentUserId);
+            if (!$currentUser || !$currentUser->verifyPassword($adminPassword)) {
+                return $this->json([
+                    'error' => true,
+                    'message' => 'Mật khẩu xác nhận không chính xác'
+                ], 403);
+            }
+        }
         
         // Cập nhật thông tin
         $user->setName($name);
@@ -325,20 +352,46 @@ class UserController extends Controller
         if ($points !== null || $spins !== null) {
             $userPoint = \App\Models\UserPoint::getOrCreate($userId);
             
-            if ($points !== null) {
-                $newBalance = (int)$points;
-                // Nếu điểm mới > tổng tích lũy hiện tại -> cập nhật luôn tổng tích lũy
-                if ($newBalance > $userPoint->getTotalEarned()) {
-                    $userPoint->setTotalEarned($newBalance);
+            $currentBalance = $userPoint->getBalance();
+            $currentSpins = $userPoint->getLuckyWheelSpins();
+            
+            $newBalance = $points !== null ? (int)$points : $currentBalance;
+            $newSpins = $spins !== null ? (int)$spins : $currentSpins;
+            
+            // Chỉ xử lý nếu có sự thay đổi
+            if ($newBalance !== $currentBalance || $newSpins !== $currentSpins) {
+                // Yêu cầu xác nhận mật khẩu admin khi thay đổi điểm số/lượt quay
+                $adminPassword = $request->input('admin_password');
+                if (empty($adminPassword)) {
+                    return $this->json([
+                        'error' => true,
+                        'message' => 'Vui lòng nhập mật khẩu của bạn để xác nhận thay đổi điểm số/lượt quay'
+                    ], 400);
                 }
-                $userPoint->setBalance($newBalance);
+
+                $currentUser = User::findById($currentUserId);
+                if (!$currentUser || !$currentUser->verifyPassword($adminPassword)) {
+                    return $this->json([
+                        'error' => true,
+                        'message' => 'Mật khẩu xác nhận không chính xác'
+                    ], 403);
+                }
+                
+                // Thực hiện cập nhật
+                if ($newBalance !== $currentBalance) {
+                     // Nếu điểm mới > tổng tích lũy hiện tại -> cập nhật luôn tổng tích lũy
+                    if ($newBalance > $userPoint->getTotalEarned()) {
+                        $userPoint->setTotalEarned($newBalance);
+                    }
+                    $userPoint->setBalance($newBalance);
+                }
+                
+                if ($newSpins !== $currentSpins) {
+                    $userPoint->setLuckyWheelSpins($newSpins);
+                }
+                
+                $userPoint->update();
             }
-            
-            if ($spins !== null) {
-                $userPoint->setLuckyWheelSpins((int)$spins);
-            }
-            
-            $userPoint->update();
         }
         
         if ($result) {
