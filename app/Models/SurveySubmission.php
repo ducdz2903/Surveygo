@@ -12,8 +12,6 @@ class SurveySubmission
     private int $id;
     private int $maKhaoSat;
     private int $maNguoiDung;
-    private string $trangThai;
-    private ?int $diemDat;
     private ?string $ghiChu;
     private string $createdAt;
     private string $updatedAt;
@@ -23,8 +21,6 @@ class SurveySubmission
         $this->id = (int) ($attributes['id'] ?? 0);
         $this->maKhaoSat = (int) ($attributes['maKhaoSat'] ?? 0);
         $this->maNguoiDung = (int) ($attributes['maNguoiDung'] ?? 0);
-        $this->trangThai = $attributes['trangThai'] ?? 'submitted';
-        $this->diemDat = isset($attributes['diemDat']) ? (int) $attributes['diemDat'] : null;
         $this->ghiChu = $attributes['ghiChu'] ?? null;
         $this->createdAt = $attributes['created_at'] ?? '';
         $this->updatedAt = $attributes['updated_at'] ?? '';
@@ -226,14 +222,6 @@ class SurveySubmission
     {
         return $this->maNguoiDung;
     }
-    public function getTrangThai(): string
-    {
-        return $this->trangThai;
-    }
-    public function getDiemDat(): ?int
-    {
-        return $this->diemDat;
-    }
     public function getGhiChu(): ?string
     {
         return $this->ghiChu;
@@ -290,7 +278,7 @@ class SurveySubmission
                 SELECT created_at FROM contact_messages WHERE created_at >= :start AND created_at <= :end
             ) AS all_responses
         ';
-        
+
         $currentMonthStmt = $db->prepare($currentMonthSql);
         $currentMonthStmt->execute([
             ':start' => $currentMonthStart,
@@ -335,8 +323,6 @@ class SurveySubmission
             'id' => $this->id,
             'maKhaoSat' => $this->maKhaoSat,
             'maNguoiDung' => $this->maNguoiDung,
-            'trangThai' => $this->trangThai,
-            'diemDat' => $this->diemDat,
             'ghiChu' => $this->ghiChu,
             'created_at' => $this->createdAt,
             'updated_at' => $this->updatedAt,

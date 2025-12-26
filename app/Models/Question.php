@@ -15,7 +15,6 @@ class Question
     private string $loaiCauHoi;
     private string $noiDungCauHoi;
     private bool $batBuocTraLoi;
-    private int $thuTu;
     private bool $isQuickPoll;
     private string $createdAt;
     private string $updatedAt;
@@ -29,7 +28,6 @@ class Question
         $this->loaiCauHoi = $attributes['loaiCauHoi'] ?? '';
         $this->noiDungCauHoi = $attributes['noiDungCauHoi'] ?? '';
         $this->batBuocTraLoi = (bool)($attributes['batBuocTraLoi'] ?? false);
-        $this->thuTu = isset($attributes['thuTu']) ? (int)$attributes['thuTu'] : 0;
         // quick_poll in DB (snake_case) or isQuickPoll in code may appear from different layers
         $this->isQuickPoll = (bool)($attributes['quick_poll'] ?? $attributes['isQuickPoll'] ?? false);
         $this->createdAt = $attributes['created_at'] ?? '';
@@ -220,7 +218,6 @@ class Question
         $noiDungCauHoi = $data['noiDungCauHoi'] ?? $this->noiDungCauHoi;
         $batBuocTraLoi = $data['batBuocTraLoi'] ?? $this->batBuocTraLoi;
         $isQuickPoll = isset($data['isQuickPoll']) ? (bool)$data['isQuickPoll'] : (isset($data['quick_poll']) ? (bool)$data['quick_poll'] : $this->isQuickPoll);
-        $thuTu = $data['thuTu'] ?? $this->thuTu;
 
         $statement = $db->prepare(
             'UPDATE questions SET loaiCauHoi = :loai, noiDungCauHoi = :noidung, batBuocTraLoi = :batbuoc, quick_poll = :quickpoll, updated_at = :updated WHERE id = :id'
@@ -271,7 +268,6 @@ class Question
             'loaiCauHoi' => $this->loaiCauHoi,
             'noiDungCauHoi' => $this->noiDungCauHoi,
             'batBuocTraLoi' => $this->batBuocTraLoi,
-            'thuTu' => $this->thuTu,
             'isQuickPoll' => $this->isQuickPoll,
             'quick_poll' => $this->isQuickPoll,
             'created_at' => $this->createdAt,
@@ -286,6 +282,5 @@ class Question
     public function getLoaiCauHoi(): string { return $this->loaiCauHoi; }
     public function getNoiDungCauHoi(): string { return $this->noiDungCauHoi; }
     public function isBatBuocTraLoi(): bool { return $this->batBuocTraLoi; }
-    public function getThuTu(): int { return $this->thuTu; }
     public function isQuickPoll(): bool { return $this->isQuickPoll; }
 }

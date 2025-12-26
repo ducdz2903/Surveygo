@@ -15,25 +15,28 @@
                 <div class="col-md-3">
                     <label class="form-label fw-bold small text-uppercase text-muted">Tìm kiếm</label>
                     <div class="input-group">
-                        <span class="input-group-text bg-light border-end-0"><i class="fas fa-search text-muted"></i></span>
-                        <input type="text" id="filter-search" class="form-control border-start-0 ps-0" placeholder="Nhập tiêu đề...">
+                        <span class="input-group-text bg-light border-end-0"><i
+                                class="fas fa-search text-muted"></i></span>
+                        <input type="text" id="filter-search" class="form-control border-start-0 ps-0"
+                            placeholder="Nhập tiêu đề...">
                     </div>
                 </div>
                 <div class="col-md-3">
                     <label class="form-label fw-bold small text-uppercase text-muted">Trạng thái</label>
                     <select class="form-select" id="filter-status">
                         <option value="">Tất cả trạng thái</option>
-                        <option value="approved">Đã duyệt</option>
+                        <option value="published">Đã duyệt</option>
                         <option value="pending">Chờ duyệt</option>
                         <option value="draft">Nháp</option>
                     </select>
                 </div>
                 <div class="col-md-3">
-                    <label class="form-label fw-bold small text-uppercase text-muted">Danh mục</label>
-                    <select class="form-select" id="filter-category">
-                        <option value="">Tất cả danh mục</option>
+                    <label class="form-label fw-bold small text-uppercase text-muted">Loại khảo sát</label>
+                    <select class="form-select" id="filter-type">
+                        <option value="">Tất cả loại</option>
                         <option value="Thói quen">Thói quen</option>
                         <option value="Sức khỏe">Sức khỏe</option>
+                        <option value="Thương mại">Thương mại</option>
                         <option value="Công nghệ">Công nghệ</option>
                         <option value="Giáo dục">Giáo dục</option>
                         <option value="Dịch vụ">Dịch vụ</option>
@@ -99,11 +102,13 @@
                 <form id="create-survey-form">
                     <div class="mb-3">
                         <label class="form-label fw-bold">Tiêu đề khảo sát <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" placeholder="Ví dụ: Khảo sát thói quen đọc sách 2024..." required>
+                        <input type="text" class="form-control" placeholder="Ví dụ: Khảo sát thói quen đọc sách 2024..."
+                            required>
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-bold">Mô tả ngắn</label>
-                        <textarea class="form-control" rows="3" placeholder="Mô tả mục đích của khảo sát này..."></textarea>
+                        <textarea class="form-control" rows="3"
+                            placeholder="Mô tả mục đích của khảo sát này..."></textarea>
                     </div>
                     <div class="row">
                         <div class="col-md-6 mb-3">
@@ -148,8 +153,8 @@
                                 <option value="">Đang tải sự kiện...</option>
                             </select>
                         </div>
-                    </div>                        
-                    </form>
+                    </div>
+                </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
@@ -164,35 +169,35 @@
 <script src="/public/assets/js/toast-helper.js"></script>
 <script src="/public/assets/js/modal-helper.js"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         let currentPage = 1;
         const itemsPerPage = 10;
         const totalSurveysEl = document.getElementById('total-surveys');
-        
+
         const AdminHelpers = window.AdminHelpers || {
             getStatusBadge: (status) => {
-                const map = { 'approved': 'success', 'pending': 'warning', 'draft': 'secondary', 'rejected': 'danger' };
+                const map = { 'published': 'success', 'approved': 'success', 'pending': 'warning', 'draft': 'secondary', 'rejected': 'danger' };
                 return 'badge bg-' + (map[status] || 'secondary');
             },
             getStatusText: (status) => {
-                const map = { 'approved': 'Đã duyệt', 'pending': 'Chờ duyệt', 'draft': 'Nháp', 'rejected': 'Từ chối' };
+                const map = { 'published': 'Đã duyệt', 'approved': 'Đã duyệt', 'pending': 'Chờ duyệt', 'draft': 'Nháp', 'rejected': 'Từ chối' };
                 return map[status] || status;
             },
             formatDate: (dateString) => {
-                if(!dateString) return '-';
+                if (!dateString) return '-';
                 return new Date(dateString).toLocaleDateString('vi-VN');
             }
         };
         const toast = typeof window.showToast === 'function'
             ? window.showToast
-            : function(_, text) { try { alert(text); } catch(e) { console.log(text); } };
+            : function (_, text) { try { alert(text); } catch (e) { console.log(text); } };
 
         // gọi api phân trang
         async function loadSurveys(page = 1) {
-            currentPage = page; 
-            
+            currentPage = page;
+
             const status = document.getElementById('filter-status').value;
-            const category = document.getElementById('filter-category').value;
+            const surveyType = document.getElementById('filter-type').value;
             const searchInput = document.getElementById('filter-search');
             const search = (searchInput ? searchInput.value : '').trim();
 
@@ -201,7 +206,7 @@
                 limit: itemsPerPage,
                 ...(search && { search }),
                 ...(status && { trangThai: status }),
-                ...(category && { danhMuc: category })
+                ...(surveyType && { loaiKhaoSat: surveyType })
             });
 
             const tbody = document.getElementById('surveys-table-body');
@@ -210,7 +215,7 @@
             try {
                 const res = await fetch(`/api/surveys?${params.toString()}`);
                 const json = await res.json();
-                
+
                 // Hỗ trợ cả cấu trúc {data: [...]} hoặc [...]
                 const data = Array.isArray(json.data) ? json.data : (Array.isArray(json) ? json : []);
                 const meta = json.meta || { total: data.length, page: page, totalPages: 1 };
@@ -245,9 +250,9 @@
                         <div class="small text-muted"><i class="fas fa-user-circle me-1"></i> ${s.maNguoiTao || 'Ẩn danh'}</div>
                     </td>
                     <td>
-                        ${s.isQuickPoll || s.loaiKhaoSat === 'quickpoll' 
-                            ? '<span class="badge bg-info bg-opacity-10 text-info border border-info">Quick Poll</span>' 
-                            : '<span class="badge bg-primary bg-opacity-10 text-primary border border-primary">Thường</span>'}
+                        ${s.isQuickPoll || s.loaiKhaoSat === 'quickpoll' || s.loaiKhaoSat === 'QuickPoll' || s.loaiKhaoSat === 'quick_poll'
+                    ? '<span class="badge bg-info bg-opacity-10 text-info border border-info">Quick Poll</span>'
+                    : '<span class="badge bg-primary bg-opacity-10 text-primary border border-primary">' + (s.loaiKhaoSat || 'Thường') + '</span>'}
                     </td>
                     <td>
                         <span class="${AdminHelpers.getStatusBadge(s.trangThai || 'draft')}">
@@ -302,14 +307,14 @@
             html += `<li class="page-item ${meta.page === meta.totalPages ? 'disabled' : ''}">
                         <button class="page-link" onclick="loadSurveys(${meta.page + 1})"><i class="fas fa-chevron-right"></i></button>
                      </li>`;
-            
+
             html += '</ul>';
             container.innerHTML = html;
         }
 
         function debounce(fn, wait = 500) {
             let timer;
-            return function(...args) {
+            return function (...args) {
                 clearTimeout(timer);
                 timer = setTimeout(() => fn.apply(this, args), wait);
             }
@@ -319,7 +324,7 @@
 
         // event listeners cho filters
         document.getElementById('filter-status').addEventListener('change', () => loadSurveys(1));
-        document.getElementById('filter-category').addEventListener('change', () => loadSurveys(1));
+        document.getElementById('filter-type').addEventListener('change', () => loadSurveys(1));
         document.getElementById('filter-search')?.addEventListener('input', debouncedLoad);
         const eventSearchInput = document.getElementById('survey-event-search');
         const debouncedEventSearch = debounce((term) => loadEventsToDropdown(term), 400);
@@ -338,12 +343,12 @@
         window.loadEventsToDropdown = loadEventsToDropdown;
 
         // hàm đặt lại bộ lọc
-        window.resetFilters = function() {
+        window.resetFilters = function () {
             const fs = document.getElementById('filter-status');
-            const fc = document.getElementById('filter-category');
+            const ft = document.getElementById('filter-type');
             const fsrch = document.getElementById('filter-search');
             if (fs) fs.value = '';
-            if (fc) fc.value = '';
+            if (ft) ft.value = '';
             if (fsrch) fsrch.value = '';
             loadSurveys(1);
         };
@@ -359,7 +364,7 @@
             try {
                 const params = new URLSearchParams({ page: 1, limit: 20 });
                 if (searchValue) params.set('search', searchValue);
-                const res = await fetch('/api/events?' + params.toString(), { headers: { 'Accept': 'application/json' }});
+                const res = await fetch('/api/events?' + params.toString(), { headers: { 'Accept': 'application/json' } });
                 if (token !== eventsLoadToken) return;
                 if (!res.ok) throw new Error('Không thể tải danh sách sự kiện');
                 const json = await res.json();
@@ -384,8 +389,8 @@
                 if (token === eventsLoadToken) sel.disabled = false;
             }
         }
-    
-        window.createSurvey = async function() {
+
+        window.createSurvey = async function () {
             console.log('Creating survey...');
             //(tieuDe, moTa, loaiKhaoSat, thoiLuongDuTinh, isQuickPoll,
             // maNguoiTao, trangThai, diemThuong, danhMuc, maSuKien, created_at, updated_at)
@@ -394,7 +399,7 @@
             const moTa = form.querySelector('textarea').value.trim();
             const loaiKhaoSat = document.getElementById('survey-type') ? document.getElementById('survey-type').value : form.querySelector('select').value;
             const thoiluong = parseInt(form.querySelector('input[name="thoiluong"]')?.value ?? form.querySelectorAll('input[type="number"]')[1].value) || 0;
-            const maNguoiTao = (function() {
+            const maNguoiTao = (function () {
                 const raw = localStorage.getItem('app.user');
                 if (!raw) return 1;
                 try {
@@ -411,13 +416,13 @@
             const eventSelect = document.getElementById('survey-event-select');
             const selectedEventId = eventSelect?.value;
             const maSuKien = selectedEventId ? (Number(selectedEventId) || null) : null;
-    
+
             const payload = {
                 tieuDe,
                 moTa,
                 loaiKhaoSat,
                 thoiLuongDuTinh: thoiluong,
-                isQuickPoll : loaiKhaoSat === 'quickpoll' ? 1 : 0,
+                isQuickPoll: loaiKhaoSat === 'quickpoll' ? 1 : 0,
                 maNguoiTao,
                 trangThai,
                 diemThuong: points,
@@ -450,7 +455,7 @@
             // refresh list
             if (window.loadSurveys) loadSurveys(1);
         };
-        window.deleteSurvey = function(id) {
+        window.deleteSurvey = function (id) {
             ModalHelper.confirm({
                 title: 'Xóa khảo sát',
                 message: 'Bạn có chắc chắn muốn xóa khảo sát #' + id + '?',
@@ -476,6 +481,5 @@
 
         // Init load
         loadSurveys(1);
-        loadEventsToDropdown();
     });
 </script>

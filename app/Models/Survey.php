@@ -97,85 +97,91 @@ class Survey
             $params[':isQuickPoll'] = intval($filters['isQuickPoll']);
         }
 
+        if (!empty($filters['loaiKhaoSat'])) {
+            $where[] = "s.loaiKhaoSat = :loaiKhaoSat";
+            $params[':loaiKhaoSat'] = $filters['loaiKhaoSat'];
+        }
+
         if (!empty($filters['maSuKien'])) {
             $where[] = "maSuKien = :maSuKien";
             $params[':maSuKien'] = (int) $filters['maSuKien'];
-            // Handle isCompleted filter
-            $needsSubmissionsJoin = false;
-            if (isset($filters['isCompleted']) && isset($filters['user_id'])) {
-                $needsSubmissionsJoin = true;
-                $params[':user_id'] = (int) $filters['user_id'];
-
-                if ($filters['isCompleted']) {
-                    // Show only completed: must have a submission for this user
-                    $where[] = "ss.maNguoiDung IS NOT NULL";
-                } else {
-                    // Show only incomplete: must NOT have a submission for this user
-                    $where[] = "ss.maNguoiDung IS NULL";
-                }
-            }
-
-            $whereClause = !empty($where) ? 'WHERE ' . implode(' AND ', $where) : '';
-
-            // Determine sorting based on sortBy parameter
-            $sortBy = $filters['sortBy'] ?? 'newest';
-            $orderClause = '';
-            $fromClause = 'FROM surveys s';
-            $selectFields = 's.*';
-            $groupBy = '';
-
-            if ($sortBy === 'hot') {
-                // LEFT JOIN with survey_submissions to count DISTINCT users who completed
-                // Sort by number of unique users (highest to lowest)
-                $fromClause = 'FROM surveys s LEFT JOIN survey_submissions ss ON s.id = ss.maKhaoSat';
-                $selectFields = 's.*, COUNT(DISTINCT ss.maNguoiDung) as response_count';
-                $groupBy = 'GROUP BY s.id';
-                $orderClause = 'ORDER BY response_count DESC, s.created_at DESC';
-            } elseif ($sortBy === 'oldest') {
-                $orderClause = 'ORDER BY s.created_at ASC';
-            } else {
-                // Default to newest
-                $orderClause = 'ORDER BY s.created_at DESC';
-            }
-
-            // Add LEFT JOIN for isCompleted filter if needed and not already joined
-            if ($needsSubmissionsJoin && $sortBy !== 'hot') {
-                $fromClause = 'FROM surveys s LEFT JOIN survey_submissions ss ON (s.id = ss.maKhaoSat AND ss.maNguoiDung = :user_id)';
-            }
-
-            // Get total count - use the same FROM clause that includes JOINs if needed
-            $countFromClause = $needsSubmissionsJoin ? $fromClause : 'FROM surveys s';
-            $countSql = "SELECT COUNT(DISTINCT s.id) as total {$countFromClause} {$whereClause}";
-            $countStmt = $db->prepare($countSql);
-            $countStmt->execute($params);
-            $total = (int) $countStmt->fetch()['total'];
-
-            // Get paginated results
-            $sql = "SELECT {$selectFields} {$fromClause} {$whereClause} {$groupBy} {$orderClause} LIMIT :offset, :limit";
-            $stmt = $db->prepare($sql);
-
-            // Bind params
-            foreach ($params as $key => $value) {
-                $stmt->bindValue($key, $value);
-            }
-            $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
-            $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
-
-            $stmt->execute();
-            $rows = $stmt->fetchAll();
-
-            $surveys = array_map(fn($row) => new self($row), $rows);
-
-            $totalPages = (int) ceil($total / $limit);
-
-            return [
-                'surveys' => $surveys,
-                'total' => $total,
-                'page' => $page,
-                'limit' => $limit,
-                'totalPages' => $totalPages,
-            ];
         }
+
+        // Handle isCompleted filter
+        $needsSubmissionsJoin = false;
+        if (isset($filters['isCompleted']) && isset($filters['user_id'])) {
+            $needsSubmissionsJoin = true;
+            $params[':user_id'] = (int) $filters['user_id'];
+
+            if ($filters['isCompleted']) {
+                // Show only completed: must have a submission for this user
+                $where[] = "ss.maNguoiDung IS NOT NULL";
+            } else {
+                // Show only incomplete: must NOT have a submission for this user
+                $where[] = "ss.maNguoiDung IS NULL";
+            }
+        }
+
+        $whereClause = !empty($where) ? 'WHERE ' . implode(' AND ', $where) : '';
+
+        // Determine sorting based on sortBy parameter
+        $sortBy = $filters['sortBy'] ?? 'newest';
+        $orderClause = '';
+        $fromClause = 'FROM surveys s';
+        $selectFields = 's.*';
+        $groupBy = '';
+
+        if ($sortBy === 'hot') {
+            // LEFT JOIN with survey_submissions to count DISTINCT users who completed
+            // Sort by number of unique users (highest to lowest)
+            $fromClause = 'FROM surveys s LEFT JOIN survey_submissions ss ON s.id = ss.maKhaoSat';
+            $selectFields = 's.*, COUNT(DISTINCT ss.maNguoiDung) as response_count';
+            $groupBy = 'GROUP BY s.id';
+            $orderClause = 'ORDER BY response_count DESC, s.created_at DESC';
+        } elseif ($sortBy === 'oldest') {
+            $orderClause = 'ORDER BY s.created_at ASC';
+        } else {
+            // Default to newest
+            $orderClause = 'ORDER BY s.created_at DESC';
+        }
+
+        // Add LEFT JOIN for isCompleted filter if needed and not already joined
+        if ($needsSubmissionsJoin && $sortBy !== 'hot') {
+            $fromClause = 'FROM surveys s LEFT JOIN survey_submissions ss ON (s.id = ss.maKhaoSat AND ss.maNguoiDung = :user_id)';
+        }
+
+        // Get total count - use the same FROM clause that includes JOINs if needed
+        $countFromClause = $needsSubmissionsJoin ? $fromClause : 'FROM surveys s';
+        $countSql = "SELECT COUNT(DISTINCT s.id) as total {$countFromClause} {$whereClause}";
+        $countStmt = $db->prepare($countSql);
+        $countStmt->execute($params);
+        $total = (int) $countStmt->fetch()['total'];
+
+        // Get paginated results
+        $sql = "SELECT {$selectFields} {$fromClause} {$whereClause} {$groupBy} {$orderClause} LIMIT :offset, :limit";
+        $stmt = $db->prepare($sql);
+
+        // Bind params
+        foreach ($params as $key => $value) {
+            $stmt->bindValue($key, $value);
+        }
+        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+
+        $stmt->execute();
+        $rows = $stmt->fetchAll();
+
+        $surveys = array_map(fn($row) => new self($row), $rows);
+
+        $totalPages = (int) ceil($total / $limit);
+
+        return [
+            'surveys' => $surveys,
+            'total' => $total,
+            'page' => $page,
+            'limit' => $limit,
+            'totalPages' => $totalPages,
+        ];
     }
 
     /**

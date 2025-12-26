@@ -626,3 +626,27 @@ INSERT IGNORE INTO survey_question_map (idKhaoSat, idCauHoi, created_at, updated
   (15,21,NOW(),NOW()),
   (16,22,NOW(),NOW());
 
+-- dữ liệu cho bảng user_responses
+INSERT IGNORE INTO user_responses (maCauHoi, maNguoiDung, maKhaoSat, noiDungTraLoi, created_at, updated_at) VALUES
+  (1, 1, 1, 'Câu trả lời 1', NOW(), NOW()),
+  (2, 2, 2, 'Câu trả lời 2', NOW(), NOW()),
+  (3, 3, 3, 'Câu trả lời 3', NOW(), NOW()),
+  (4, 4, 4, 'Câu trả lời 4', NOW(), NOW()),
+  (5, 5, 5, 'Câu trả lời 5', NOW(), NOW()),
+  (6, 6, 6, 'Câu trả lời 6', NOW(), NOW()),
+  (7, 7, 7, 'Câu trả lời 7', NOW(), NOW()),
+  (8, 8, 8, 'Câu trả lời 8', NOW(), NOW()),
+  (9, 9, 9, 'Câu trả lời 9', NOW(), NOW()),
+  (10, 10, 10, 'Câu trả lời 10', NOW(), NOW()),
+  (11, 11, 11, 'Câu trả lời 11', NOW(), NOW()),
+  (12, 12, 12, 'Câu trả lời 12', NOW(), NOW()),
+  (13, 13, 13, 'Câu trả lời 13', NOW(), NOW()),
+  (14, 14, 14, 'Câu trả lời 14', NOW(), NOW()),
+  (15, 15, 15, 'Câu trả lời 15', NOW(), NOW()),
+  (16, 16, 16, 'Câu trả lời 16', NOW(), NOW()),
+  (17, 17, 17, 'Câu trả lời 17', NOW(), NOW()),
+  (18, 18, 18, 'Câu trả lời 18', NOW(), NOW()),
+  (19, 19, 19, 'Câu trả lời 19', NOW(), NOW()),
+  (20, 20, 20, 'Câu trả lời 20', NOW(), NOW()),
+  (21, 21, 21, 'Câu trả lời 21', NOW(), NOW()),
+  (22, 22, 22, 'Câu trả lời 22', NOW(), NOW());

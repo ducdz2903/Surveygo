@@ -38,74 +38,79 @@ class SurveyController extends Controller
             $filters['trangThai'] = $trangThai;
         }
 
+
         if ($danhMuc = $request->query('danhMuc')) {
             $filters['danhMuc'] = $danhMuc;
         }
 
+        if ($loaiKhaoSat = $request->query('loaiKhaoSat')) {
+            $filters['loaiKhaoSat'] = $loaiKhaoSat;
+        }
+
         if ($maSuKien = $request->query('maSuKien')) {
             $filters['maSuKien'] = (int) $maSuKien;
-            if ($sortBy = $request->query('sortBy')) {
-                $filters['sortBy'] = $sortBy;
-            }
+        }
+        if ($sortBy = $request->query('sortBy')) {
+            $filters['sortBy'] = $sortBy;
+        }
 
-            $qpParam = $request->query('isQuickPoll');
+        $qpParam = $request->query('isQuickPoll');
 
-            if ($qpParam !== null && $qpParam !== '') {
-                $filters['isQuickPoll'] = (int) filter_var($qpParam, FILTER_VALIDATE_BOOLEAN);
-            }
+        if ($qpParam !== null && $qpParam !== '') {
+            $filters['isQuickPoll'] = (int) filter_var($qpParam, FILTER_VALIDATE_BOOLEAN);
+        }
 
-            // Add isCompleted filter if user_id is provided
-            $isCompletedParam = $request->query('isCompleted');
-            if ($isCompletedParam !== null && $isCompletedParam !== '' && $userId) {
-                $filters['isCompleted'] = filter_var($isCompletedParam, FILTER_VALIDATE_BOOLEAN);
-                $filters['user_id'] = $userId;
-            }
+        // Add isCompleted filter if user_id is provided
+        $isCompletedParam = $request->query('isCompleted');
+        if ($isCompletedParam !== null && $isCompletedParam !== '' && $userId) {
+            $filters['isCompleted'] = filter_var($isCompletedParam, FILTER_VALIDATE_BOOLEAN);
+            $filters['user_id'] = $userId;
+        }
 
-            $result = Survey::paginate($page, $limit, $filters);
+        $result = Survey::paginate($page, $limit, $filters);
 
-            // Nếu có user_id, kiểm tra từng survey xem user đã submit chưa
-            $surveyData = array_map(fn($s) => $s->toArray(), $result['surveys']);
+        // Nếu có user_id, kiểm tra từng survey xem user đã submit chưa
+        $surveyData = array_map(fn($s) => $s->toArray(), $result['surveys']);
 
-            if ($userId) {
-                try {
-                    $db = \App\Core\Container::get('db');
-                    foreach ($surveyData as &$survey) {
-                        $stmt = $db->prepare(
-                            'SELECT COUNT(*) as count FROM survey_submissions 
+        if ($userId) {
+            try {
+                $db = \App\Core\Container::get('db');
+                foreach ($surveyData as &$survey) {
+                    $stmt = $db->prepare(
+                        'SELECT COUNT(*) as count FROM survey_submissions 
                          WHERE maKhaoSat = :survey_id AND maNguoiDung = :user_id'
-                        );
-                        $stmt->execute([
-                            ':survey_id' => $survey['id'],
-                            ':user_id' => $userId
-                        ]);
-                        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-                        $survey['isCompleted'] = ($row && $row['count'] > 0);
-                    }
-                } catch (\Throwable $e) {
-                    error_log('[SurveyController::index] Error checking completion status: ' . $e->getMessage());
-                    // Nếu có lỗi, set tất cả về false
-                    foreach ($surveyData as &$survey) {
-                        $survey['isCompleted'] = false;
-                    }
+                    );
+                    $stmt->execute([
+                        ':survey_id' => $survey['id'],
+                        ':user_id' => $userId
+                    ]);
+                    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+                    $survey['isCompleted'] = ($row && $row['count'] > 0);
                 }
-            } else {
-                // Nếu không có user_id, set tất cả isCompleted = false
+            } catch (\Throwable $e) {
+                error_log('[SurveyController::index] Error checking completion status: ' . $e->getMessage());
+                // Nếu có lỗi, set tất cả về false
                 foreach ($surveyData as &$survey) {
                     $survey['isCompleted'] = false;
                 }
             }
-
-            return $this->json([
-                'error' => false,
-                'data' => $surveyData,
-                'meta' => [
-                    'total' => $result['total'],
-                    'page' => $result['page'],
-                    'limit' => $result['limit'],
-                    'totalPages' => $result['totalPages'],
-                ],
-            ]);
+        } else {
+            // Nếu không có user_id, set tất cả isCompleted = false
+            foreach ($surveyData as &$survey) {
+                $survey['isCompleted'] = false;
+            }
         }
+
+        return $this->json([
+            'error' => false,
+            'data' => $surveyData,
+            'meta' => [
+                'total' => $result['total'],
+                'page' => $result['page'],
+                'limit' => $result['limit'],
+                'totalPages' => $result['totalPages'],
+            ],
+        ]);
     }
 
     /**
@@ -552,7 +557,7 @@ class SurveyController extends Controller
 
         // lưu mapping nhiều-nhiều (nếu được truyền maKhaoSat)
         if (!empty($data['maKhaoSat'])) {
-            $this->attachQuestionToSurvey((int) $data['maKhaoSat'], $question->getId(), (int) ($data['thuTu'] ?? 0));
+            $this->attachQuestionToSurvey((int) $data['maKhaoSat'], $question->getId());
         }
 
         return $this->json([

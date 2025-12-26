@@ -82,13 +82,12 @@ $__mk = static function (string $base, string $path): string {
                                     <th class="ps-3" style="width: 90px;">Mã</th>
                                     <th>Câu hỏi</th>
                                     <th style="width: 150px;">Loại</th>
-                                    <th style="width: 110px;" class="text-center">Thứ tự</th>
                                     <th class="text-end pe-3" style="width: 150px;">Thao tác</th>
                                 </tr>
                             </thead>
                             <tbody id="questions-body">
                                 <tr>
-                                    <td colspan="5" class="text-center py-5">
+                                    <td colspan="4" class="text-center py-5">
                                         <div class="spinner-border text-primary" role="status"></div>
                                     </td>
                                 </tr>
@@ -532,7 +531,7 @@ $__mk = static function (string $base, string $path): string {
         questionsCache = list;
         const tbody = document.getElementById('questions-body');
         if (!list || list.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-muted"><i class="fas fa-inbox me-2"></i>Chưa có câu hỏi nào trong khảo sát này.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="4" class="text-center py-4 text-muted"><i class="fas fa-inbox me-2"></i>Chưa có câu hỏi nào trong khảo sát này.</td></tr>`;
             document.getElementById('survey-question-count').textContent = 0;
             return;
         }
@@ -547,7 +546,6 @@ $__mk = static function (string $base, string $path): string {
                     <div class="text-muted small">${q.batBuocTraLoi ? 'Bắt buộc trả lời' : 'Không bắt buộc'}</div>
                 </td>
                 <td>${typeBadge(q.loaiCauHoi)}</td>
-                <td class="text-center">${q.thuTu ?? '-'}</td>
                 <td class="text-end pe-3">
                     <div class="btn-group btn-group-sm">
                         <button class="btn btn-light text-primary" type="button" onclick="openQuestionModal(${q.id})" title="Sửa">
@@ -564,7 +562,7 @@ $__mk = static function (string $base, string $path): string {
 
     function setLoadingState() {
         const tbody = document.getElementById('questions-body');
-        tbody.innerHTML = `<tr><td colspan="5" class="text-center py-5"><div class="spinner-border text-primary"></div></td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="4" class="text-center py-5"><div class="spinner-border text-primary"></div></td></tr>`;
     }
 
     function openQuestionModal(id = null) {
