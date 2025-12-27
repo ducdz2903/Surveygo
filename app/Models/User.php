@@ -149,18 +149,6 @@ class User
         }
     }
 
-    public static function deleteById(int $id): bool
-    {
-        $db = Container::get('db');
-    
-        try {
-            $stmt = $db->prepare('DELETE FROM users WHERE id = :id');
-            return $stmt->execute([':id' => $id]);
-        } catch (\Exception $e) {
-            error_log('Failed to delete user: ' . $e->getMessage());
-            return false;
-        }
-    }
 
     public function verifyPassword(string $password): bool
     {

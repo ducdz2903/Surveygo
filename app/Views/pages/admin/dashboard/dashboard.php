@@ -11,75 +11,83 @@
 
     <div class="row g-4 mb-4">
         <div class="col-md-3">
-            <div class="stat-card primary fade-in">
-                <div class="d-flex align-items-center justify-content-between">
-                    <div>
-                        <h6 class="text-muted mb-2">Tổng Users</h6>
-                        <h3 class="mb-0" id="stat-users">0</h3>
-                        <div class="trend up mt-2" id="user-trend">
-                            <i class="fas fa-arrow-up"></i>
-                            <span id="user-growth-percent">+0%</span>
+            <a href="/admin/users" class="text-decoration-none">
+                <div class="stat-card primary fade-in">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <h6 class="text-muted mb-2">Tổng Users</h6>
+                            <h3 class="mb-0" id="stat-users">0</h3>
+                            <div class="trend up mt-2" id="user-trend">
+                                <i class="fas fa-arrow-up"></i>
+                                <span id="user-growth-percent">+0%</span>
+                            </div>
+                        </div>
+                        <div class="stat-icon bg-primary bg-opacity-10 text-primary">
+                            <i class="fas fa-users"></i>
                         </div>
                     </div>
-                    <div class="stat-icon bg-primary bg-opacity-10 text-primary">
-                        <i class="fas fa-users"></i>
-                    </div>
                 </div>
-            </div>
+            </a>
         </div>
 
         <div class="col-md-3">
-            <div class="stat-card success fade-in" style="animation-delay: 0.1s">
-                <div class="d-flex align-items-center justify-content-between">
-                    <div>
-                        <h6 class="text-muted mb-2">Khảo sát</h6>
-                        <h3 class="mb-0" id="stat-surveys">0</h3>
-                        <div class="trend up mt-2" id="survey-trend">
-                            <i class="fas fa-arrow-up"></i>
-                            <span id="survey-growth-percent">+0%</span>
+            <a href="/admin/surveys" class="text-decoration-none">
+                <div class="stat-card success fade-in" style="animation-delay: 0.1s">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <h6 class="text-muted mb-2">Khảo sát</h6>
+                            <h3 class="mb-0" id="stat-surveys">0</h3>
+                            <div class="trend up mt-2" id="survey-trend">
+                                <i class="fas fa-arrow-up"></i>
+                                <span id="survey-growth-percent">+0%</span>
+                            </div>
+                        </div>
+                        <div class="stat-icon bg-success bg-opacity-10 text-success">
+                            <i class="fas fa-poll"></i>
                         </div>
                     </div>
-                    <div class="stat-icon bg-success bg-opacity-10 text-success">
-                        <i class="fas fa-poll"></i>
-                    </div>
                 </div>
-            </div>
+            </a>
         </div>
 
         <div class="col-md-3">
-            <div class="stat-card warning fade-in" style="animation-delay: 0.2s">
-                <div class="d-flex align-items-center justify-content-between">
-                    <div>
-                        <h6 class="text-muted mb-2">Phản hồi</h6>
-                        <h3 class="mb-0" id="stat-responses">0</h3>
-                        <div class="trend up mt-2" id="response-trend">
-                            <i class="fas fa-arrow-up"></i>
-                            <span id="response-growth-percent">+0%</span>
+            <a href="/admin/reports" class="text-decoration-none">
+                <div class="stat-card warning fade-in" style="animation-delay: 0.2s">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <h6 class="text-muted mb-2">Phản hồi</h6>
+                            <h3 class="mb-0" id="stat-responses">0</h3>
+                            <div class="trend up mt-2" id="response-trend">
+                                <i class="fas fa-arrow-up"></i>
+                                <span id="response-growth-percent">+0%</span>
+                            </div>
+                        </div>
+                        <div class="stat-icon bg-warning bg-opacity-10 text-warning">
+                            <i class="fas fa-chart-line"></i>
                         </div>
                     </div>
-                    <div class="stat-icon bg-warning bg-opacity-10 text-warning">
-                        <i class="fas fa-chart-line"></i>
-                    </div>
                 </div>
-            </div>
+            </a>
         </div>
 
         <div class="col-md-3">
-            <div class="stat-card danger fade-in" style="animation-delay: 0.3s">
-                <div class="d-flex align-items-center justify-content-between">
-                    <div>
-                        <h6 class="text-muted mb-2">Sự kiện</h6>
-                        <h3 class="mb-0" id="stat-events">0</h3>
-                        <div class="trend down mt-2" id="event-trend">
-                            <i class="fas fa-arrow-down"></i>
-                            <span id="event-growth-percent">-0%</span>
+            <a href="/admin/events" class="text-decoration-none">
+                <div class="stat-card danger fade-in" style="animation-delay: 0.3s">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <h6 class="text-muted mb-2">Sự kiện</h6>
+                            <h3 class="mb-0" id="stat-events">0</h3>
+                            <div class="trend down mt-2" id="event-trend">
+                                <i class="fas fa-arrow-down"></i>
+                                <span id="event-growth-percent">-0%</span>
+                            </div>
+                        </div>
+                        <div class="stat-icon bg-danger bg-opacity-10 text-danger">
+                            <i class="fas fa-calendar"></i>
                         </div>
                     </div>
-                    <div class="stat-icon bg-danger bg-opacity-10 text-danger">
-                        <i class="fas fa-calendar"></i>
-                    </div>
                 </div>
-            </div>
+            </a>
         </div>
     </div>
 

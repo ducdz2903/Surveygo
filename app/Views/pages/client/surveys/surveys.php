@@ -9,13 +9,13 @@
 
         <!-- bộ lọc -->
         <div class="row mb-4">
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <div class="input-group">
                     <span class="input-group-text"><i class="fas fa-search"></i></span>
                     <input type="text" class="form-control" id="search-input" placeholder="Tìm kiếm khảo sát...">
                 </div>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <select class="form-select" id="status-filter">
                     <option value="">Tất cả</option>
                     <option value="hot">Hot 🔥</option>
