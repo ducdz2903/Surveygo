@@ -39,11 +39,11 @@ $router->post('/api/auth/change-password', [App\Controllers\AuthController::clas
 
 // Landing pages - públicas
 $router->get('/', [HomeController::class, 'home']);
-$router->get('/home', [HomeController::class, 'homeAfterLogin']);
-$router->get('/surveys', [HomeController::class, 'surveys']);
+$router->get('/home', [HomeController::class, 'homeAfterLogin'], [new AuthMiddleware()]);
+$router->get('/surveys', [HomeController::class, 'surveys'], [new AuthMiddleware()]);
 $router->get('/surveys/guide', [HomeController::class, 'surveyGuide']);
 $router->get('/surveys/{id}/questions', [HomeController::class, 'surveyQuestions']);
-$router->get('/quick-poll', [HomeController::class, 'quickPoll']);
+$router->get('/quick-poll', [HomeController::class, 'quickPoll'], [new AuthMiddleware()]);
 $router->get('/daily-rewards', [HomeController::class, 'dailyRewards'], [new AuthMiddleware()]);
 $router->get('/events', [HomeController::class, 'events'], [new AuthMiddleware()]);
 $router->get('/rewards', [HomeController::class, 'rewards'], [new AuthMiddleware()]);

@@ -171,6 +171,7 @@ class Router
                 return [
                     'handler' => $route['handler'],
                     'params' => $params,
+                    'middleware' => $route['middleware'] ?? [],
                 ];
             }
         }
