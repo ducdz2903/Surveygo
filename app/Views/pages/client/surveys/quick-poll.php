@@ -388,12 +388,18 @@
         const questionType = document.getElementById('questionType').value;
         const answerOptions = document.getElementById('answerOptions');
         const answerPreview = document.getElementById('answerPreview');
+        const optionInputs = document.querySelectorAll('#optionsContainer input');
+        
         if (questionType === 'single' || questionType === 'multiple') {
             answerOptions.style.display = 'block';
             answerPreview.style.display = 'none';
+            // Add required attribute back to option inputs
+            optionInputs.forEach(input => input.setAttribute('required', 'required'));
         } else {
             answerOptions.style.display = 'none';
             answerPreview.style.display = 'block';
+            // Remove required attribute from option inputs when hidden
+            optionInputs.forEach(input => input.removeAttribute('required'));
             renderPreview(questionType);
         }
     }
@@ -514,7 +520,7 @@
 
         try {
             // Show loading state
-            const saveButton = document.querySelector('button[onclick="saveQuickPoll()"]');
+            const saveButton = document.getElementById('btn-save-quick-poll');
             const originalText = saveButton.innerHTML;
             saveButton.disabled = true;
             saveButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Đang lưu...';
