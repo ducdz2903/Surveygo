@@ -8,7 +8,7 @@
                         thưởng hấp dẫn khác.</p>
                     <div class="hero-stats d-flex gap-4 mt-4">
                         <div class="stat-item">
-                            <div class="stat-value text-gradient" id="total-points-stat">1,250</div>
+                            <div class="stat-value text-gradient" id="total-points-stat">---</div>
                             <div class="stat-label">Điểm Hiện Có</div>
                         </div>
                     </div>
@@ -22,7 +22,7 @@
                         </div>
                         <div class="balance-text">
                             <span class="balance-label">Tổng Điểm</span>
-                            <div class="balance-amount" id="total-points">1,250</div>
+                            <div class="balance-amount" id="total-points">---</div>
                             <span class="balance-subtext">Bạn có thể đổi ngay!</span>
                         </div>
                         <div class="balance-decoration">
@@ -321,6 +321,18 @@
                 // Render vào card
                 document.getElementById('total-points').textContent = userBalance.toLocaleString('vi-VN');
                 document.getElementById('total-points-stat').textContent = userBalance.toLocaleString('vi-VN');
+                
+                // Cập nhật localStorage để đồng bộ
+                try {
+                    const raw = localStorage.getItem('app.user');
+                    if (raw) {
+                        const user = JSON.parse(raw);
+                        user.points = userBalance;
+                        localStorage.setItem('app.user', JSON.stringify(user));
+                    }
+                } catch (e) {
+                    console.error('Error updating localStorage:', e);
+                }
             } else {
                 // Fallback: lấy từ localStorage
                 loadUserPoints();
@@ -338,7 +350,7 @@
             const raw = localStorage.getItem('app.user');
             if (raw) {
                 const user = JSON.parse(raw);
-                userBalance = user.points || 1250;
+                userBalance = user.points || 0;
 
                 document.getElementById('total-points').textContent = userBalance.toLocaleString('vi-VN');
                 document.getElementById('total-points-stat').textContent = userBalance.toLocaleString('vi-VN');

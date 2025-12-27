@@ -10,7 +10,7 @@
                 <div class="points-card d-inline-flex align-items-center justify-content-between w-100 p-3 p-md-4">
                     <div class="points-info text-start">
                         <div class="points-label">Điểm hiện có</div>
-                        <div class="points-value" id="user-points">1,250</div>
+                        <div class="points-value" id="user-points">---</div>
                     </div>
                     <a href="<?= rtrim($baseUrl, '/') ?>/rewards" class="btn btn-outline-accent flex-shrink-0"> <i class="fas fa-gift me-2"></i>Đổi
                         thưởng ngay
