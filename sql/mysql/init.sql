@@ -475,7 +475,7 @@ VALUES
 ('RW-SHOPEE-100', 'Voucher Shopee 100.000đ', 'giftcard', 'shopee', 12000, 100000, 150, 'shopee_100.png', 'Voucher Shopee áp dụng toàn sàn.', NULL, NULL, NULL),
 ('RW-LAZADA-50', 'Voucher Lazada 50.000đ', 'giftcard', 'lazada', 6000, 50000, 180, 'lazada_50.png', 'Voucher Lazada.', NULL, NULL, NULL),
 
-('RW-PH-SPEAKER', 'Loa Bluetooth mini', 'physical', NULL, 18000, NULL, 25, 'speaker.png', 'Loa Bluetooth âm thanh lớn.', NULL, NULL, NULL),
+('RW-PH-SPEAKER', 'Loa Bluetooth mini', 'physical', NULL, 18000, NULL, 25, 'speaker.png', 'Loa Bluetooth  âm thanh lớn.', NULL, NULL, NULL),
 ('RW-PH-POWERA', 'Sạc dự phòng 10.000mAh', 'physical', NULL, 22000, NULL, 20, 'powerbank.png', 'Sạc dự phòng dung lượng cao.', NULL, NULL, NULL),
 ('RW-PH-LAMP', 'Đèn bàn học chống cận', 'physical', NULL, 12000, NULL, 30, 'study_lamp.png', 'Đèn LED tiết kiệm điện.', NULL, NULL, NULL),
 
