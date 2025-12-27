@@ -165,9 +165,20 @@ $url = static function (array $urls, string $key, string $fallbackPath = '/') us
             }
 
             if (logoutBtn) {
-                logoutBtn.addEventListener('click', function () {
-                    try { localStorage.removeItem('app.user'); } catch (e) { }
-                    window.location.href = window.location.origin + '/login';
+                logoutBtn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    
+                    fetch(BASE_URL + '/api/logout', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                    .then(response => response.json())
+                    .finally(() => {
+                        try { localStorage.removeItem('app.user'); } catch (e) { }
+                        window.location.href = BASE_URL + '/login';
+                    });
                 });
             }
         } catch (e) { }
