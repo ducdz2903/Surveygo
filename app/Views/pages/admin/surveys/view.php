@@ -139,10 +139,7 @@ $__mk = static function (string $base, string $path): string {
                         <input class="form-check-input" type="checkbox" role="switch" id="question-required">
                         <label class="form-check-label" for="question-required">Bắt buộc trả lời</label>
                     </div>
-                    <div class="form-check form-switch mb-2">
-                        <input class="form-check-input" type="checkbox" role="switch" id="question-quickpoll">
-                        <label class="form-check-label" for="question-quickpoll">Quick Poll</label>
-                    </div>
+
                 </form>
             </div>
             <div class="modal-footer">
@@ -226,7 +223,7 @@ $__mk = static function (string $base, string $path): string {
     const questionTypeSelect = document.getElementById('question-type');
     const questionOrderInput = document.getElementById('question-order');
     const questionRequiredInput = document.getElementById('question-required');
-    const questionQuickPollInput = document.getElementById('question-quickpoll');
+
 
     const libraryBody = document.getElementById('library-body');
     const librarySearch = document.getElementById('library-search');
@@ -639,9 +636,7 @@ $__mk = static function (string $base, string $path): string {
         questionTypeSelect.value = question.loaiCauHoi || 'single_choice';
         questionOrderInput.value = question.thuTu ?? 0;
         questionRequiredInput.checked = Boolean(question.batBuocTraLoi);
-        if (typeof questionQuickPollInput !== 'undefined' && questionQuickPollInput !== null) {
-            questionQuickPollInput.checked = Boolean(question.isQuickPoll || question.quick_poll);
-        }
+
     }
 
     async function safeParseResponse(res) {
@@ -674,7 +669,7 @@ $__mk = static function (string $base, string $path): string {
             noiDungCauHoi: content,
             loaiCauHoi: questionTypeSelect.value,
             batBuocTraLoi: questionRequiredInput.checked ? 1 : 0,
-            isQuickPoll: (typeof questionQuickPollInput !== 'undefined' && questionQuickPollInput !== null) ? (questionQuickPollInput.checked ? 1 : 0) : 0,
+
             thuTu: Number(questionOrderInput.value || 0),
         };
 

@@ -250,7 +250,7 @@
                         <div class="small text-muted"><i class="fas fa-user-circle me-1"></i> ${s.maNguoiTao || 'Ẩn danh'}</div>
                     </td>
                     <td>
-                        ${s.isQuickPoll || s.loaiKhaoSat === 'quickpoll' || s.loaiKhaoSat === 'QuickPoll' || s.loaiKhaoSat === 'quick_poll'
+                        ${s.loaiKhaoSat === 'quickpoll' || s.loaiKhaoSat === 'QuickPoll' || s.loaiKhaoSat === 'quick_poll'
                     ? '<span class="badge bg-info bg-opacity-10 text-info border border-info">Quick Poll</span>'
                     : '<span class="badge bg-primary bg-opacity-10 text-primary border border-primary">' + (s.loaiKhaoSat || 'Thường') + '</span>'}
                     </td>
@@ -392,7 +392,7 @@
 
         window.createSurvey = async function () {
             console.log('Creating survey...');
-            //(tieuDe, moTa, loaiKhaoSat, thoiLuongDuTinh, isQuickPoll,
+            //(tieuDe, moTa, loaiKhaoSat, thoiLuongDuTinh,
             // maNguoiTao, trangThai, diemThuong, danhMuc, maSuKien, created_at, updated_at)
             const form = document.getElementById('create-survey-form');
             const tieuDe = form.querySelector('input[type="text"]').value.trim();
@@ -422,7 +422,6 @@
                 moTa,
                 loaiKhaoSat,
                 thoiLuongDuTinh: thoiluong,
-                isQuickPoll: loaiKhaoSat === 'quickpoll' ? 1 : 0,
                 maNguoiTao,
                 trangThai,
                 diemThuong: points,
