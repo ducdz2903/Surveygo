@@ -238,7 +238,7 @@ class SurveySubmission
     /**
      * Get comprehensive response statistics including survey submissions, feedback, and contact messages
      * 
-     * @return array Statistics data including totals, monthly counts, and growth percentage
+     * @return array Statistics data including totals, daily counts, and growth percentage
      */
     public static function getResponseStatistics(): array
     {
@@ -260,46 +260,44 @@ class SurveySubmission
         // Calculate combined total
         $totalResponses = $totalSubmissions + $totalFeedback + $totalContact;
 
-        // Get current month date range
-        $currentMonthStart = date('Y-m-01 00:00:00');
-        $currentMonthEnd = date('Y-m-t 23:59:59');
-
-        // Get previous month date range
-        $previousMonthStart = date('Y-m-01 00:00:00', strtotime('first day of last month'));
-        $previousMonthEnd = date('Y-m-t 23:59:59', strtotime('last day of last month'));
-
-        // Count new responses in current month (all three tables combined)
-        $currentMonthSql = '
+        // Count new responses created today (all three tables combined)
+        $todaySql = '
             SELECT COUNT(*) as count FROM (
-                SELECT created_at FROM survey_submissions WHERE created_at >= :start AND created_at <= :end
+                SELECT created_at FROM survey_submissions WHERE DATE(created_at) = CURDATE()
                 UNION ALL
-                SELECT created_at FROM feedbacks WHERE created_at >= :start AND created_at <= :end
+                SELECT created_at FROM feedbacks WHERE DATE(created_at) = CURDATE()
                 UNION ALL
-                SELECT created_at FROM contact_messages WHERE created_at >= :start AND created_at <= :end
+                SELECT created_at FROM contact_messages WHERE DATE(created_at) = CURDATE()
             ) AS all_responses
         ';
 
-        $currentMonthStmt = $db->prepare($currentMonthSql);
-        $currentMonthStmt->execute([
-            ':start' => $currentMonthStart,
-            ':end' => $currentMonthEnd,
-        ]);
-        $newResponsesThisMonth = (int) $currentMonthStmt->fetch()['count'];
+        $todayStmt = $db->prepare($todaySql);
+        $todayStmt->execute();
+        $newResponsesToday = (int) $todayStmt->fetch()['count'];
 
-        // Count new responses in previous month
-        $previousMonthStmt = $db->prepare($currentMonthSql);
-        $previousMonthStmt->execute([
-            ':start' => $previousMonthStart,
-            ':end' => $previousMonthEnd,
-        ]);
-        $newResponsesPreviousMonth = (int) $previousMonthStmt->fetch()['count'];
+        // Count new responses created yesterday
+        $yesterdaySql = '
+            SELECT COUNT(*) as count FROM (
+                SELECT created_at FROM survey_submissions WHERE DATE(created_at) = CURDATE() - INTERVAL 1 DAY
+                UNION ALL
+                SELECT created_at FROM feedbacks WHERE DATE(created_at) = CURDATE() - INTERVAL 1 DAY
+                UNION ALL
+                SELECT created_at FROM contact_messages WHERE DATE(created_at) = CURDATE() - INTERVAL 1 DAY
+            ) AS all_responses
+        ';
 
-        // Calculate monthly growth percentage
+        $yesterdayStmt = $db->prepare($yesterdaySql);
+        $yesterdayStmt->execute();
+        $newResponsesYesterday = (int) $yesterdayStmt->fetch()['count'];
+
+        // Calculate daily growth percentage
         $growthPercentage = 0.0;
-        if ($newResponsesPreviousMonth > 0) {
-            $growthPercentage = (($newResponsesThisMonth - $newResponsesPreviousMonth) / $newResponsesPreviousMonth) * 100;
-        } elseif ($newResponsesThisMonth > 0) {
-            $growthPercentage = 100.0; // If no responses last month but have responses this month
+        if ($newResponsesYesterday > 0) {
+            $growthPercentage = (($newResponsesToday - $newResponsesYesterday) / $newResponsesYesterday) * 100;
+        } elseif ($newResponsesToday > 0) {
+            $growthPercentage = 100.0; // If no responses yesterday but have responses today
+        } elseif ($newResponsesYesterday > 0 && $newResponsesToday === 0) {
+            $growthPercentage = -100.0; // If had responses yesterday but none today
         }
 
         return [
@@ -307,8 +305,8 @@ class SurveySubmission
             'survey_submissions' => $totalSubmissions,
             'feedbacks' => $totalFeedback,
             'contact_messages' => $totalContact,
-            'new_responses_this_month' => $newResponsesThisMonth,
-            'new_responses_previous_month' => $newResponsesPreviousMonth,
+            'new_responses_today' => $newResponsesToday,
+            'new_responses_yesterday' => $newResponsesYesterday,
             'growth_percentage' => round($growthPercentage, 1),
             'is_growth_positive' => $growthPercentage >= 0,
         ];
