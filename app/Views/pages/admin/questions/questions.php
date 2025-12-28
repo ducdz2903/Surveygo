@@ -120,16 +120,14 @@
                                 <option value="">Không liên kết khảo sát</option>
                                 <?php if (!empty($surveys)): ?>
                                     <?php foreach ($surveys as $survey): ?>
-                                        <option value="<?= $survey->getId() ?>"><?= htmlspecialchars($survey->getTieuDe()) ?></option>
+                                        <option value="<?= $survey->getId() ?>"><?= htmlspecialchars($survey->getTieuDe()) ?>
+                                        </option>
                                     <?php endforeach; ?>
                                 <?php endif; ?>
                             </select>
                         </div>
                     </div>
-                    <div class="form-check form-switch mb-3">
-                        <input class="form-check-input" type="checkbox" role="switch" id="modal-is-quickpoll">
-                        <label class="form-check-label" for="modal-is-quickpoll">Quick Poll</label>
-                    </div>
+
                     <div id="options-area" class="mb-3 border rounded p-3 bg-light">
                         <label class="form-label fw-bold small text-uppercase">Các lựa chọn trả lời</label>
                         <div id="options-list">
@@ -296,7 +294,7 @@
                     <td class="ps-4"><span class="font-monospace text-dark">#${q.maCauHoi || q.id}</span></td>
                     <td>
                 <div class="fw-bold text-dark text-truncate" style="max-width: 350px;" 
-                             title="${escapeHtml(q.noiDungCauHoi)}">${escapeHtml(q.noiDungCauHoi)}${(q.isQuickPoll || q.quick_poll) ? ' <span class="badge bg-warning text-dark ms-2">Quick Poll</span>' : ''}</div>
+                             title="${escapeHtml(q.noiDungCauHoi)}">${escapeHtml(q.noiDungCauHoi)}</div>
                     </td>
                     <td>${getTypeBadge(q.loaiCauHoi)}</td>
                     <td><small class="text-muted">${q.created_at ? q.created_at.split(' ')[0] : ''}</small></td>
@@ -366,14 +364,14 @@
         const setFormReadOnly = (isReadOnly) => {
             const form = document.getElementById('question-form');
             const elements = form.querySelectorAll('input, select, textarea, button:not([data-bs-dismiss])');
-            
+
             // Disable/Enable all form elements
             elements.forEach(el => {
                 el.disabled = isReadOnly;
             });
-            
+
             const btnSave = document.getElementById('btn-save-question');
-            
+
             // Toggle Save Button
             if (isReadOnly) {
                 btnSave.style.display = 'none';
@@ -387,7 +385,7 @@
             // Gather answers from inputs
             const answerInputs = document.querySelectorAll('#options-list input');
             const answers = Array.from(answerInputs).map(input => ({ noiDungCauTraLoi: input.value }));
-            
+
             renderPreview(type, answers);
         };
 
@@ -403,10 +401,10 @@
                 </button>
             `;
             list.appendChild(div);
-            
+
             // Bind input event for live preview
             div.querySelector('input').addEventListener('input', updateLivePreview);
-            div.querySelector('.btn-remove-option').addEventListener('click', function() {
+            div.querySelector('.btn-remove-option').addEventListener('click', function () {
                 div.remove();
                 updateLivePreview();
             });
@@ -431,7 +429,7 @@
                     container.appendChild(div);
                 });
             } else if (type === 'multiple_choice') {
-                 if (!answers || answers.length === 0) {
+                if (!answers || answers.length === 0) {
                     container.innerHTML = '<span class="text-muted fst-italic">Chưa có lựa chọn nào</span>';
                     return;
                 }
@@ -472,7 +470,7 @@
             form.reset();
             document.getElementById('question-id').value = '';
             document.getElementById('options-list').innerHTML = '';
-            
+
             const modalTitle = document.getElementById('modalTitle');
             const optionsArea = document.getElementById('options-area');
 
@@ -487,7 +485,7 @@
                 setFormReadOnly(false);
                 updateLivePreview();
                 new bootstrap.Modal(document.getElementById('questionModal')).show();
-            } 
+            }
             else if (mode === 'edit' || mode === 'view') {
                 if (mode === 'edit') {
                     modalTitle.textContent = 'Cập nhật câu hỏi #' + id;
@@ -518,14 +516,14 @@
         }
 
         function fillQuestionForm(data) {
-             const optionsArea = document.getElementById('options-area');
+            const optionsArea = document.getElementById('options-area');
 
             // Populate Fields
             document.getElementById('question-id').value = data.id || '';
             document.getElementById('question-content').value = data.noiDungCauHoi;
             document.getElementById('modal-type-select').value = data.loaiCauHoi;
             document.getElementById('modal-survey-select').value = data.maKhaoSat || '';
-            try { document.getElementById('modal-is-quickpoll').checked = Boolean(data.isQuickPoll || data.quick_poll); } catch(e) {}
+
 
             // Toggle Options Area based on Type
             optionsArea.style.display = (data.loaiCauHoi === 'text' || data.loaiCauHoi === 'rating') ? 'none' : 'block';
@@ -543,7 +541,7 @@
 
         // hàm lưu
         // Logic xử lý khi nhấn nút Lưu câu hỏi
-        document.getElementById('btn-save-question').addEventListener('click', async function() {
+        document.getElementById('btn-save-question').addEventListener('click', async function () {
             const form = document.getElementById('question-form');
             if (!form.checkValidity()) {
                 form.reportValidity();
@@ -552,7 +550,7 @@
 
             const modalTitle = document.getElementById('modalTitle').textContent;
             const id = document.getElementById('question-id').value;
-            
+
             // Handle maKhaoSat explicitly
             let maKhaoSat = document.getElementById('modal-survey-select').value;
             if (!maKhaoSat || maKhaoSat === '-1' || maKhaoSat === '') {
@@ -563,7 +561,7 @@
             const payload = {
                 noiDungCauHoi: document.getElementById('question-content').value,
                 loaiCauHoi: document.getElementById('modal-type-select').value,
-                isQuickPoll: (document.getElementById('modal-is-quickpoll') ? (document.getElementById('modal-is-quickpoll').checked ? 1 : 0) : 0),
+
                 answers: [] // Prepare answers array
             };
 
@@ -603,7 +601,7 @@
                     if (res.ok) {
                         const modalEl = document.getElementById('questionModal');
                         const modalInstance = bootstrap.Modal.getInstance(modalEl);
-                        
+
                         // Reset form when modal is hidden
                         modalEl.addEventListener('hidden.bs.modal', function resetForm() {
                             const form = document.getElementById('question-form');
@@ -613,7 +611,7 @@
                             // Remove this listener after it fires once
                             modalEl.removeEventListener('hidden.bs.modal', resetForm);
                         }, { once: true });
-                        
+
                         modalInstance.hide();
                         loadQuestions();
                         showToast('success', 'Tạo câu hỏi mới thành công!');
@@ -649,7 +647,7 @@
                     if (res.ok) {
                         const modalEl = document.getElementById('questionModal');
                         const modalInstance = bootstrap.Modal.getInstance(modalEl);
-                        
+
                         // Reset form when modal is hidden
                         modalEl.addEventListener('hidden.bs.modal', function resetForm() {
                             const form = document.getElementById('question-form');
@@ -659,7 +657,7 @@
                             // Remove this listener after it fires once
                             modalEl.removeEventListener('hidden.bs.modal', resetForm);
                         }, { once: true });
-                        
+
                         modalInstance.hide();
                         loadQuestions();
                         showToast('success', 'Cập nhật thành công!');
@@ -706,7 +704,7 @@
         });
 
         document.getElementById('question-content').addEventListener('input', updateLivePreview);
-        
+
         document.getElementById('btn-add-option').addEventListener('click', () => {
             addOption();
             updateLivePreview();
@@ -724,29 +722,29 @@
         // Init
         loadQuestions();
     });
-        // Ghi đè hàm xóa để dùng modal-helper.js
-        window.deleteQuestion = (id) => {
-            showConfirm({
-                title: 'Xác nhận xóa',
-                message: 'Bạn có chắc muốn xóa câu hỏi này?',
-                type: 'danger',
-                confirmText: 'Xóa',
-                cancelText: 'Hủy',
-                isDangerous: true,
-                onConfirm: async () => {
-                    try {
-                        const res = await fetch(`/api/questions/${id}`, { method: 'DELETE' });
-                        if (res.ok) {
-                            loadQuestions();
-                            showToast('success', 'Xóa thành công!');
-                        } else {
-                            showToast('error', 'Không thể xóa!');
-                        }
-                    } catch (e) {
-                        console.error(e);
-                        showToast('error', 'Lỗi kết nối khi xóa!');
+    // Ghi đè hàm xóa để dùng modal-helper.js
+    window.deleteQuestion = (id) => {
+        showConfirm({
+            title: 'Xác nhận xóa',
+            message: 'Bạn có chắc muốn xóa câu hỏi này?',
+            type: 'danger',
+            confirmText: 'Xóa',
+            cancelText: 'Hủy',
+            isDangerous: true,
+            onConfirm: async () => {
+                try {
+                    const res = await fetch(`/api/questions/${id}`, { method: 'DELETE' });
+                    if (res.ok) {
+                        loadQuestions();
+                        showToast('success', 'Xóa thành công!');
+                    } else {
+                        showToast('error', 'Không thể xóa!');
                     }
+                } catch (e) {
+                    console.error(e);
+                    showToast('error', 'Lỗi kết nối khi xóa!');
                 }
-            });
-        };
+            }
+        });
+    };
 </script>

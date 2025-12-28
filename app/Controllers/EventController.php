@@ -365,14 +365,23 @@ class EventController extends Controller
         }
 
         if (array_key_exists('soLuotRutThamMoiLan', $data)) {
-            $data['soLuotRutThamMoiLan'] = (int) $data['soLuotRutThamMoiLan'];
+            $newSpinValue = (int) $data['soLuotRutThamMoiLan'];
+            $currentSpinValue = $event->getSoLuotRutThamMoiLan();
 
-            if ($event->getTrangThai() !== 'upcoming') {
-                return $this->json([
-                    'error' => true,
-                    'message' => 'Chỉ được thay đổi số lượt rút thăm khi sự kiện đang ở trạng thái upcoming.',
-                ], 422);
+            // Only validate if the value actually changed
+            if ($newSpinValue !== $currentSpinValue) {
+                // Check the target status (if being changed) or current status
+                $targetStatus = $data['trangThai'] ?? $event->getTrangThai();
+
+                if ($targetStatus !== 'upcoming' && $event->getTrangThai() !== 'upcoming') {
+                    return $this->json([
+                        'error' => true,
+                        'message' => 'Chỉ được thay đổi số lượt rút thăm khi sự kiện đang ở trạng thái upcoming.',
+                    ], 422);
+                }
             }
+
+            $data['soLuotRutThamMoiLan'] = $newSpinValue;
         }
 
         $errors = $this->validateEventUpdate($data);

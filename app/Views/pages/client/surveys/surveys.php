@@ -18,6 +18,7 @@
             <div class="col-md-2">
                 <select class="form-select" id="status-filter">
                     <option value="">Tất cả</option>
+                    <option value="standalone">Khảo sát riêng 📋</option>
                     <option value="hot">Hot 🔥</option>
                     <option value="new">Chưa hoàn thành ⏳</option>
                     <option value="old">Đã hoàn thành ✅</option>
@@ -135,10 +136,24 @@
             const queryParams = new URLSearchParams({
                 page: page,
                 limit: pageSize,
-                trangThai: 'published',
                 isQuickPoll: false,
                 ...filters,
             });
+            
+            // Logic: 
+            // - Nếu có filter maSuKien: lấy approved + event đó
+            // - Nếu filter standalone: lấy published (không cần event)
+            // - Mặc định: lấy cả approved+event VÀ published
+            if (!filters.maSuKien && !filters.standalone) {
+                // Mặc định: hiển thị cả 2 loại
+                queryParams.set('clientView', 'true');
+            } else if (filters.standalone) {
+                // Khảo sát riêng: chỉ published
+                queryParams.set('trangThai', 'published');
+            } else if (filters.maSuKien) {
+                // Theo sự kiện: approved + event
+                queryParams.set('trangThai', 'approved');
+            }
 
             // Thêm user_id vào query params nếu có
             if (userId) {
@@ -184,7 +199,7 @@
             let buttonText = 'Bắt đầu';
             let buttonClass = 'btn btn-gradient mt-auto w-100';
             let buttonIcon = 'fas fa-play';
-            
+
             if (survey.isCompleted) {
                 // Đã hoàn thành - hiển thị icon dấu tích ở góc card
                 completedCheckmark = '<i class="fas fa-check-circle" style="position: absolute; top: 15px; right: 15px; font-size: 24px; color: #28a745; z-index: 10;"></i>';
@@ -198,7 +213,7 @@
                 const now = new Date();
                 const hoursDiff = (now - createdAt) / (1000 * 60 * 60);
                 const isNew = hoursDiff < 24;
-                
+
                 // Ưu tiên: Hot > Mới (nếu < 24h) > Không có badge
                 if (survey.trangThai === 'hoạtĐộng') {
                     badge = { class: 'badge-hot', icon: 'fas fa-fire', text: 'Hot' };
@@ -262,13 +277,17 @@
     document.getElementById('status-filter').addEventListener('change', function (e) {
         const filters = { ...currentFilters };
         const value = e.target.value;
-        
+
         // Reset filters first
         delete filters.trangThai;
         delete filters.sortBy;
         delete filters.isCompleted;
-        
-        if (value === 'hot') {
+        delete filters.standalone;
+
+        if (value === 'standalone') {
+            // Khảo sát riêng: surveys without event (maSuKien is null)
+            filters.standalone = 'true';
+        } else if (value === 'hot') {
             // Hot: sort by completion count (number of unique users)
             filters.sortBy = 'hot';
         } else if (value === 'new') {
@@ -281,7 +300,7 @@
             filters.sortBy = 'newest';
         }
         // If value is empty (Tất cả), all filters are already deleted
-        
+
         loadSurveys(1, filters);
     });
 

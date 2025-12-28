@@ -15,21 +15,20 @@ class Question
     private string $loaiCauHoi;
     private string $noiDungCauHoi;
     private bool $batBuocTraLoi;
-    private bool $isQuickPoll;
+
     private string $createdAt;
     private string $updatedAt;
 
     public function __construct(array $attributes)
     {
-        $this->id = (int)($attributes['id'] ?? 0);
+        $this->id = (int) ($attributes['id'] ?? 0);
         $this->maCauHoi = $attributes['maCauHoi'] ?? '';
         // legacy support: maKhaoSat may be provided by older code, but questions table no longer stores survey id
-        $this->maKhaoSat = isset($attributes['maKhaoSat']) ? (int)$attributes['maKhaoSat'] : 0;
+        $this->maKhaoSat = isset($attributes['maKhaoSat']) ? (int) $attributes['maKhaoSat'] : 0;
         $this->loaiCauHoi = $attributes['loaiCauHoi'] ?? '';
         $this->noiDungCauHoi = $attributes['noiDungCauHoi'] ?? '';
-        $this->batBuocTraLoi = (bool)($attributes['batBuocTraLoi'] ?? false);
-        // quick_poll in DB (snake_case) or isQuickPoll in code may appear from different layers
-        $this->isQuickPoll = (bool)($attributes['quick_poll'] ?? $attributes['isQuickPoll'] ?? false);
+        $this->batBuocTraLoi = (bool) ($attributes['batBuocTraLoi'] ?? false);
+
         $this->createdAt = $attributes['created_at'] ?? '';
         $this->updatedAt = $attributes['updated_at'] ?? '';
     }
@@ -45,7 +44,7 @@ class Question
 
         // If filtering by survey, use the map table join (survey_question_map uses idKhaoSat/idCauHoi)
         if (!empty($filters['maKhaoSat'])) {
-            $surveyId = (int)$filters['maKhaoSat'];
+            $surveyId = (int) $filters['maKhaoSat'];
 
             if ($surveyId === -1) {
                 // Find questions NOT in any survey
@@ -54,7 +53,7 @@ class Question
                              WHERE sqm.idKhaoSat IS NULL";
                 $countStmt = $db->prepare($countSql);
                 $countStmt->execute();
-                $total = (int)$countStmt->fetchColumn();
+                $total = (int) $countStmt->fetchColumn();
 
                 $sql = "SELECT q.* FROM questions q
                         LEFT JOIN survey_question_map sqm ON q.id = sqm.idCauHoi
@@ -62,8 +61,8 @@ class Question
                         ORDER BY q.id ASC
                         LIMIT :limit OFFSET :offset";
                 $stmt = $db->prepare($sql);
-                $stmt->bindValue(':limit', (int)$perPage, PDO::PARAM_INT);
-                $stmt->bindValue(':offset', (int)$offset, PDO::PARAM_INT);
+                $stmt->bindValue(':limit', (int) $perPage, PDO::PARAM_INT);
+                $stmt->bindValue(':offset', (int) $offset, PDO::PARAM_INT);
                 $stmt->execute();
                 $rows = $stmt->fetchAll();
             } else {
@@ -71,7 +70,7 @@ class Question
                 $countSql = "SELECT COUNT(*) as cnt FROM survey_question_map sqm WHERE sqm.idKhaoSat = :surveyId";
                 $countStmt = $db->prepare($countSql);
                 $countStmt->execute([':surveyId' => $surveyId]);
-                $total = (int)$countStmt->fetchColumn();
+                $total = (int) $countStmt->fetchColumn();
 
                 $sql = "SELECT q.* FROM survey_question_map sqm JOIN questions q ON q.id = sqm.idCauHoi
                         WHERE sqm.idKhaoSat = :surveyId
@@ -79,8 +78,8 @@ class Question
                         LIMIT :limit OFFSET :offset";
                 $stmt = $db->prepare($sql);
                 $stmt->bindValue(':surveyId', $surveyId, PDO::PARAM_INT);
-                $stmt->bindValue(':limit', (int)$perPage, PDO::PARAM_INT);
-                $stmt->bindValue(':offset', (int)$offset, PDO::PARAM_INT);
+                $stmt->bindValue(':limit', (int) $perPage, PDO::PARAM_INT);
+                $stmt->bindValue(':offset', (int) $offset, PDO::PARAM_INT);
                 $stmt->execute();
                 $rows = $stmt->fetchAll();
             }
@@ -105,7 +104,7 @@ class Question
             $countSql = "SELECT COUNT(*) as cnt FROM questions $whereSql";
             $countStmt = $db->prepare($countSql);
             $countStmt->execute($params);
-            $total = (int)$countStmt->fetchColumn();
+            $total = (int) $countStmt->fetchColumn();
 
             // fetch paginated rows
             $sql = "SELECT * FROM questions $whereSql ORDER BY id ASC LIMIT :limit OFFSET :offset";
@@ -113,15 +112,15 @@ class Question
             foreach ($params as $k => $v) {
                 $stmt->bindValue($k, $v);
             }
-            $stmt->bindValue(':limit', (int)$perPage, PDO::PARAM_INT);
-            $stmt->bindValue(':offset', (int)$offset, PDO::PARAM_INT);
+            $stmt->bindValue(':limit', (int) $perPage, PDO::PARAM_INT);
+            $stmt->bindValue(':offset', (int) $offset, PDO::PARAM_INT);
             $stmt->execute();
             $rows = $stmt->fetchAll();
         }
 
         $data = array_map(fn($row) => new self($row), $rows);
 
-        $totalPages = $perPage > 0 ? (int)ceil($total / $perPage) : 1;
+        $totalPages = $perPage > 0 ? (int) ceil($total / $perPage) : 1;
 
         return [
             'data' => $data,
@@ -147,7 +146,7 @@ class Question
         $row = $statement->fetch();
 
         return $row ? new self($row) : null;
-    } 
+    }
     /**
      * Tạo câu hỏi mới
      * - Auto-gen maCauHoi nếu không cung cấp
@@ -179,23 +178,22 @@ class Question
         $now = (new \DateTimeImmutable())->format('Y-m-d H:i:s');
 
         try {
-            // questions table in schema stores quick_poll and does not contain survey id or thuTu
+            // questions table in schema
             $statement = $db->prepare(
-                'INSERT INTO questions (maCauHoi, loaiCauHoi, noiDungCauHoi, batBuocTraLoi, quick_poll, created_at, updated_at)
-                VALUES (:ma, :loai, :noidung, :batbuoc, :quickpoll, :created, :updated)'
+                'INSERT INTO questions (maCauHoi, loaiCauHoi, noiDungCauHoi, batBuocTraLoi, created_at, updated_at)
+                VALUES (:ma, :loai, :noidung, :batbuoc, :created, :updated)'
             );
 
             $statement->execute([
                 ':ma' => $maCauHoi,
                 ':loai' => $data['loaiCauHoi'],
                 ':noidung' => $data['noiDungCauHoi'],
-                ':batbuoc' => (int)($data['batBuocTraLoi'] ?? false),
-                ':quickpoll' => (int)($data['isQuickPoll'] ?? $data['quick_poll'] ?? false),
+                ':batbuoc' => (int) ($data['batBuocTraLoi'] ?? false),
                 ':created' => $now,
                 ':updated' => $now,
             ]);
 
-            $id = (int)$db->lastInsertId();
+            $id = (int) $db->lastInsertId();
             return self::find($id);
         } catch (\PDOException $e) {
             error_log('Question::create failed: ' . $e->getMessage());
@@ -217,17 +215,15 @@ class Question
         $loaiCauHoi = $data['loaiCauHoi'] ?? $this->loaiCauHoi;
         $noiDungCauHoi = $data['noiDungCauHoi'] ?? $this->noiDungCauHoi;
         $batBuocTraLoi = $data['batBuocTraLoi'] ?? $this->batBuocTraLoi;
-        $isQuickPoll = isset($data['isQuickPoll']) ? (bool)$data['isQuickPoll'] : (isset($data['quick_poll']) ? (bool)$data['quick_poll'] : $this->isQuickPoll);
 
         $statement = $db->prepare(
-            'UPDATE questions SET loaiCauHoi = :loai, noiDungCauHoi = :noidung, batBuocTraLoi = :batbuoc, quick_poll = :quickpoll, updated_at = :updated WHERE id = :id'
+            'UPDATE questions SET loaiCauHoi = :loai, noiDungCauHoi = :noidung, batBuocTraLoi = :batbuoc, updated_at = :updated WHERE id = :id'
         );
 
         return $statement->execute([
             ':loai' => $loaiCauHoi,
             ':noidung' => $noiDungCauHoi,
-            ':batbuoc' => (int)$batBuocTraLoi,
-            ':quickpoll' => $isQuickPoll ? 1 : 0,
+            ':batbuoc' => (int) $batBuocTraLoi,
             ':updated' => $now,
             ':id' => $this->id,
         ]);
@@ -268,19 +264,34 @@ class Question
             'loaiCauHoi' => $this->loaiCauHoi,
             'noiDungCauHoi' => $this->noiDungCauHoi,
             'batBuocTraLoi' => $this->batBuocTraLoi,
-            'isQuickPoll' => $this->isQuickPoll,
-            'quick_poll' => $this->isQuickPoll,
             'created_at' => $this->createdAt,
             'updated_at' => $this->updatedAt,
         ];
     }
 
     // Getters
-    public function getId(): int { return $this->id; }
-    public function getMaCauHoi(): string { return $this->maCauHoi; }
-    public function getMaKhaoSat(): int { return $this->maKhaoSat; }
-    public function getLoaiCauHoi(): string { return $this->loaiCauHoi; }
-    public function getNoiDungCauHoi(): string { return $this->noiDungCauHoi; }
-    public function isBatBuocTraLoi(): bool { return $this->batBuocTraLoi; }
-    public function isQuickPoll(): bool { return $this->isQuickPoll; }
+    public function getId(): int
+    {
+        return $this->id;
+    }
+    public function getMaCauHoi(): string
+    {
+        return $this->maCauHoi;
+    }
+    public function getMaKhaoSat(): int
+    {
+        return $this->maKhaoSat;
+    }
+    public function getLoaiCauHoi(): string
+    {
+        return $this->loaiCauHoi;
+    }
+    public function getNoiDungCauHoi(): string
+    {
+        return $this->noiDungCauHoi;
+    }
+    public function isBatBuocTraLoi(): bool
+    {
+        return $this->batBuocTraLoi;
+    }
 }

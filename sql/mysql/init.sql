@@ -38,12 +38,12 @@ CREATE TABLE IF NOT EXISTS surveys (
   moTa TEXT DEFAULT NULL,
   loaiKhaoSat VARCHAR(50) DEFAULT NULL,
   maNguoiTao INT UNSIGNED NOT NULL,
-  trangThai ENUM('draft','pending','published','rejected') NOT NULL DEFAULT 'draft',
+  trangThai ENUM('draft','pending','approved','published','rejected') NOT NULL DEFAULT 'draft',
   diemThuong INT DEFAULT 10,
   danhMuc INT DEFAULT NULL,
   maSuKien INT UNSIGNED DEFAULT NULL,
   thoiLuongDuTinh INT DEFAULT NULL,
-  isQuickPoll BOOLEAN NOT NULL DEFAULT FALSE,
+
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   FOREIGN KEY (maNguoiTao) REFERENCES users(id) ON DELETE CASCADE,
@@ -56,7 +56,7 @@ CREATE TABLE IF NOT EXISTS questions (
   loaiCauHoi VARCHAR(50) NOT NULL,
   noiDungCauHoi TEXT NOT NULL,
   batBuocTraLoi BOOLEAN NOT NULL DEFAULT FALSE,
-  quick_poll BOOLEAN NOT NULL DEFAULT FALSE,
+
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -297,48 +297,48 @@ INSERT IGNORE INTO events (id, maSuKien, tenSuKien, thoiGianBatDau, thoiGianKetT
 
 INSERT IGNORE INTO surveys (
   id, maKhaoSat, tieuDe, moTa, loaiKhaoSat, maNguoiTao, trangThai, diemThuong, danhMuc, 
-  maSuKien, thoiLuongDuTinh, isQuickPoll, created_at, updated_at
+  maSuKien, thoiLuongDuTinh, created_at, updated_at
 ) VALUES
-  (1, 'KS001', 'Khảo sát về thói quen đọc sách', 'Khảo sát nhằm tìm hiểu thói quen đọc sách của người Việt Nam.', 'Thói quen', 1, 'published', 10, 1, NULL, 15, FALSE, NOW(), NOW()),
-  (2, 'KS002', 'Khảo sát về sức khỏe cộng đồng', 'Khảo sát nhằm đánh giá tình trạng sức khỏe cộng đồng.', 'Sức khỏe', 2, 'draft', 15, 2, NULL, 20, FALSE, NOW(), NOW()),
-  (3, 'KS003', 'Khảo sát về trang web thương mại điện tử', 'Đánh giá trải nghiệm mua sắm trực tuyến của bạn.', 'Thương mại', 1, 'pending', 12, 1, NULL, 12, FALSE, NOW(), NOW()),
-  (4, 'KS004', 'Khảo sát về ứng dụng di động', 'Cho biết ý kiến của bạn về các ứng dụng di động yêu thích.', 'Công nghệ', 2, 'pending', 10, 2, NULL, 10, FALSE, NOW(), NOW()),
-  (5, 'KS005', 'Khảo sát về dịch vụ khách hàng', 'Đánh giá chất lượng dịch vụ khách hàng.', 'Dịch vụ', 1, 'pending', 20, 1, NULL, 18, FALSE, NOW(), NOW()),
-  (6, 'KS006', 'Khảo sát về nhu cầu giáo dục trực tuyến', 'Tìm hiểu nhu cầu về các khóa học trực tuyến.', 'Giáo dục', 2, 'pending', 15, 2, NULL, 16, FALSE, NOW(), NOW()),
-  (7,'KS007','Mức độ hài lòng tổng quan','Khảo sát nhanh về mức độ hài lòng.','QuickPoll',1,'pending',5,1,NULL,1,TRUE,NOW(),NOW()),
-  (8,'KS008','Bạn hay uống cà phê không?','Khảo sát nhanh về thói quen uống cà phê.','QuickPoll',1,'pending',5,1,NULL,1,TRUE,NOW(),NOW()),
-  (9,'KS009','Thời gian dùng mạng xã hội','Khảo sát thời lượng dùng MXH.','QuickPoll',2,'pending',5,1,NULL,1,TRUE,NOW(),NOW()),
-  (10,'KS010','Bạn tập thể dục bao lâu?','Khảo sát về mức độ vận động.','QuickPoll',1,'pending',5,1,NULL,1,TRUE,NOW(),NOW()),
-  (11,'KS011','Bạn ngủ bao nhiêu giờ?','Khảo sát thói quen ngủ.','QuickPoll',1,'pending',5,1,NULL,1,TRUE,NOW(),NOW()),
-  (12,'KS012','Bạn xem phim thể loại gì?','Khảo sát thể loại phim yêu thích.','QuickPoll',1,'pending',5,1,NULL,1,TRUE,NOW(),NOW()),
-  (13,'QP013','Ý tưởng Year End Party','Thu thập ý kiến nhanh cho tiệc cuối năm.','QuickPoll',1,'pending',5,3,NULL,1,TRUE,NOW(),NOW()),
-  (14,'QP014','Phản hồi tính năng Dark Mode','Đánh giá nhanh giao diện tối mới cập nhật.','QuickPoll',2,'pending',5,2,NULL,1,TRUE,NOW(),NOW()),
-  (15,'QP015','Bữa trưa nay ăn gì?','Bình chọn món ăn cho team building trưa nay.','QuickPoll',1,'pending',0,3,NULL,1,TRUE,NOW(),NOW()),
-  (16,'QP016','Góp ý ẩn danh','Hòm thư góp ý nhanh ẩn danh hàng tuần.','QuickPoll',2,'pending',0,3,NULL,1,TRUE,NOW(),NOW());
+  (1, 'KS001', 'Khảo sát về thói quen đọc sách', 'Khảo sát nhằm tìm hiểu thói quen đọc sách của người Việt Nam.', 'Thói quen', 1, 'published', 10, 1, NULL, 15, NOW(), NOW()),
+  (2, 'KS002', 'Khảo sát về sức khỏe cộng đồng', 'Khảo sát nhằm đánh giá tình trạng sức khỏe cộng đồng.', 'Sức khỏe', 2, 'draft', 15, 2, NULL, 20, NOW(), NOW()),
+  (3, 'KS003', 'Khảo sát về trang web thương mại điện tử', 'Đánh giá trải nghiệm mua sắm trực tuyến của bạn.', 'Thương mại', 1, 'pending', 12, 1, NULL, 12, NOW(), NOW()),
+  (4, 'KS004', 'Khảo sát về ứng dụng di động', 'Cho biết ý kiến của bạn về các ứng dụng di động yêu thích.', 'Công nghệ', 2, 'pending', 10, 2, NULL, 10, NOW(), NOW()),
+  (5, 'KS005', 'Khảo sát về dịch vụ khách hàng', 'Đánh giá chất lượng dịch vụ khách hàng.', 'Dịch vụ', 1, 'pending', 20, 1, NULL, 18, NOW(), NOW()),
+  (6, 'KS006', 'Khảo sát về nhu cầu giáo dục trực tuyến', 'Tìm hiểu nhu cầu về các khóa học trực tuyến.', 'Giáo dục', 2, 'pending', 15, 2, NULL, 16, NOW(), NOW()),
+  (7,'KS007','Mức độ hài lòng tổng quan','Khảo sát nhanh về mức độ hài lòng.','QuickPoll',1,'pending',5,1,NULL,1,NOW(),NOW()),
+  (8,'KS008','Bạn hay uống cà phê không?','Khảo sát nhanh về thói quen uống cà phê.','QuickPoll',1,'pending',5,1,NULL,1,NOW(),NOW()),
+  (9,'KS009','Thời gian dùng mạng xã hội','Khảo sát thời lượng dùng MXH.','QuickPoll',2,'pending',5,1,NULL,1,NOW(),NOW()),
+  (10,'KS010','Bạn tập thể dục bao lâu?','Khảo sát về mức độ vận động.','QuickPoll',1,'pending',5,1,NULL,1,NOW(),NOW()),
+  (11,'KS011','Bạn ngủ bao nhiêu giờ?','Khảo sát thói quen ngủ.','QuickPoll',1,'pending',5,1,NULL,1,NOW(),NOW()),
+  (12,'KS012','Bạn xem phim thể loại gì?','Khảo sát thể loại phim yêu thích.','QuickPoll',1,'pending',5,1,NULL,1,NOW(),NOW()),
+  (13,'QP013','Ý tưởng Year End Party','Thu thập ý kiến nhanh cho tiệc cuối năm.','QuickPoll',1,'pending',5,3,NULL,1,NOW(),NOW()),
+  (14,'QP014','Phản hồi tính năng Dark Mode','Đánh giá nhanh giao diện tối mới cập nhật.','QuickPoll',2,'pending',5,2,NULL,1,NOW(),NOW()),
+  (15,'QP015','Bữa trưa nay ăn gì?','Bình chọn món ăn cho team building trưa nay.','QuickPoll',1,'pending',0,3,NULL,1,NOW(),NOW()),
+  (16,'QP016','Góp ý ẩn danh','Hòm thư góp ý nhanh ẩn danh hàng tuần.','QuickPoll',2,'pending',0,3,NULL,1,NOW(),NOW());
 
-INSERT IGNORE INTO questions (id, maCauHoi, loaiCauHoi, noiDungCauHoi, batBuocTraLoi, quick_poll, created_at, updated_at) VALUES
-  (1, 'CH001', 'multiple_choice', 'Bạn thường đọc sách vào thời gian nào trong ngày?', TRUE, FALSE, NOW(), NOW()),
-  (2, 'CH002', 'single_choice', 'Bạn thích thể loại sách nào nhất?', TRUE, FALSE, NOW(), NOW()),
-  (3, 'CH003', 'text', 'Bạn có thường xuyên kiểm tra sức khỏe không?', FALSE, FALSE, NOW(), NOW()),
-  (4, 'CH004', 'multiple_choice', 'Bạn có thói quen tập thể dục hàng ngày không?', TRUE,  FALSE, NOW(), NOW()),
-  (5, 'CH005', 'single_choice', 'Bạn mua sắm trực tuyến bao lâu một lần?', TRUE,  FALSE, NOW(), NOW()),
-  (6, 'CH006', 'multiple_choice', 'Nhóm sản phẩm nào bạn thường mua trực tuyến?', TRUE,  FALSE, NOW(), NOW()),
-  (7, 'CH007', 'text', 'Ứng dụng di động nào bạn sử dụng nhiều nhất?', FALSE, FALSE, NOW(), NOW()),
-  (8, 'CH008', 'single_choice', 'Bạn đánh giá như thế nào về chất lượng ứng dụng?', TRUE,  FALSE, NOW(), NOW()),
-  (9, 'CH009', 'text', 'Dịch vụ khách hàng nào cải thiện cần thiết nhất?', FALSE,  FALSE, NOW(), NOW()),
-  (10, 'CH010', 'multiple_choice', 'Thông qua kênh nào bạn muốn liên hệ hỗ trợ?', TRUE,  FALSE, NOW(), NOW()),
-  (11, 'CH011', 'single_choice', 'Bạn quan tâm đến học các khóa nào?', TRUE,  FALSE, NOW(), NOW()),
-  (12, 'CH012', 'multiple_choice', 'Hình thức học tập nào bạn ưa thích?', TRUE,  FALSE, NOW(), NOW()),
-  (13,'CH013','single_choice','Bạn cảm thấy mức độ hài lòng hiện tại như thế nào?',TRUE,TRUE,NOW(),NOW()),
-  (14,'CH014','single_choice','Bạn uống cà phê bao nhiêu lần/tuần?',TRUE,TRUE,NOW(),NOW()),
-  (15,'CH015','single_choice','Bạn dùng mạng xã hội bao nhiêu giờ mỗi ngày?',TRUE,TRUE,NOW(),NOW()),
-  (16,'CH016','single_choice','Bạn tập thể dục bao lâu mỗi tuần?',TRUE,TRUE,NOW(),NOW()),
-  (17,'CH017','single_choice','Bạn ngủ trung bình bao nhiêu giờ mỗi ngày?',TRUE,TRUE,NOW(),NOW()),
-  (18,'CH018','single_choice','Bạn thích thể loại phim nào nhất?',TRUE,TRUE,NOW(),NOW()),
-  (19, 'QPQ001', 'single_choice', 'Bạn thích tổ chức Year End Party trong nhà hay ngoài trời?', TRUE,  TRUE, NOW(), NOW()),
-  (20, 'QPQ002', 'single_choice', 'Bạn đánh giá giao diện Dark Mode mới bao nhiêu điểm?', TRUE,  TRUE, NOW(), NOW()),
-  (21, 'QPQ003', 'multiple_choice', 'Trưa nay bạn muốn ăn món gì? (Chọn tối đa 2)', TRUE,  TRUE, NOW(), NOW()),
-  (22, 'QPQ004', 'text', 'Điều gì làm bạn cảm thấy không thoải mái nhất trong tuần qua tại công ty?', TRUE, TRUE, NOW(), NOW());
+INSERT IGNORE INTO questions (id, maCauHoi, loaiCauHoi, noiDungCauHoi, batBuocTraLoi, created_at, updated_at) VALUES
+  (1, 'CH001', 'multiple_choice', 'Bạn thường đọc sách vào thời gian nào trong ngày?', TRUE, NOW(), NOW()),
+  (2, 'CH002', 'single_choice', 'Bạn thích thể loại sách nào nhất?', TRUE, NOW(), NOW()),
+  (3, 'CH003', 'text', 'Bạn có thường xuyên kiểm tra sức khỏe không?', FALSE, NOW(), NOW()),
+  (4, 'CH004', 'multiple_choice', 'Bạn có thói quen tập thể dục hàng ngày không?', TRUE, NOW(), NOW()),
+  (5, 'CH005', 'single_choice', 'Bạn mua sắm trực tuyến bao lâu một lần?', TRUE, NOW(), NOW()),
+  (6, 'CH006', 'multiple_choice', 'Nhóm sản phẩm nào bạn thường mua trực tuyến?', TRUE, NOW(), NOW()),
+  (7, 'CH007', 'text', 'Ứng dụng di động nào bạn sử dụng nhiều nhất?', FALSE, NOW(), NOW()),
+  (8, 'CH008', 'single_choice', 'Bạn đánh giá như thế nào về chất lượng ứng dụng?', TRUE, NOW(), NOW()),
+  (9, 'CH009', 'text', 'Dịch vụ khách hàng nào cải thiện cần thiết nhất?', FALSE, NOW(), NOW()),
+  (10, 'CH010', 'multiple_choice', 'Thông qua kênh nào bạn muốn liên hệ hỗ trợ?', TRUE, NOW(), NOW()),
+  (11, 'CH011', 'single_choice', 'Bạn quan tâm đến học các khóa nào?', TRUE, NOW(), NOW()),
+  (12, 'CH012', 'multiple_choice', 'Hình thức học tập nào bạn ưa thích?', TRUE, NOW(), NOW()),
+  (13,'CH013','single_choice','Bạn cảm thấy mức độ hài lòng hiện tại như thế nào?',TRUE,NOW(),NOW()),
+  (14,'CH014','single_choice','Bạn uống cà phê bao nhiêu lần/tuần?',TRUE,NOW(),NOW()),
+  (15,'CH015','single_choice','Bạn dùng mạng xã hội bao nhiêu giờ mỗi ngày?',TRUE,NOW(),NOW()),
+  (16,'CH016','single_choice','Bạn tập thể dục bao lâu mỗi tuần?',TRUE,NOW(),NOW()),
+  (17,'CH017','single_choice','Bạn ngủ trung bình bao nhiêu giờ mỗi ngày?',TRUE,NOW(),NOW()),
+  (18,'CH018','single_choice','Bạn thích thể loại phim nào nhất?',TRUE,NOW(),NOW()),
+  (19, 'QPQ001', 'single_choice', 'Bạn thích tổ chức Year End Party trong nhà hay ngoài trời?', TRUE, NOW(), NOW()),
+  (20, 'QPQ002', 'single_choice', 'Bạn đánh giá giao diện Dark Mode mới bao nhiêu điểm?', TRUE, NOW(), NOW()),
+  (21, 'QPQ003', 'multiple_choice', 'Trưa nay bạn muốn ăn món gì? (Chọn tối đa 2)', TRUE, NOW(), NOW()),
+  (22, 'QPQ004', 'text', 'Điều gì làm bạn cảm thấy không thoải mái nhất trong tuần qua tại công ty?', TRUE, NOW(), NOW());
 
 
 INSERT IGNORE INTO answers (id, idCauHoi, noiDungCauTraLoi, creator_id, created_at, updated_at) VALUES
