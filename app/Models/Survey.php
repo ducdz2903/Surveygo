@@ -82,7 +82,10 @@ class Survey
             $params[':search'] = '%' . $filters['search'] . '%';
         }
 
-        if (!empty($filters['trangThai'])) {
+        // Client view: show approved+event OR published (standalone)
+        if (!empty($filters['clientView'])) {
+            $where[] = "((s.trangThai = 'approved' AND s.maSuKien IS NOT NULL AND s.maSuKien > 0) OR s.trangThai = 'published')";
+        } elseif (!empty($filters['trangThai'])) {
             $where[] = "s.trangThai = :trangThai";
             $params[':trangThai'] = $filters['trangThai'];
         }
@@ -107,6 +110,11 @@ class Survey
         if (!empty($filters['maSuKien'])) {
             $where[] = "maSuKien = :maSuKien";
             $params[':maSuKien'] = (int) $filters['maSuKien'];
+        }
+
+        // Standalone filter: surveys without event assignment
+        if (!empty($filters['standalone'])) {
+            $where[] = "(s.maSuKien IS NULL OR s.maSuKien = 0)";
         }
 
         // Handle isCompleted filter

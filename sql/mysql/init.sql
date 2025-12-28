@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS surveys (
   moTa TEXT DEFAULT NULL,
   loaiKhaoSat VARCHAR(50) DEFAULT NULL,
   maNguoiTao INT UNSIGNED NOT NULL,
-  trangThai ENUM('draft','pending','published','rejected') NOT NULL DEFAULT 'draft',
+  trangThai ENUM('draft','pending','approved','published','rejected') NOT NULL DEFAULT 'draft',
   diemThuong INT DEFAULT 10,
   danhMuc INT DEFAULT NULL,
   maSuKien INT UNSIGNED DEFAULT NULL,

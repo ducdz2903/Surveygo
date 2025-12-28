@@ -50,6 +50,23 @@ class SurveyController extends Controller
         if ($maSuKien = $request->query('maSuKien')) {
             $filters['maSuKien'] = (int) $maSuKien;
         }
+
+        // Standalone filter: surveys without event (maSuKien is null)
+        $standaloneParam = $request->query('standalone');
+        if ($standaloneParam !== null && $standaloneParam !== '') {
+            if (filter_var($standaloneParam, FILTER_VALIDATE_BOOLEAN)) {
+                $filters['standalone'] = true;
+            }
+        }
+
+        // Client view: show both approved+event AND published surveys
+        $clientViewParam = $request->query('clientView');
+        if ($clientViewParam !== null && $clientViewParam !== '') {
+            if (filter_var($clientViewParam, FILTER_VALIDATE_BOOLEAN)) {
+                $filters['clientView'] = true;
+            }
+        }
+
         if ($sortBy = $request->query('sortBy')) {
             $filters['sortBy'] = $sortBy;
         }

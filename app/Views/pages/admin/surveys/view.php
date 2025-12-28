@@ -469,7 +469,8 @@ $__mk = static function (string $base, string $path): string {
                     const options = [
                         ['draft', 'Nháp'],
                         ['pending', 'Chờ duyệt'],
-                        ['published', 'Công bố'],
+                        ['approved', 'Đã duyệt (Event)'],
+                        ['published', 'Công bố (Riêng)'],
                         ['rejected', 'Từ chối'],
                     ];
                     options.forEach(([val, label]) => {
