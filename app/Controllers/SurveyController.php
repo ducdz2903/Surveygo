@@ -54,10 +54,13 @@ class SurveyController extends Controller
             $filters['sortBy'] = $sortBy;
         }
 
+        // Use loaiKhaoSat filter for quick polls instead of isQuickPoll
         $qpParam = $request->query('isQuickPoll');
-
         if ($qpParam !== null && $qpParam !== '') {
-            $filters['isQuickPoll'] = (int) filter_var($qpParam, FILTER_VALIDATE_BOOLEAN);
+            // Map isQuickPoll=true to loaiKhaoSat='quick_poll'
+            if (filter_var($qpParam, FILTER_VALIDATE_BOOLEAN)) {
+                $filters['loaiKhaoSat'] = 'QuickPoll';
+            }
         }
 
         // Add isCompleted filter if user_id is provided
@@ -169,7 +172,7 @@ class SurveyController extends Controller
     /**
      * POST /api/surveys
      * Tạo khảo sát mới
-     * Body:(maKhaoSat, tieuDe, moTa, loaiKhaoSat, thoiLuongDuTinh, isQuickPoll, maNguoiTao, trangThai, diemThuong, danhMuc, soLuongCauHoi, maSuKien, created_at, updated_at)
+     * Body:(maKhaoSat, tieuDe, moTa, loaiKhaoSat, thoiLuongDuTinh, maNguoiTao, trangThai, diemThuong, danhMuc, soLuongCauHoi, maSuKien, created_at, updated_at)
      */
     public function create(Request $request)
     {
@@ -191,7 +194,7 @@ class SurveyController extends Controller
         $data['moTa'] = $data['moTa'] ?? $data['mo_ta'] ?? $data['description'] ?? $request->input('moTa') ?? null;
         $data['loaiKhaoSat'] = $data['loaiKhaoSat'] ?? $data['loai_khao_sat'] ?? $data['type'] ?? $request->input('loaiKhaoSat') ?? null;
         $data['thoiLuongDuTinh'] = isset($data['thoiLuongDuTinh']) ? (int) $data['thoiLuongDuTinh'] : (isset($data['thoi_luong']) ? (int) $data['thoi_luong'] : (int) ($request->input('thoiLuongDuTinh') ?? 0));
-        $data['isQuickPoll'] = isset($data['isQuickPoll']) ? (int) $data['isQuickPoll'] : ((($data['loaiKhaoSat'] ?? '') === 'quickpoll') ? 1 : 0);
+
         $data['maNguoiTao'] = (int) (isset($data['maNguoiTao']) ? $data['maNguoiTao'] : ($request->input('maNguoiTao') ?? ($request->input('ma_nguoi_tao') ?? 1)));
         $data['trangThai'] = $data['trangThai'] ?? $data['trang_thai'] ?? $request->input('trangThai') ?? 'draft';
         $data['diemThuong'] = isset($data['diemThuong']) ? (int) $data['diemThuong'] : (int) ($data['points'] ?? $request->input('diemThuong') ?? 0);
@@ -299,7 +302,7 @@ class SurveyController extends Controller
                 'tieuDe' => $data['title'],
                 'moTa' => $data['description'] ?? '',
                 'loaiKhaoSat' => 'quick_poll',
-                'isQuickPoll' => 1,
+
                 'diemThuong' => (int) ($data['points'] ?? 0),
                 'maNguoiTao' => $userId,
                 'trangThai' => 'published',
@@ -318,7 +321,7 @@ class SurveyController extends Controller
             $questionData = [
                 'noiDungCauHoi' => $data['title'],
                 'loaiCauHoi' => $data['questionType'],
-                'isQuickPoll' => 1,
+
                 'batBuocTraLoi' => 1,
                 'maKhaoSat' => $survey->getId()
             ];

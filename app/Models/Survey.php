@@ -14,7 +14,7 @@ class Survey
     private ?string $moTa;
     private ?string $loaiKhaoSat;
     private ?int $thoiLuongDuTinh;
-    private bool $isQuickPoll;
+
     private int $maNguoiTao;
     private string $trangThai;
     private int $diemThuong;
@@ -31,7 +31,7 @@ class Survey
         $this->moTa = $attributes['moTa'] ?? null;
         $this->loaiKhaoSat = $attributes['loaiKhaoSat'] ?? null;
         $this->thoiLuongDuTinh = $attributes['thoiLuongDuTinh'] ? (int) $attributes['thoiLuongDuTinh'] : null;
-        $this->isQuickPoll = (bool) ($attributes['isQuickPoll'] ?? false);
+
         $this->maNguoiTao = (int) ($attributes['maNguoiTao'] ?? 0);
         $this->trangThai = $attributes['trangThai'] ?? 'draft';
         $this->diemThuong = (int) ($attributes['diemThuong'] ?? 0);
@@ -60,7 +60,7 @@ class Survey
      * 
      * @param int $page Trang hiện tại (bắt đầu từ 1)
      * @param int $limit Số khảo sát trên mỗi trang
-     * @param array $filters Mảng lọc: ['search' => '', 'trangThai' => '', 'danhMuc' => '', 'isQuickPoll' => bool, 'sortBy' => '']
+     * @param array $filters Mảng lọc: ['search' => '', 'trangThai' => '', 'danhMuc' => '', 'sortBy' => '']
      * @return array ['surveys' => [...], 'total' => int, 'page' => int, 'limit' => int, 'totalPages' => int]
      */
     public static function paginate(int $page = 1, int $limit = 10, array $filters = []): array
@@ -92,14 +92,16 @@ class Survey
             $params[':danhMuc'] = (int) $filters['danhMuc'];
         }
 
-        if (isset($filters['isQuickPoll'])) {
-            $where[] = "s.isQuickPoll = :isQuickPoll";
-            $params[':isQuickPoll'] = intval($filters['isQuickPoll']);
-        }
+
 
         if (!empty($filters['loaiKhaoSat'])) {
-            $where[] = "s.loaiKhaoSat = :loaiKhaoSat";
-            $params[':loaiKhaoSat'] = $filters['loaiKhaoSat'];
+            // Support multiple quick poll variants
+            if ($filters['loaiKhaoSat'] === 'quick_poll') {
+                $where[] = "s.loaiKhaoSat = 'QuickPoll'";
+            } else {
+                $where[] = "s.loaiKhaoSat = :loaiKhaoSat";
+                $params[':loaiKhaoSat'] = $filters['loaiKhaoSat'];
+            }
         }
 
         if (!empty($filters['maSuKien'])) {
@@ -243,8 +245,8 @@ class Survey
 
         try {
             $statement = $db->prepare(
-                'INSERT INTO surveys (maKhaoSat, tieuDe, moTa, loaiKhaoSat, thoiLuongDuTinh, isQuickPoll, maNguoiTao, trangThai, diemThuong, danhMuc, maSuKien, created_at, updated_at)
-                 VALUES (:ma, :tieu, :mo, :loai, :thoiluong, :isquickpoll, :user, :status, :diem, :danh, :sukien, :created, :updated)'
+                'INSERT INTO surveys (maKhaoSat, tieuDe, moTa, loaiKhaoSat, thoiLuongDuTinh, maNguoiTao, trangThai, diemThuong, danhMuc, maSuKien, created_at, updated_at)
+                 VALUES (:ma, :tieu, :mo, :loai, :thoiluong, :user, :status, :diem, :danh, :sukien, :created, :updated)'
             );
 
             $statement->execute([
@@ -253,7 +255,7 @@ class Survey
                 ':mo' => $data['moTa'] ?? null,
                 ':loai' => $data['loaiKhaoSat'] ?? null,
                 ':thoiluong' => $data['thoiLuongDuTinh'] ?? null,
-                ':isquickpoll' => (int) ($data['isQuickPoll'] ?? 0),
+
                 ':user' => $data['maNguoiTao'],
                 ':status' => $data['trangThai'] ?? 'draft',
                 ':diem' => (int) ($data['diemThuong'] ?? 0),
@@ -285,7 +287,7 @@ class Survey
         $moTa = $data['moTa'] ?? $this->moTa;
         $loaiKhaoSat = $data['loaiKhaoSat'] ?? $this->loaiKhaoSat;
         $thoiLuongDuTinh = $data['thoiLuongDuTinh'] ?? $this->thoiLuongDuTinh;
-        $isQuickPoll = isset($data['isQuickPoll']) ? (bool) $data['isQuickPoll'] : $this->isQuickPoll;
+
         $trangThai = $data['trangThai'] ?? $this->trangThai;
         $diemThuong = $data['diemThuong'] ?? $this->diemThuong;
         $danhMuc = isset($data['danhMuc']) ? (int) $data['danhMuc'] : $this->danhMuc;
@@ -293,7 +295,7 @@ class Survey
         $maSuKien = array_key_exists('maSuKien', $data) ? $data['maSuKien'] : $this->maSuKien;
 
         $statement = $db->prepare(
-            'UPDATE surveys SET tieuDe = :tieu, moTa = :mo, loaiKhaoSat = :loai, thoiLuongDuTinh = :thoiluong, isQuickPoll = :isquickpoll,
+            'UPDATE surveys SET tieuDe = :tieu, moTa = :mo, loaiKhaoSat = :loai, thoiLuongDuTinh = :thoiluong,
              trangThai = :status, diemThuong = :diem, danhMuc = :danh, maSuKien = :sukien, updated_at = :updated WHERE id = :id'
         );
 
@@ -302,7 +304,7 @@ class Survey
             ':mo' => $moTa,
             ':loai' => $loaiKhaoSat,
             ':thoiluong' => $thoiLuongDuTinh,
-            ':isquickpoll' => $isQuickPoll,
+
             ':status' => $trangThai,
             ':diem' => (int) $diemThuong,
             ':danh' => $danhMuc,
@@ -402,7 +404,7 @@ class Survey
             'moTa' => $this->moTa,
             'loaiKhaoSat' => $this->loaiKhaoSat,
             'thoiLuongDuTinh' => $this->thoiLuongDuTinh,
-            'isQuickPoll' => $this->isQuickPoll,
+
             'maNguoiTao' => $this->maNguoiTao,
             'trangThai' => $this->trangThai,
             'diemThuong' => $this->diemThuong,
@@ -435,10 +437,7 @@ class Survey
         return $this->moTa;
     }
 
-    public function getIsQuickPoll(): bool
-    {
-        return $this->isQuickPoll;
-    }
+
 
     public function getMaNguoiTao(): int
     {
