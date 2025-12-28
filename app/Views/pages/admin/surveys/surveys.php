@@ -115,19 +115,19 @@
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-bold">Loại khảo sát</label>
-                            <select class="form-select" required>
+                            <select id="survey-type" class="form-select" required>
                                 <option value="regular">Khảo sát thường</option>
                                 <option value="quickpoll">Quick Poll</option>
                             </select>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-bold">Danh mục <span class="text-danger">*</span></label>
-                            <select class="form-select" required>
-                                <option value="Thói quen">Thói quen</option>
-                                <option value="Sức khỏe">Sức khỏe</option>
-                                <option value="Công nghệ">Công nghệ</option>
-                                <option value="Giáo dục">Giáo dục</option>
-                                <option value="Dịch vụ">Dịch vụ</option>
+                            <select id="survey-category" class="form-select" required>
+                                <option value="1">Thói quen</option>
+                                <option value="3">Sức khỏe</option>
+                                <option value="2">Công nghệ</option>
+                                <option value="4">Giáo dục</option>
+                                <option value="5">Dịch vụ</option>
                             </select>
                         </div>
                     </div>
