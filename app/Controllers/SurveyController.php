@@ -806,7 +806,7 @@ class SurveyController extends Controller
 
         // Validate trangThai if provided (only value validation; authorization is handled client-side per request)
         if (isset($data['trangThai'])) {
-            $allowed = ['draft', 'pending', 'published', 'rejected'];
+            $allowed = ['draft', 'pending', 'published', 'rejected', 'approved'];
             if (!in_array($data['trangThai'], $allowed, true)) {
                 $errors['trangThai'] = 'trangThai không hợp lệ.';
             }
