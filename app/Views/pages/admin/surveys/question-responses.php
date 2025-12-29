@@ -179,14 +179,10 @@ $__mk = static function (string $base, string $path): string {
             el.classList.toggle('active', parseInt(el.dataset.userId) === userId);
         });
 
-        // Find user response
-        const response = responseData.responses.find(r => r.maNguoiDung === userId);
+        const response = responseData.responses.find(r => parseInt(r.maNguoiDung) === parseInt(userId));
         if (!response) return;
 
-        // Update selected user badge
         document.getElementById('selected-user-badge').textContent = response.userName || 'Ẩn danh';
-
-        // Render response detail
         renderResponseDetail(response);
     }
 

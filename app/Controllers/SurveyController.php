@@ -806,7 +806,7 @@ class SurveyController extends Controller
 
         // Validate trangThai if provided (only value validation; authorization is handled client-side per request)
         if (isset($data['trangThai'])) {
-            $allowed = ['draft', 'pending', 'published', 'rejected'];
+            $allowed = ['draft', 'pending', 'published', 'rejected', 'approved'];
             if (!in_array($data['trangThai'], $allowed, true)) {
                 $errors['trangThai'] = 'trangThai không hợp lệ.';
             }
@@ -968,6 +968,17 @@ class SurveyController extends Controller
             ], 201);
 
         } catch (\Exception $e) {
+            // Check if it's a duplicate entry error
+            if (
+                strpos($e->getMessage(), 'Duplicate entry') !== false ||
+                strpos($e->getMessage(), '1062') !== false
+            ) {
+                return $this->json([
+                    'error' => true,
+                    'message' => 'Bạn đã làm khảo sát này rồi. Mỗi người chỉ được làm một lần.',
+                ], 409);
+            }
+
             return $this->json([
                 'error' => true,
                 'message' => 'Error submitting survey: ' . $e->getMessage(),

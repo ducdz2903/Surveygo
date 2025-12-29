@@ -100,7 +100,7 @@ $currentPath = $currentPath ?? ($_SERVER['REQUEST_URI'] ?? '/');
             </li>
         </ul>
 
-        <div class="nav-section">HỆ THỐNG</div>
+        <div class="nav-section">TIỆN ÍCH</div>
         <ul class="nav flex-column">
             <li class="nav-item">
                 <a class="nav-link" href="/">

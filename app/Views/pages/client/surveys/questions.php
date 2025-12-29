@@ -458,7 +458,9 @@
             const modal = bootstrap.Modal.getInstance(document.getElementById('feedbackModal'));
             modal?.hide();
             setTimeout(() => {
-                window.location.href = '/surveys';
+                // Redirect về quick-poll nếu đây là quick poll, ngược lại về surveys
+                const redirectUrl = surveyData?.isQuickPoll ? '/quick-poll' : '/surveys';
+                window.location.href = redirectUrl;
             }, 300);
         });
 
@@ -510,7 +512,9 @@
                 modal?.hide();
 
                 setTimeout(() => {
-                    window.location.href = '/surveys';
+                    // Redirect về quick-poll nếu đây là quick poll, ngược lại về surveys
+                    const redirectUrl = surveyData?.isQuickPoll ? '/quick-poll' : '/surveys';
+                    window.location.href = redirectUrl;
                 }, 500);
             } catch (error) {
                 console.error('Lỗi:', error);
