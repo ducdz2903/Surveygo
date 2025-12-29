@@ -33,7 +33,7 @@ class UserInvite
     }
 
     /**
-     * Generate a unique 6-digit alphanumeric invite code
+     * Tạo mã mời duy nhất 6 chữ số và chữ cái
      */
     private static function generateInviteCode(): string
     {
@@ -42,10 +42,10 @@ class UserInvite
         
         $maxAttempts = 10;
         for ($i = 0; $i < $maxAttempts; $i++) {
-            // Generate 6-character alphanumeric code (uppercase and numbers)
+            // Tạo mã 6 ký tự alphanum (chữ hoa và số)
             $code = substr(str_shuffle('ABCDEFGHJKLMNPQRSTUVWXYZ23456789'), 0, 6);
             
-            // Check if code already exists
+            // Kiểm tra nếu mã đã tồn tại
             $stmt = $db->prepare('SELECT COUNT(*) as count FROM user_invites WHERE invite_code = :code');
             $stmt->execute([':code' => $code]);
             $result = $stmt->fetch();
@@ -55,12 +55,12 @@ class UserInvite
             }
         }
         
-        // Fallback: use timestamp-based code
+        // Dự phòng: sử dụng mã dựa trên timestamp
         return strtoupper(substr(md5(uniqid((string) mt_rand(), true)), 0, 6));
     }
 
     /**
-     * Generate a unique random invite token
+     * Tạo token mời duy nhất ngẫu nhiên
      */
     private static function generateInviteToken(): string
     {
@@ -69,10 +69,10 @@ class UserInvite
         
         $maxAttempts = 10;
         for ($i = 0; $i < $maxAttempts; $i++) {
-            // Generate 32-character random token
+            // Tạo token ngẫu nhiên 32 ký tự
             $token = bin2hex(random_bytes(16));
             
-            // Check if token already exists
+            // Kiểm tra nếu token đã tồn tại
             $stmt = $db->prepare('SELECT COUNT(*) as count FROM user_invites WHERE invite_token = :token');
             $stmt->execute([':token' => $token]);
             $result = $stmt->fetch();
@@ -82,16 +82,16 @@ class UserInvite
             }
         }
         
-        // Fallback (unlikely to happen)
+        // Dự phòng (không chắc xảy ra)
         return bin2hex(random_bytes(16));
     }
 
     /**
-     * Generate invite link based on token
+     * Tạo link mời dựa trên token
      */
     private static function generateInviteLink(string $token): string
     {
-        // Get base URL from server configuration
+        // Lấy URL gốc từ cấu hình server
         $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
         $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
         
@@ -99,7 +99,7 @@ class UserInvite
     }
 
     /**
-     * Create a new invite record for a user
+     * Tạo bản ghi mới mới cho user
      */
     public static function create(int $userId): self
     {
@@ -131,7 +131,7 @@ class UserInvite
     }
 
     /**
-     * Find invite record by ID
+     * Tìm bản ghi mới theo ID
      */
     public static function findById(int $id): ?self
     {
@@ -150,7 +150,7 @@ class UserInvite
     }
 
     /**
-     * Find invite record by user ID
+     * Tìm bản ghi mời theo user ID
      */
     public static function findByUserId(int $userId): ?self
     {
@@ -169,7 +169,7 @@ class UserInvite
     }
 
     /**
-     * Find invite record by invite code
+     * Tìm bản ghi mời theo mã mời
      */
     public static function findByInviteCode(string $code): ?self
     {
@@ -188,7 +188,7 @@ class UserInvite
     }
 
     /**
-     * Find invite record by invite token
+     * Tìm bản ghi mời theo invite token
      */
     public static function findByToken(string $token): ?self
     {
@@ -207,7 +207,7 @@ class UserInvite
     }
 
     /**
-     * Get or create invite record for a user
+     * Lấy hoặc tảo bản ghi mời cho user
      */
     public static function getOrCreate(int $userId): self
     {
@@ -221,7 +221,7 @@ class UserInvite
     }
 
     /**
-     * Increment the invited count for this user
+     * Tăng số lượng đã mời cho user này
      */
     public function incrementInviteCount(): void
     {
@@ -245,7 +245,7 @@ class UserInvite
     }
 
     /**
-     * Add to total rewards earned from referrals
+     * Thêm vào tổng thưởng kiếm được từ giới thiệu
      */
     public function addRewards(int $amount): void
     {

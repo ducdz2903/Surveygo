@@ -329,41 +329,41 @@ class User
     }
 
     /**
-     * Get user statistics including total, daily growth, and new users
+     * Lấy thống kê người dùng bao gồm tổng số, tăng trưởng hàng ngày và người dùng mới
      * 
-     * @return array Statistics data
+     * @return array Dữ liệu thống kê
      */
     public static function getUserStatistics(): array
     {
         /** @var PDO $db */
         $db = Container::get('db');
 
-        // Get total users
+        // Lấy tổng số người dùng
         $totalStmt = $db->query('SELECT COUNT(*) as total FROM users');
         $totalUsers = (int) $totalStmt->fetch()['total'];
 
-        // Count new users created today
+        // Đếm người dùng mới đăng ký hôm nay
         $todayStmt = $db->prepare(
             'SELECT COUNT(*) as count FROM users WHERE DATE(created_at) = CURDATE()'
         );
         $todayStmt->execute();
         $newUsersToday = (int) $todayStmt->fetch()['count'];
 
-        // Count new users created yesterday
+        // Đếm người dùng mới đăng ký hôm qua
         $yesterdayStmt = $db->prepare(
             'SELECT COUNT(*) as count FROM users WHERE DATE(created_at) = CURDATE() - INTERVAL 1 DAY'
         );
         $yesterdayStmt->execute();
         $newUsersYesterday = (int) $yesterdayStmt->fetch()['count'];
 
-        // Calculate daily growth percentage
+        // Tính phần trăm tăng trưởng hàng ngày
         $growthPercentage = 0.0;
         if ($newUsersYesterday > 0) {
             $growthPercentage = (($newUsersToday - $newUsersYesterday) / $newUsersYesterday) * 100;
         } elseif ($newUsersToday > 0) {
-            $growthPercentage = 100.0; // If no users yesterday but have users today
+            $growthPercentage = 100.0; // Nếu không có người dùng hôm qua nhưng có người dùng hôm nay
         } elseif ($newUsersYesterday > 0 && $newUsersToday === 0) {
-            $growthPercentage = -100.0; // If had users yesterday but none today
+            $growthPercentage = -100.0; // Nếu có người dùng hôm qua nhưng không có hôm nay
         }
 
         return [
@@ -376,10 +376,10 @@ class User
     }
 
     /**
-     * Get top active users by completed surveys count
+     * Lấy top người dùng hoạt động theo số khảo sát đã hoàn thành
      * 
-     * @param int $limit Number of users to return
-     * @return array Array of users with completed_surveys_count and created_surveys_count
+     * @param int $limit Số lượng người dùng trả về
+     * @return array Mảng người dùng với completed_surveys_count và created_surveys_count
      */
     public static function getTopActiveUsers(int $limit = 5): array
     {

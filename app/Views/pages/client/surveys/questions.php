@@ -42,7 +42,7 @@
 
                 <div class="modal-body p-4">
                     <form id="feedback-form">
-                        <!-- Rating Section -->
+                        <!-- Phần đánh giá -->
                         <div class="mb-4">
                             <label class="d-block mb-3 fw-600">
                                 Bạn cảm thấy như thế nào? <span class="text-danger">*</span>
@@ -68,7 +68,7 @@
                             <input type="hidden" id="rating-value" name="danhGia" value="0">
                         </div>
 
-                        <!-- Comment Section -->
+                        <!-- Phần bình luận -->
                         <div class="mb-3">
                             <label for="feedback-text" class="form-label fw-600">
                                 Góp ý thêm <span class="text-muted fw-normal">(tuỳ chọn)</span>
@@ -195,7 +195,7 @@
                 `;
         }
 
-        // Handle rating type questions with 5 stars
+        // Xử lý câu hỏi đánh giá với 5 sao
         if (loaiCauHoi === 'rating') {
             const currentRating = answers[questionId] || 0;
             return `
@@ -284,18 +284,18 @@
         });
     }
 
-    // Function to handle star rating clicks
+    // Hàm xử lý click vào sao đánh giá
     function setRating(questionId, rating) {
-        // Update the answers object
+        // Cập nhật đối tượng answers
         answers[questionId] = rating;
         
-        // Update the hidden input
+        // Cập nhật input ẩn
         const hiddenInput = document.getElementById(`rating_${questionId}`);
         if (hiddenInput) {
             hiddenInput.value = rating;
         }
         
-        // Update all stars visual state
+        // Cập nhật trạng thái hiển thị tất cả các sao
         const container = document.querySelector(`[data-question-id="${questionId}"]`);
         if (container) {
             const stars = container.querySelectorAll('.rating-star');
@@ -310,7 +310,7 @@
                 }
             });
             
-            // Update the rating text
+            // Cập nhật văn bản đánh giá
             const ratingText = document.getElementById(`rating-text-${questionId}`);
             if (ratingText) {
                 ratingText.textContent = `Đánh giá: ${rating} sao`;
@@ -386,12 +386,12 @@
 
             window.ToastHelper?.show('success', 'Nộp bài thành công!');
 
-            // Lưu surveyId và userId để sử dụng trong feedback modal
+            // Lưu surveyId và userId để sử dụng trong modal phản hồi
             window.currentSurveyId = surveyId;
             window.currentUserId = user.id;
             window.currentUserName = user.name || 'Người dùng';
 
-            // Hiển thị modal phản hồi thay vì redirect ngay
+            // Hiển thị modal phản hồi thay vì chuyển hướng ngay
             setTimeout(() => {
                 const feedbackModal = new bootstrap.Modal(document.getElementById('feedbackModal'), {
                     backdrop: 'static',
@@ -422,9 +422,9 @@
         return String(text).replace(/[&<>"']/g, m => map[m]);
     }
 
-    // Setup feedback modal handlers
+    // Thiết lập các xử lý modal phản hồi
     document.addEventListener('DOMContentLoaded', function () {
-        // Setup rating stars
+        // Thiết lập các sao đánh giá
         const ratingStars = document.querySelectorAll('.rating-btn');
         const ratingValue = document.getElementById('rating-value');
         const ratingText = document.getElementById('rating-text');
@@ -435,13 +435,13 @@
                 const rating = this.dataset.rating;
                 ratingValue.value = rating;
 
-                // Update UI - remove active from all, add to clicked
+                // Cập nhật giao diện - xóa active khỏi tất cả, thêm vào sao được click
                 ratingStars.forEach(s => s.classList.remove('active'));
                 for (let i = 0; i < rating; i++) {
                     ratingStars[i].classList.add('active');
                 }
 
-                // Update text
+                // Cập nhật văn bản
                 const ratingTexts = {
                     1: '⭐ Rất tệ',
                     2: '⭐⭐ Tệ',
