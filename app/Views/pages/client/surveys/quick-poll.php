@@ -33,12 +33,15 @@
                             style="border-radius: 8px;">
                             <i class="fas fa-redo me-2"></i>Xóa bộ lọc
                         </button>
-                        <button
-                            class="btn btn-primary-gradient btn-lg d-flex align-items-center justify-content-center gap-2 px-4 py-2 fw-bold shadow-sm"
-                            data-bs-toggle="modal" data-bs-target="#createQuickPollModal" style="border-radius: 10px;">
-                            <i class="fas fa-plus-circle fs-5"></i>
-                            <span>Tạo Quick-poll</span>
-                        </button>
+                        <span id="create-quickpoll-wrapper" data-bs-toggle="tooltip" data-bs-placement="top" title="">
+                            <button id="btn-create-quickpoll"
+                                class="btn btn-primary-gradient btn-lg d-flex align-items-center justify-content-center gap-2 px-4 py-2 fw-bold shadow-sm"
+                                data-bs-toggle="modal" data-bs-target="#createQuickPollModal"
+                                style="border-radius: 10px;">
+                                <i class="fas fa-plus-circle fs-5"></i>
+                                <span>Tạo Quick-poll</span>
+                            </button>
+                        </span>
                     </div>
                 </div>
 
@@ -348,6 +351,7 @@
     // Initialize
     document.addEventListener('DOMContentLoaded', function () {
         loadQuickPolls();
+        checkPremiumAndUpdateButton();
 
         document.getElementById('search-input').addEventListener('input', function (e) {
             const filters = { ...currentFilters };
@@ -401,6 +405,41 @@
             resetModal();
         });
     });
+
+    // Check premium status and update create button
+    async function checkPremiumAndUpdateButton() {
+        const btn = document.getElementById('btn-create-quickpoll');
+        const wrapper = document.getElementById('create-quickpoll-wrapper');
+        if (!btn || !wrapper) return;
+
+        try {
+            const response = await fetch('/api/premium/status', {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' }
+            });
+            const data = await response.json();
+
+            if (!data.is_premium) {
+                // User is not premium - disable button
+                btn.disabled = true;
+                btn.style.background = '#6c757d';
+                btn.style.opacity = '0.7';
+                btn.style.cursor = 'not-allowed';
+                btn.style.pointerEvents = 'none';
+                btn.removeAttribute('data-bs-toggle');
+                btn.removeAttribute('data-bs-target');
+                
+                // Set tooltip on wrapper (tooltip doesn't work on disabled buttons)
+                wrapper.setAttribute('title', 'Chức năng này dành riêng cho người dùng Premium');
+                wrapper.style.cursor = 'not-allowed';
+                
+                // Initialize tooltip
+                new bootstrap.Tooltip(wrapper);
+            }
+        } catch (error) {
+            console.error('Error checking premium status:', error);
+        }
+    }
 
     // Toggle answer options visibility based on question type
     function toggleAnswerOptions() {
