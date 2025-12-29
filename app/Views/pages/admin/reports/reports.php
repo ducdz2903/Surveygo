@@ -4,14 +4,6 @@
             <h4 class="mb-1">Báo cáo & Thống kê</h4>
             <p class="text-muted mb-0">Tổng hợp số liệu hoạt động của hệ thống</p>
         </div>
-        <div class="btn-group">
-            <button class="btn btn-outline-primary" onclick="showToast('info', 'Đang xuất PDF...')">
-                <i class="fas fa-file-pdf me-2"></i>Xuất PDF
-            </button>
-            <button class="btn btn-outline-success" onclick="showToast('info', 'Đang xuất Excel...')">
-                <i class="fas fa-file-excel me-2"></i>Xuất Excel
-            </button>
-        </div>
     </div>
 
     <div class="row g-4 mb-4">
@@ -89,15 +81,9 @@
                 name: user.name,
                 completedSurveys: user.completed_surveys_count
             })),
-            categories: {
-                labels: ['Giáo dục', 'Công nghệ', 'Đời sống', 'Sức khỏe', 'Giải trí', 'Khác'],
-                data: [35, 25, 20, 15, 10, 5]
-            },
-            growth: {
-                labels: ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'],
-                users: [50, 65, 80, 120, 150, 190, 220, 250, 300, 320, 350, 400],
-                responses: [200, 250, 300, 450, 500, 600, 750, 800, 950, 1100, 1200, 1500]
-            }
+            categories: null,
+            growth: null
+            // growth will be fetched from API
         };
         function getAvatarColor(name) {
             const colors = ['#3498db', '#e74c3c', '#2ecc71', '#f1c40f', '#9b59b6', '#1abc9c'];
@@ -155,79 +141,113 @@
             }
         }
 
-        // hàm tạo biểu đồ danh mục
+        // hàm tạo biểu đồ danh mục - sẽ fetch dữ liệu từ API
         const catCtx = document.getElementById('categoryChart');
-        if (catCtx) {
-            new Chart(catCtx, {
-                type: 'doughnut', 
-                data: {
-                    labels: reportData.categories.labels,
-                    datasets: [{
-                        data: reportData.categories.data,
-                        backgroundColor: [
-                            '#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b', '#858796'
-                        ],
-                        hoverOffset: 4,
-                        borderWidth: 0
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { position: 'right' }
+        let categoryChart = null;
+        async function loadCategoryChart() {
+            if (!catCtx) return;
+            try {
+                const res = await fetch('/api/admin/categories');
+                const payload = await res.json();
+                if (!payload.success) throw new Error(payload.message || 'No data');
+                const cats = payload.data;
+
+                categoryChart = new Chart(catCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: cats.labels,
+                        datasets: [{
+                            data: cats.data,
+                            backgroundColor: [
+                                '#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b'
+                            ],
+                            hoverOffset: 4,
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'right' }
+                        }
                     }
+                });
+            } catch (err) {
+                if (catCtx && catCtx.parentElement) {
+                    catCtx.parentElement.innerHTML = '<div class="text-center py-4 text-muted">Không có dữ liệu</div>';
                 }
-            });
+                console.error('Failed to load category stats', err);
+            }
         }
 
-        // hàm tạo biểu đồ tăng trưởng
+        // Load category chart
+        loadCategoryChart();
+
+        // hàm tạo biểu đồ tăng trưởng - fetch từ API
         const growthCtx = document.getElementById('growthChart');
-        if (growthCtx) {
-            new Chart(growthCtx, {
-                type: 'line',
-                data: {
-                    labels: reportData.growth.labels,
-                    datasets: [
-                        {
-                            label: 'Người dùng mới',
-                            data: reportData.growth.users,
-                            borderColor: '#4e73df',
-                            backgroundColor: 'rgba(78, 115, 223, 0.05)',
-                            tension: 0.3,
-                            fill: true
-                        },
-                        {
-                            label: 'Lượt phản hồi',
-                            data: reportData.growth.responses,
-                            borderColor: '#1cc88a',
-                            backgroundColor: 'rgba(28, 200, 138, 0.05)',
-                            tension: 0.3,
-                            fill: true
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    interaction: {
-                        mode: 'index',
-                        intersect: false,
+        let growthChart = null;
+        async function loadGrowthChart() {
+            if (!growthCtx) return;
+            try {
+                const res = await fetch('/api/admin/growth');
+                const payload = await res.json();
+                if (!payload.success) throw new Error(payload.message || 'No data');
+                const g = payload.data;
+
+                growthChart = new Chart(growthCtx, {
+                    type: 'line',
+                    data: {
+                        labels: g.labels,
+                        datasets: [
+                            {
+                                label: 'Người dùng mới',
+                                data: g.users,
+                                borderColor: '#4e73df',
+                                backgroundColor: 'rgba(78, 115, 223, 0.05)',
+                                tension: 0.3,
+                                fill: true
+                            },
+                            {
+                                label: 'Lượt phản hồi',
+                                data: g.responses,
+                                borderColor: '#1cc88a',
+                                backgroundColor: 'rgba(28, 200, 138, 0.05)',
+                                tension: 0.3,
+                                fill: true
+                            }
+                        ]
                     },
-                    plugins: {
-                        legend: { position: 'top' }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: { borderDash: [2, 4], color: "#eaecf4" }
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: {
+                            mode: 'index',
+                            intersect: false,
                         },
-                        x: {
-                            grid: { display: false }
+                        plugins: {
+                            legend: { position: 'top' }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: { borderDash: [2, 4], color: "#eaecf4" }
+                            },
+                            x: {
+                                grid: { display: false }
+                            }
                         }
                     }
+                });
+            } catch (err) {
+                if (growthCtx && growthCtx.parentElement) {
+                    growthCtx.parentElement.innerHTML = '<div class="text-center py-4 text-muted">Không có dữ liệu</div>';
                 }
-            });
+                console.error('Failed to load growth stats', err);
+            }
         }
+
+        // Load growth chart
+        loadGrowthChart();
     });
 </script>

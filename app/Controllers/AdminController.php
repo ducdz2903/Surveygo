@@ -289,4 +289,105 @@ class AdminController extends Controller
             ], 500);
         }
     }
+
+    public function getCategoryStats(Request $request)
+    {
+        try {
+            $db = \App\Core\Container::get('db');
+
+            $stmt = $db->query("SELECT COALESCE(danhMuc, 0) as category, COUNT(*) as cnt FROM surveys GROUP BY COALESCE(danhMuc,0)");
+            $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+            $counts = [];
+            foreach ($rows as $r) {
+                $counts[(int)$r['category']] = (int)$r['cnt'];
+            }
+
+            $labels = [
+                1 => 'Thói quen',
+                2 => 'Công nghệ',
+                3 => 'Sức khỏe',
+                4 => 'Giáo dục',
+                5 => 'Dịch vụ',
+            ];
+
+            $data = [];
+            $finalLabels = [];
+            foreach ($labels as $id => $label) {
+                $finalLabels[] = $label;
+                $data[] = $counts[$id] ?? 0;
+            }
+
+            return \App\Core\Response::json([
+                'success' => true,
+                'data' => [
+                    'labels' => $finalLabels,
+                    'data' => $data,
+                ],
+            ]);
+        } catch (\Throwable $e) {
+            return \App\Core\Response::json([
+                'success' => false,
+                'message' => 'Failed to load category stats: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function getGrowthStats(Request $request)
+    {
+        try {
+            $db = \App\Core\Container::get('db');
+
+            $months = [];
+            $labels = [];
+            $dt = new \DateTimeImmutable('first day of this month');
+            for ($i = 11; $i >= 0; $i--) {
+                $m = $dt->modify("-{$i} months");
+                $ym = $m->format('Y-m');
+                $months[] = $ym;
+                $labels[] = $m->format('M');
+            }
+
+            $start = $months[0] . '-01 00:00:00';
+
+            // người dùng theo tháng
+            $userStmt = $db->prepare("SELECT DATE_FORMAT(created_at, '%Y-%m') as ym, COUNT(*) as cnt FROM users WHERE created_at >= :start GROUP BY ym");
+            $userStmt->execute([':start' => $start]);
+            $userRows = $userStmt->fetchAll(\PDO::FETCH_ASSOC);
+            $userMap = [];
+            foreach ($userRows as $r) {
+                $userMap[$r['ym']] = (int) $r['cnt'];
+            }
+
+            //  phản hồi khảo sát theo tháng
+            $respStmt = $db->prepare("SELECT DATE_FORMAT(created_at, '%Y-%m') as ym, COUNT(*) as cnt FROM survey_submissions WHERE created_at >= :start GROUP BY ym");
+            $respStmt->execute([':start' => $start]);
+            $respRows = $respStmt->fetchAll(\PDO::FETCH_ASSOC);
+            $respMap = [];
+            foreach ($respRows as $r) {
+                $respMap[$r['ym']] = (int) $r['cnt'];
+            }
+
+            $users = [];
+            $responses = [];
+            foreach ($months as $ym) {
+                $users[] = $userMap[$ym] ?? 0;
+                $responses[] = $respMap[$ym] ?? 0;
+            }
+
+            return \App\Core\Response::json([
+                'success' => true,
+                'data' => [
+                    'labels' => $labels,
+                    'users' => $users,
+                    'responses' => $responses,
+                ],
+            ]);
+        } catch (\Throwable $e) {
+            return \App\Core\Response::json([
+                'success' => false,
+                'message' => 'Failed to load growth stats: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
 }

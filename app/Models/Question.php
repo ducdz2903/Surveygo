@@ -173,7 +173,7 @@ class Question
         }
 
         // Auto-gen maCauHoi nếu chưa có - use microtime for better uniqueness
-        $maCauHoi = $data['maCauHoi'] ?? 'CH-' . substr(uniqid('', true), -8);
+        $maCauHoi = $data['maCauHoi'] ?? 'CH-' . substr(uniqid('', true), -7);
 
         $now = (new \DateTimeImmutable())->format('Y-m-d H:i:s');
 
@@ -253,6 +253,24 @@ class Question
     }
 
     /**
+     * Lấy maKhaoSat từ bảng survey_question_map (nếu có)
+     */
+    public function getSurveyId(): int
+    {
+        /** @var \PDO $db */
+        $db = Container::get('db');
+
+        try {
+            $stmt = $db->prepare('SELECT idKhaoSat FROM survey_question_map WHERE idCauHoi = :questionId LIMIT 1');
+            $stmt->execute([':questionId' => $this->id]);
+            $row = $stmt->fetch();
+            return $row ? (int) $row['idKhaoSat'] : 0;
+        } catch (\Throwable $e) {
+            return 0;
+        }
+    }
+
+    /**
      * Chuyển đổi thành array
      */
     public function toArray(): array
@@ -260,7 +278,7 @@ class Question
         return [
             'id' => $this->id,
             'maCauHoi' => $this->maCauHoi,
-            'maKhaoSat' => $this->maKhaoSat,
+            'maKhaoSat' => $this->getSurveyId(), // Lấy từ mapping table
             'loaiCauHoi' => $this->loaiCauHoi,
             'noiDungCauHoi' => $this->noiDungCauHoi,
             'batBuocTraLoi' => $this->batBuocTraLoi,
