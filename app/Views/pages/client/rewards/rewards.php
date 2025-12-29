@@ -529,18 +529,51 @@
                     <label class="form-label">Tên Ngân Hàng <span class="text-danger">*</span></label>
                     <select class="form-select" id="bankName" name="bank_name" required>
                         <option value="">Chọn ngân hàng</option>
-                        <option value="VCB">Vietcombank (VCB)</option>
-                        <option value="TCB">Techcombank (TCB)</option>
-                        <option value="STB">Sacombank (STB)</option>
-                        <option value="VIB">Việt Á Bank (VIB)</option>
-                        <option value="SHB">SHB Bank</option>
-                        <option value="MB">MB Bank</option>
-                        <option value="ACB">ACB Bank</option>
-                        <option value="TPB">TPBank</option>
-                        <option value="BIDV">BIDV</option>
-                        <option value="AGRI">Agribank</option>
-                        <option value="momo">MoMo</option>
-                        <option value="zalopay">ZaloPay</option>
+
+                            <option value="acb">Ngân hàng Á Châu (ACB)</option>
+                            <option value="agribank">Agribank</option>
+                            <option value="anbinhbank">Ngân hàng An Bình</option>
+                            <option value="bao viet">Ngân hàng Bảo Việt</option>
+                            <option value="bidv">BIDV</option>
+                            <option value="cake">NH số Cake</option>
+                            <option value="cimb">CIMB</option>
+                            <option value="eximbank">Eximbank</option>
+                            <option value="hsbc">HSBC</option>
+                            <option value="kien long">Ngân hàng Kiên Long</option>
+                            <option value="kbank">KBank</option>
+                            <option value="liobank">LioBank</option>
+                            <option value="lpbank">LPBank</option>
+                            <option value="mbbank">MB Bank</option>
+                            <option value="mbv">MBV</option>
+                            <option value="mari">Maritime Bank</option>
+                            <option value="momo">MoMo</option>
+                            <option value="nh bac a">NH Bắc Á</option>
+                            <option value="nh ban viet">NH Bản Việt</option>
+                            <option value="nh chinh sach">NH Chính sách xã hội</option>
+                            <option value="nh dau khi">Ngân hàng Dầu khí Toàn cầu</option>
+                            <option value="nh dong nam a">NH Đông Nam Á</option>
+                            <option value="nh nam a">NH Nam Á</option>
+                            <option value="timo">NH số Timo</option>
+                            <option value="ubank">NH số Ubank</option>
+                            <option value="vikki">NH số Vikki</option>
+                            <option value="nh viet a">NH Việt Á</option>
+                            <option value="ocb">OCB</option>
+                            <option value="petrolimex">Petrolimex Bank</option>
+                            <option value="pvcombank">PVCombank</option>
+                            <option value="sacombank">Sacombank</option>
+                            <option value="saigonbank">Ngân hàng Sài Gòn Công Thương</option>
+                            <option value="sai gon">SCB (Sài Gòn)</option>
+                            <option value="shbank">SHB Bank</option>
+                            <option value="shinhan">Shinhan Bank</option>
+                            <option value="tcb">Techcombank</option>
+                            <option value="tp hcm">HDBank</option>
+                            <option value="tpbank">TPBank</option>
+                            <option value="vcb">Vietcombank (VCB)</option>
+                            <option value="vietin">VietinBank</option>
+                            <option value="vib">VIB</option>
+                            <option value="woori">Woori Bank</option>
+                            <option value="zalopay">ZaloPay</option>
+
                     </select>
                 </div>
                 <div class="mb-3">
