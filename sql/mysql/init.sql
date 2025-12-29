@@ -730,3 +730,56 @@ INSERT IGNORE INTO user_responses (maCauHoi, maNguoiDung, maKhaoSat, noiDungTraL
   (22, 8, 16, 'Phòng họp thường xuyên bị đặt trùng lịch, gây khó khăn cho công việc.', NOW(), NOW()),
   (22, 9, 16, 'Điều hòa trong văn phòng quá lạnh, mong được điều chỉnh nhiệt độ.', NOW(), NOW());
 
+-- Dữ liệu cho bảng survey_submissions (phải khớp với user_responses)
+-- Format: (maKhaoSat, maNguoiDung, trangThai, diemDat, ghiChu)
+INSERT IGNORE INTO survey_submissions (maKhaoSat, maNguoiDung, trangThai, diemDat, ghiChu, created_at, updated_at) VALUES
+  -- Survey 1: Users 1, 4, 5
+  (1, 1, 'submitted', 10, 'Submitted from seed data', NOW(), NOW()),
+  (1, 4, 'submitted', 10, 'Submitted from seed data', NOW(), NOW()),
+  (1, 5, 'submitted', 10, 'Submitted from seed data', NOW(), NOW()),
+  
+  -- Survey 2: Users 2, 6
+  (2, 2, 'submitted', 15, 'Submitted from seed data', NOW(), NOW()),
+  (2, 6, 'submitted', 15, 'Submitted from seed data', NOW(), NOW()),
+  
+  -- Survey 3: Users 7, 8
+  (3, 7, 'submitted', 12, 'Submitted from seed data', NOW(), NOW()),
+  (3, 8, 'submitted', 12, 'Submitted from seed data', NOW(), NOW()),
+  
+  -- Survey 4: Users 9, 10
+  (4, 9, 'submitted', 10, 'Submitted from seed data', NOW(), NOW()),
+  (4, 10, 'submitted', 10, 'Submitted from seed data', NOW(), NOW()),
+  
+  -- Survey 5: Users 11, 12
+  (5, 11, 'submitted', 20, 'Submitted from seed data', NOW(), NOW()),
+  (5, 12, 'submitted', 20, 'Submitted from seed data', NOW(), NOW()),
+  
+  -- Survey 6: Users 13, 14
+  (6, 13, 'submitted', 15, 'Submitted from seed data', NOW(), NOW()),
+  (6, 14, 'submitted', 15, 'Submitted from seed data', NOW(), NOW()),
+  
+  -- Survey 7 (Quick Poll): Users 1, 2, 3
+  (7, 1, 'submitted', 5, 'Submitted from seed data', NOW(), NOW()),
+  (7, 2, 'submitted', 5, 'Submitted from seed data', NOW(), NOW()),
+  (7, 3, 'submitted', 5, 'Submitted from seed data', NOW(), NOW()),
+  
+  -- Survey 8 (Quick Poll): Users 4, 5
+  (8, 4, 'submitted', 5, 'Submitted from seed data', NOW(), NOW()),
+  (8, 5, 'submitted', 5, 'Submitted from seed data', NOW(), NOW()),
+  
+  -- Survey 13: Users 1, 2, 3
+  (13, 1, 'submitted', 5, 'Submitted from seed data', NOW(), NOW()),
+  (13, 2, 'submitted', 5, 'Submitted from seed data', NOW(), NOW()),
+  (13, 3, 'submitted', 5, 'Submitted from seed data', NOW(), NOW()),
+  
+  -- Survey 14: Users 4, 5
+  (14, 4, 'submitted', 5, 'Submitted from seed data', NOW(), NOW()),
+  (14, 5, 'submitted', 5, 'Submitted from seed data', NOW(), NOW()),
+  
+  -- Survey 15: Users 6, 7
+  (15, 6, 'submitted', 0, 'Submitted from seed data', NOW(), NOW()),
+  (15, 7, 'submitted', 0, 'Submitted from seed data', NOW(), NOW()),
+  
+  -- Survey 16: Users 8, 9
+  (16, 8, 'submitted', 0, 'Submitted from seed data', NOW(), NOW()),
+  (16, 9, 'submitted', 0, 'Submitted from seed data', NOW(), NOW());

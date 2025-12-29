@@ -288,13 +288,13 @@
     function setRating(questionId, rating) {
         // Update the answers object
         answers[questionId] = rating;
-        
+
         // Update the hidden input
         const hiddenInput = document.getElementById(`rating_${questionId}`);
         if (hiddenInput) {
             hiddenInput.value = rating;
         }
-        
+
         // Update all stars visual state
         const container = document.querySelector(`[data-question-id="${questionId}"]`);
         if (container) {
@@ -309,7 +309,7 @@
                     star.classList.add('text-muted');
                 }
             });
-            
+
             // Update the rating text
             const ratingText = document.getElementById(`rating-text-${questionId}`);
             if (ratingText) {
@@ -458,7 +458,9 @@
             const modal = bootstrap.Modal.getInstance(document.getElementById('feedbackModal'));
             modal?.hide();
             setTimeout(() => {
-                window.location.href = '/surveys';
+                // Redirect về quick-poll nếu đây là quick poll, ngược lại về surveys
+                const redirectUrl = surveyData?.isQuickPoll ? '/quick-poll' : '/surveys';
+                window.location.href = redirectUrl;
             }, 300);
         });
 
@@ -510,7 +512,9 @@
                 modal?.hide();
 
                 setTimeout(() => {
-                    window.location.href = '/surveys';
+                    // Redirect về quick-poll nếu đây là quick poll, ngược lại về surveys
+                    const redirectUrl = surveyData?.isQuickPoll ? '/quick-poll' : '/surveys';
+                    window.location.href = redirectUrl;
                 }, 500);
             } catch (error) {
                 console.error('Lỗi:', error);

@@ -968,6 +968,17 @@ class SurveyController extends Controller
             ], 201);
 
         } catch (\Exception $e) {
+            // Check if it's a duplicate entry error
+            if (
+                strpos($e->getMessage(), 'Duplicate entry') !== false ||
+                strpos($e->getMessage(), '1062') !== false
+            ) {
+                return $this->json([
+                    'error' => true,
+                    'message' => 'Bạn đã làm khảo sát này rồi. Mỗi người chỉ được làm một lần.',
+                ], 409);
+            }
+
             return $this->json([
                 'error' => true,
                 'message' => 'Error submitting survey: ' . $e->getMessage(),
