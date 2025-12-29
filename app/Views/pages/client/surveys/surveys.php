@@ -118,7 +118,7 @@
         }
     }
 
-    // Load surveys
+    // Tải danh sách khảo sát
     async function loadSurveys(page = 1, filters = {}) {
         try {
             // Lấy user_id từ localStorage
@@ -178,7 +178,7 @@
         }
     }
 
-    // Render surveys
+    // Hiển thị các khảo sát
     function renderSurveys(surveys, meta) {
         const container = document.getElementById('surveys-container');
 
@@ -278,28 +278,28 @@
         const filters = { ...currentFilters };
         const value = e.target.value;
 
-        // Reset filters first
+        // Reset các bộ lọc trước
         delete filters.trangThai;
         delete filters.sortBy;
         delete filters.isCompleted;
         delete filters.standalone;
 
         if (value === 'standalone') {
-            // Khảo sát riêng: surveys without event (maSuKien is null)
+            // Khảo sát riêng: các khảo sát không có sự kiện (maSuKien là null)
             filters.standalone = 'true';
         } else if (value === 'hot') {
-            // Hot: sort by completion count (number of unique users)
+            // Hot: sắp xếp theo số lượng hoàn thành (số lượng người dùng duy nhất)
             filters.sortBy = 'hot';
         } else if (value === 'new') {
-            // Chưa hoàn thành: show incomplete surveys, sorted by newest
+            // Chưa hoàn thành: hiển thị các khảo sát chưa hoàn thành, sắp xếp theo mới nhất
             filters.isCompleted = 'false';
             filters.sortBy = 'newest';
         } else if (value === 'old') {
-            // Đã hoàn thành: show completed surveys, sorted by newest
+            // Đã hoàn thành: hiển thị các khảo sát đã hoàn thành, sắp xếp theo mới nhất
             filters.isCompleted = 'true';
             filters.sortBy = 'newest';
         }
-        // If value is empty (Tất cả), all filters are already deleted
+        // Nếu giá trị rỗng (Tất cả), tất cả bộ lọc đã được xóa
 
         loadSurveys(1, filters);
     });

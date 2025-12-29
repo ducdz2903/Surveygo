@@ -12,7 +12,7 @@ use App\Models\UserInvite;
 class InviteController extends Controller
 {
     /**
-     * Get current user's invite code and link
+     * Lấy mã mời và link mời của người dùng hiện tại
      * GET /api/invites/my-invite
      */
     public function getMyInvite()
@@ -27,7 +27,7 @@ class InviteController extends Controller
         }
 
         try {
-            // Get or create invite record for this user
+            // Lấy hoặc tạo bản ghi mời cho user này
             $invite = UserInvite::getOrCreate($user['id']);
             
             return Response::json([
@@ -48,7 +48,7 @@ class InviteController extends Controller
     }
 
     /**
-     * Validate an invite code
+     * Kiểm tra mã mời
      * GET /api/invites/validate?code=ABC123
      */
     public function validateCode()
@@ -90,7 +90,7 @@ class InviteController extends Controller
     }
 
     /**
-     * Get referral statistics for current user
+     * Lấy thống kê giới thiệu cho người dùng hiện tại
      * GET /api/invites/stats
      */
     public function getStats()
@@ -135,7 +135,7 @@ class InviteController extends Controller
     }
 
     /**
-     * Helper method to get current user from session
+     * Phương thức hỗ trợ để lấy người dùng hiện tại từ session
      */
     private function getCurrentUser(): ?array
     {
@@ -148,7 +148,7 @@ class InviteController extends Controller
             ];
         }
         
-        // Fallback: try to get from GET/POST parameters
+        // Dự phòng: thử lấy từ GET/POST parameters
         $userId = $_GET['userId'] ?? $_POST['userId'] ?? null;
         if ($userId) {
             return ['id' => (int) $userId];

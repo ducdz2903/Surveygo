@@ -59,10 +59,10 @@ class AuthController extends Controller
             ], 422);
         }
 
-        // Validate invite - prioritize token over code
+        // kiểm tra lời mời có hợp lệ không? -> tạo token giấu code mời đi.
         $inviterInvite = null;
         if ($inviteToken) {
-            // Try to find by token first
+            // tìm theo token trước
             $inviterInvite = \App\Models\UserInvite::findByToken($inviteToken);
             if (!$inviterInvite) {
                 return $this->json([
@@ -71,7 +71,7 @@ class AuthController extends Controller
                 ], 422);
             }
         } elseif ($inviteCode) {
-            // Fall back to code (manual input)
+            // trả về code mời vừa nhập (manual input)
             $inviterInvite = \App\Models\UserInvite::findByInviteCode($inviteCode);
             if (!$inviterInvite) {
                 return $this->json([
@@ -83,7 +83,7 @@ class AuthController extends Controller
 
         $hashed = password_hash($password, PASSWORD_BCRYPT);
 
-        // Create user with invited_by reference
+        // Tạo user với invited_by reference
         $db = Container::get('db');
         $now = (new \DateTimeImmutable())->format('Y-m-d H:i:s');
         
@@ -108,7 +108,7 @@ class AuthController extends Controller
 
         $newUserId = (int) $db->lastInsertId();
         
-        // Update user code
+        // Cập nhật user code
         if ($newUserId > 0) {
             $code = 'US' . str_pad((string) $newUserId, 3, '0', STR_PAD_LEFT);
             $upd = $db->prepare('UPDATE users SET code = :code WHERE id = :id');
@@ -117,7 +117,7 @@ class AuthController extends Controller
 
         $user = User::findById($newUserId);
 
-        // Process referral rewards if invite code was used
+        // Bắt đầu xử lý thưởng giới thiệu nếu có mã mời
     if ($inviterInvite && $user) {
         try {
             $rewardAmount = 500; // 500 points for both parties

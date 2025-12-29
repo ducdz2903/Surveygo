@@ -463,7 +463,7 @@ class Survey
     }
 
     /**
-     * Lấy thống kê khảo sát bao gồm tổng số, tăng trưởng hàng tháng và khảo sát mới
+     * Lấy thống kê khảo sát bao gồm tổng số, tăng trưởng hàng ngày và khảo sát mới
      * 
      * @return array Dữ liệu thống kê
      */
@@ -476,46 +476,34 @@ class Survey
         $totalStmt = $db->query('SELECT COUNT(*) as total FROM surveys');
         $totalSurveys = (int) $totalStmt->fetch()['total'];
 
-        // Lấy khoảng thời gian của tháng hiện tại
-        $currentMonthStart = date('Y-m-01 00:00:00');
-        $currentMonthEnd = date('Y-m-t 23:59:59');
-
-        // Lấy khoảng thời gian của tháng trước
-        $previousMonthStart = date('Y-m-01 00:00:00', strtotime('first day of last month'));
-        $previousMonthEnd = date('Y-m-t 23:59:59', strtotime('last day of last month'));
-
-        // Đếm số khảo sát mới trong tháng hiện tại
-        $currentMonthStmt = $db->prepare(
-            'SELECT COUNT(*) as count FROM surveys WHERE created_at >= :start AND created_at <= :end'
+        // Đếm số khảo sát mới được tạo hôm nay
+        $todayStmt = $db->prepare(
+            'SELECT COUNT(*) as count FROM surveys WHERE DATE(created_at) = CURDATE()'
         );
-        $currentMonthStmt->execute([
-            ':start' => $currentMonthStart,
-            ':end' => $currentMonthEnd,
-        ]);
-        $newSurveysThisMonth = (int) $currentMonthStmt->fetch()['count'];
+        $todayStmt->execute();
+        $newSurveysToday = (int) $todayStmt->fetch()['count'];
 
-        // Đếm số khảo sát mới trong tháng trước
-        $previousMonthStmt = $db->prepare(
-            'SELECT COUNT(*) as count FROM surveys WHERE created_at >= :start AND created_at <= :end'
+        // Đếm số khảo sát mới được tạo hôm qua
+        $yesterdayStmt = $db->prepare(
+            'SELECT COUNT(*) as count FROM surveys WHERE DATE(created_at) = CURDATE() - INTERVAL 1 DAY'
         );
-        $previousMonthStmt->execute([
-            ':start' => $previousMonthStart,
-            ':end' => $previousMonthEnd,
-        ]);
-        $newSurveysPreviousMonth = (int) $previousMonthStmt->fetch()['count'];
+        $yesterdayStmt->execute();
+        $newSurveysYesterday = (int) $yesterdayStmt->fetch()['count'];
 
-        // Tính phần trăm tăng trưởng hàng tháng
+        // Tính phần trăm tăng trưởng hàng ngày
         $growthPercentage = 0.0;
-        if ($newSurveysPreviousMonth > 0) {
-            $growthPercentage = (($newSurveysThisMonth - $newSurveysPreviousMonth) / $newSurveysPreviousMonth) * 100;
-        } elseif ($newSurveysThisMonth > 0) {
-            $growthPercentage = 100.0; // Nếu không có khảo sát tháng trước nhưng có khảo sát tháng này
+        if ($newSurveysYesterday > 0) {
+            $growthPercentage = (($newSurveysToday - $newSurveysYesterday) / $newSurveysYesterday) * 100;
+        } elseif ($newSurveysToday > 0) {
+            $growthPercentage = 100.0; // Nếu không có khảo sát hôm qua nhưng có khảo sát hôm nay
+        } elseif ($newSurveysYesterday > 0 && $newSurveysToday === 0) {
+            $growthPercentage = -100.0; // Nếu có khảo sát hôm qua nhưng không có hôm nay
         }
 
         return [
             'total_surveys' => $totalSurveys,
-            'new_surveys_this_month' => $newSurveysThisMonth,
-            'new_surveys_previous_month' => $newSurveysPreviousMonth,
+            'new_surveys_today' => $newSurveysToday,
+            'new_surveys_yesterday' => $newSurveysYesterday,
             'growth_percentage' => round($growthPercentage, 1),
             'is_growth_positive' => $growthPercentage >= 0,
         ];

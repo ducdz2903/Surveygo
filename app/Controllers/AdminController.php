@@ -81,10 +81,10 @@ class AdminController extends Controller
         $view = new \App\Core\View();
         $data = $this->pageData($request);
 
-        // Fetch top surveys by responses with average ratings
+        // Lấy top khảo sát theo số lượng phản hồi với đánh giá trung bình
         $data['topSurveys'] = \App\Models\Survey::getTopSurveysByResponses(5);
 
-        // Fetch top active users by survey count
+        // Lấy top người dùng hoạt động theo số khảo sát
         $data['topUsers'] = \App\Models\User::getTopActiveUsers(5);
 
         $content = $view->render('pages/admin/reports/reports', $data);
@@ -183,14 +183,14 @@ class AdminController extends Controller
     }
 
     /**
-     * API endpoint to get top surveys by response count
+     * API endpoint để lấy top khảo sát theo số lượng phản hồi
      * GET /api/admin/top-surveys
      */
     public function getTopSurveys(Request $request)
     {
         try {
             $limit = (int) ($request->query('limit') ?? 5);
-            $limit = max(1, min(20, $limit)); // Between 1 and 20
+            $limit = max(1, min(20, $limit)); // Giữa 1 và 20
 
             $topSurveys = \App\Models\Survey::getTopSurveysByResponses($limit);
 
@@ -207,7 +207,7 @@ class AdminController extends Controller
     }
 
     /**
-     * API endpoint to get user statistics
+     * API endpoint để lấy thống kê người dùng
      * GET /api/admin/user-stats
      */
     public function getUserStats(Request $request)
@@ -228,7 +228,7 @@ class AdminController extends Controller
     }
 
     /**
-     * API endpoint to get survey statistics
+     * API endpoint để lấy thống kê khảo sát
      * GET /api/admin/survey-stats
      */
     public function getSurveyStats(Request $request)
@@ -249,7 +249,7 @@ class AdminController extends Controller
     }
 
     /**
-     * API endpoint to get response statistics (survey submissions, feedback, contact messages)
+     * API endpoint để lấy thống kê phản hồi (nộp khảo sát, phản hồi, tin nhắn liên hệ)
      * GET /api/admin/response-stats
      */
     public function getResponseStats(Request $request)
@@ -270,7 +270,7 @@ class AdminController extends Controller
     }
 
     /**
-     * API endpoint to get event statistics
+     * API endpoint để lấy thống kê sự kiện
      * GET /api/admin/event-stats
      */
     public function getEventStats(Request $request)
@@ -286,6 +286,107 @@ class AdminController extends Controller
             return \App\Core\Response::json([
                 'success' => false,
                 'message' => 'Failed to load event statistics: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function getCategoryStats(Request $request)
+    {
+        try {
+            $db = \App\Core\Container::get('db');
+
+            $stmt = $db->query("SELECT COALESCE(danhMuc, 0) as category, COUNT(*) as cnt FROM surveys GROUP BY COALESCE(danhMuc,0)");
+            $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+            $counts = [];
+            foreach ($rows as $r) {
+                $counts[(int)$r['category']] = (int)$r['cnt'];
+            }
+
+            $labels = [
+                1 => 'Thói quen',
+                2 => 'Công nghệ',
+                3 => 'Sức khỏe',
+                4 => 'Giáo dục',
+                5 => 'Dịch vụ',
+            ];
+
+            $data = [];
+            $finalLabels = [];
+            foreach ($labels as $id => $label) {
+                $finalLabels[] = $label;
+                $data[] = $counts[$id] ?? 0;
+            }
+
+            return \App\Core\Response::json([
+                'success' => true,
+                'data' => [
+                    'labels' => $finalLabels,
+                    'data' => $data,
+                ],
+            ]);
+        } catch (\Throwable $e) {
+            return \App\Core\Response::json([
+                'success' => false,
+                'message' => 'Failed to load category stats: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function getGrowthStats(Request $request)
+    {
+        try {
+            $db = \App\Core\Container::get('db');
+
+            $months = [];
+            $labels = [];
+            $dt = new \DateTimeImmutable('first day of this month');
+            for ($i = 11; $i >= 0; $i--) {
+                $m = $dt->modify("-{$i} months");
+                $ym = $m->format('Y-m');
+                $months[] = $ym;
+                $labels[] = $m->format('M');
+            }
+
+            $start = $months[0] . '-01 00:00:00';
+
+            // người dùng theo tháng
+            $userStmt = $db->prepare("SELECT DATE_FORMAT(created_at, '%Y-%m') as ym, COUNT(*) as cnt FROM users WHERE created_at >= :start GROUP BY ym");
+            $userStmt->execute([':start' => $start]);
+            $userRows = $userStmt->fetchAll(\PDO::FETCH_ASSOC);
+            $userMap = [];
+            foreach ($userRows as $r) {
+                $userMap[$r['ym']] = (int) $r['cnt'];
+            }
+
+            //  phản hồi khảo sát theo tháng
+            $respStmt = $db->prepare("SELECT DATE_FORMAT(created_at, '%Y-%m') as ym, COUNT(*) as cnt FROM survey_submissions WHERE created_at >= :start GROUP BY ym");
+            $respStmt->execute([':start' => $start]);
+            $respRows = $respStmt->fetchAll(\PDO::FETCH_ASSOC);
+            $respMap = [];
+            foreach ($respRows as $r) {
+                $respMap[$r['ym']] = (int) $r['cnt'];
+            }
+
+            $users = [];
+            $responses = [];
+            foreach ($months as $ym) {
+                $users[] = $userMap[$ym] ?? 0;
+                $responses[] = $respMap[$ym] ?? 0;
+            }
+
+            return \App\Core\Response::json([
+                'success' => true,
+                'data' => [
+                    'labels' => $labels,
+                    'users' => $users,
+                    'responses' => $responses,
+                ],
+            ]);
+        } catch (\Throwable $e) {
+            return \App\Core\Response::json([
+                'success' => false,
+                'message' => 'Failed to load growth stats: ' . $e->getMessage(),
             ], 500);
         }
     }

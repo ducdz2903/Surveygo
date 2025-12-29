@@ -71,16 +71,16 @@ class UserController extends Controller
     }
 
     /**
-     * Get user profile statistics
-     * Returns: completed surveys count, current points, and redemptions count
+     * Lấy thống kê hồ sơ người dùng
+     * Trả về: số khảo sát đã hoàn thành, điểm hiện tại và số lần đổi thưởng
      */
     public function getUserProfileStats(Request $request)
     {
         try {
-            // Get user ID from request or session
+            // Lấy ID người dùng từ request hoặc session
             $userId = $request->query('user_id');
             if (!$userId) {
-                // Try to get from session if authenticated
+                // Thử lấy từ session nếu đã xác thực
                 if (isset($_SESSION['user_id'])) {
                     $userId = (int) $_SESSION['user_id'];
                 } else {
@@ -93,14 +93,14 @@ class UserController extends Controller
 
             $db = Container::get('db');
 
-            // Get completed surveys count from survey_submissions table
+            // Lấy số khảo sát đã hoàn thành từ bảng survey_submissions
             $surveysStmt = $db->prepare(
                 'SELECT COUNT(*) as count FROM survey_submissions WHERE maNguoiDung = :user_id'
             );
             $surveysStmt->execute([':user_id' => $userId]);
             $completedSurveys = (int) $surveysStmt->fetch()['count'];
 
-            // Get current points balance from user_points table
+            // Lấy số dư điểm hiện tại từ bảng user_points
             $pointsStmt = $db->prepare(
                 'SELECT balance FROM user_points WHERE user_id = :user_id'
             );
@@ -108,7 +108,7 @@ class UserController extends Controller
             $pointsRow = $pointsStmt->fetch();
             $currentPoints = $pointsRow ? (int) $pointsRow['balance'] : 0;
 
-            // Get redemptions count from reward_redemptions table
+            // Lấy số lần đổi thưởng từ bảng reward_redemptions
             $redemptionsStmt = $db->prepare(
                 'SELECT COUNT(*) as count FROM reward_redemptions WHERE user_id = :user_id'
             );
@@ -200,7 +200,7 @@ class UserController extends Controller
         $gender = $request->input('gender') ?? 'other';
         $role = $request->input('role') ?? 'user';
 
-        // Validation
+        // Kiểm tra dữ liệu
         if (empty($name) || empty($email) || empty($password)) {
             return $this->json([
                 'error' => true,
@@ -290,7 +290,7 @@ class UserController extends Controller
             ], 404);
         }
         
-        // Validation input
+        // Kiểm tra dữ liệu đầu vào
         $name = trim($request->input('name') ?? '');
         $email = trim($request->input('email') ?? '');
         $phone = trim($request->input('phone') ?? '');

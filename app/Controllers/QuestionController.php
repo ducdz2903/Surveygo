@@ -18,7 +18,7 @@ class QuestionController extends Controller
     // api lấy all
     public function index(Request $request)
     {
-        // Support pagination and filters
+        // Hỗ trợ phân trang và bộ lọc
         $page = (int)($request->query('page') ?? 1);
         $perPage = (int)($request->query('per_page') ?? 10);
         $search = $request->query('search') ?? null;
@@ -80,7 +80,7 @@ class QuestionController extends Controller
             ], 404);
         }
 
-        // Include answers for preview
+        // Bao gồm các đáp án để xem trước
         $data = $question->toArray();
         $data['answers'] = $question->getAnswers();
 
@@ -141,27 +141,27 @@ class QuestionController extends Controller
             ], 422);
         }
 
-        // Link to Survey if maKhaoSat is provided
+        // Liên kết với khảo sát nếu có maKhaoSat
         if (!empty($data['maKhaoSat']) && is_numeric($data['maKhaoSat'])) {
             SurveyQuestionMap::attach((int)$data['maKhaoSat'], $question->getId());
         }
 
-        // Handle Answers (if any)
+        // Xử lý các đáp án (nếu có)
         if (!empty($data['answers']) && is_array($data['answers'])) {
             foreach ($data['answers'] as $ans) {
                 if (!empty($ans['noiDungCauTraLoi'])) {
                     Answer::create([
-                        'idCauHoi' => $question->getId(), // Use new ID
+                        'idCauHoi' => $question->getId(), // Sử dụng ID mới
                         'noiDungCauTraLoi' => $ans['noiDungCauTraLoi'],
-                        'creator_id' => 1 // simplified, should be current user
+                        'creator_id' => 1 // đơn giản hóa, nên là người dùng hiện tại
                     ]);
                 }
             }
         }
 
-        // Log activity
+        // Ghi log hoạt động
         try {
-            // Get userId from session if available
+            // Lấy userId từ session nếu có
             $userId = $_SESSION['user_id'] ?? 0;
             if ($userId) {
                 ActivityLogHelper::logQuestionCreated(
@@ -218,27 +218,27 @@ class QuestionController extends Controller
             ], 500);
         }
 
-        // Update Survey Link (if maKhaoSat key exists in payload)
+        // Cập nhật liên kết khảo sát (nếu có key maKhaoSat trong payload)
         if (array_key_exists('maKhaoSat', $data)) {
-            // Treat null, empty string, or -1 as "unlink"
+            // Coi null, chuỗi rỗng, hoặc -1 là "hủy liên kết"
             $surveyId = $data['maKhaoSat'];
             
-            // Always detach all current links for this question (assuming 1-to-many from Question side for this UI)
+            // Luôn hủy tất cả liên kết hiện tại cho câu hỏi này (giả định quan hệ 1-nhiều từ phía câu hỏi cho UI này)
             SurveyQuestionMap::detachAllByQuestion($question->getId());
 
-            // If a valid survey ID is selected, attach it
+            // Nếu có ID khảo sát hợp lệ được chọn, gắn nó vào
             if ($surveyId && is_numeric($surveyId) && (int)$surveyId > 0) {
                  SurveyQuestionMap::attach((int)$surveyId, $question->getId());
             }
         }
 
-        // Handle Answers Update (Replace Strategy)
-        // Only if 'answers' key exists in payload (even if empty, meaning "remove all")
+        // Xử lý cập nhật đáp án (chiến lược thay thế)
+        // Chỉ nếu có key 'answers' trong payload (ngay cả khi rỗng, nghĩa là "xóa tất cả")
         if (isset($data['answers']) && is_array($data['answers'])) {
-            // Delete old answers
+            // Xóa các đáp án cũ
             Answer::deleteByQuestion($question->getId());
             
-            // Add new answers
+            // Thêm các đáp án mới
             foreach ($data['answers'] as $ans) {
                 if (!empty($ans['noiDungCauTraLoi'])) {
                     Answer::create([
@@ -250,7 +250,7 @@ class QuestionController extends Controller
             }
         }
 
-        // Reload
+        // Tải lại
         $question = Question::find((int)$id);
 
         return $this->json([

@@ -109,7 +109,7 @@
     }
 
     async function startSurvey(surveyId) {
-        // Get user from localStorage
+        // Lấy thông tin user từ localStorage
         const userRaw = localStorage.getItem('app.user');
         const user = userRaw ? JSON.parse(userRaw) : null;
 
@@ -123,7 +123,7 @@
         }
 
         try {
-            // Check if user already submitted this survey
+            // Kiểm tra nếu user đã nộp khảo sát này rồi
             const response = await fetch(`/api/surveys/${surveyId}/check-submission?userId=${user.id}`);
             const result = await response.json();
 
@@ -133,7 +133,7 @@
                 return;
             }
 
-            // If no submission found, proceed to survey directly
+            // Nếu chưa nộp, tiến hành vào khảo sát trực tiếp
             window.location.href = `/surveys/${surveyId}/questions`;
 
         } catch (error) {

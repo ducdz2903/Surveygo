@@ -76,7 +76,7 @@ class ActivityLogHelper
     }
 
     /**
-     * Log when user successfully invites someone (inviter side)
+     * Ghi log khi người dùng mời thành công ai đó (phía người mời)
      */
     public static function logReferralInviter(int $inviterId, int $invitedUserId, string $invitedUserName, int $points): void
     {
@@ -88,7 +88,7 @@ class ActivityLogHelper
     }
 
     /**
-     * Log when user registers via invite (invitee side)
+     * Ghi log khi người dùng đăng ký qua mời (phía người được mời)
      */
     public static function logReferralInvitee(int $inviteeId, int $inviterId, string $inviterName, int $points): void
     {
