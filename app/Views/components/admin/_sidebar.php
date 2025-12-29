@@ -103,14 +103,6 @@ $currentPath = $currentPath ?? ($_SERVER['REQUEST_URI'] ?? '/');
         <div class="nav-section">HỆ THỐNG</div>
         <ul class="nav flex-column">
             <li class="nav-item">
-                <a class="nav-link <?= str_contains($currentPath, '/admin/settings') ? 'active' : '' ?>"
-                    href="/admin/settings">
-                    <i class="fas fa-cog"></i>
-                    <span>Cài đặt</span>
-                </a>
-            </li>
-
-            <li class="nav-item">
                 <a class="nav-link" href="/">
                     <i class="fas fa-arrow-left"></i>
                     <span>Về trang chủ</span>

@@ -224,6 +224,10 @@ $router->get('/api/admin/user-stasts', [AdminController::class, 'getUserStats'],
 $router->get('/api/admin/survey-stats', [AdminController::class, 'getSurveyStats'], [new RoleMiddleware(['admin'])]);
 $router->get('/api/admin/response-stats', [AdminController::class, 'getResponseStats'], [new RoleMiddleware(['admin'])]);
 $router->get('/api/admin/event-stats', [AdminController::class, 'getEventStats'], [new RoleMiddleware(['admin'])]);
+// Categories distribution for reports
+$router->get('/api/admin/categories', [AdminController::class, 'getCategoryStats'], [new RoleMiddleware(['admin'])]);
+// Growth statistics for reports
+$router->get('/api/admin/growth', [AdminController::class, 'getGrowthStats'], [new RoleMiddleware(['admin'])]);
 
 // Premium API routes
 $router->post('/api/premium/create-transaction', [PremiumController::class, 'createTransaction'], [new AuthMiddleware()]);
