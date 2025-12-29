@@ -51,7 +51,7 @@ class SurveyController extends Controller
             $filters['maSuKien'] = (int) $maSuKien;
         }
 
-        // Standalone filter: surveys without event (maSuKien is null)
+        // Bộ lọc standalone: khảo sát không có sự kiện (maSuKien là null)
         $standaloneParam = $request->query('standalone');
         if ($standaloneParam !== null && $standaloneParam !== '') {
             if (filter_var($standaloneParam, FILTER_VALIDATE_BOOLEAN)) {
@@ -59,7 +59,7 @@ class SurveyController extends Controller
             }
         }
 
-        // Client view: show both approved+event AND published surveys
+        // Chế độ xem client: hiển thị cả khảo sát approved+event VÀ published
         $clientViewParam = $request->query('clientView');
         if ($clientViewParam !== null && $clientViewParam !== '') {
             if (filter_var($clientViewParam, FILTER_VALIDATE_BOOLEAN)) {
@@ -74,13 +74,13 @@ class SurveyController extends Controller
         // Use loaiKhaoSat filter for quick polls instead of isQuickPoll
         $qpParam = $request->query('isQuickPoll');
         if ($qpParam !== null && $qpParam !== '') {
-            // Map isQuickPoll=true to loaiKhaoSat='quick_poll'
+            // Ánh xạ isQuickPoll=true thành loaiKhaoSat='quick_poll'
             if (filter_var($qpParam, FILTER_VALIDATE_BOOLEAN)) {
                 $filters['loaiKhaoSat'] = 'QuickPoll';
             }
         }
 
-        // Add isCompleted filter if user_id is provided
+        // Thêm bộ lọc isCompleted nếu có user_id
         $isCompletedParam = $request->query('isCompleted');
         if ($isCompletedParam !== null && $isCompletedParam !== '' && $userId) {
             $filters['isCompleted'] = filter_var($isCompletedParam, FILTER_VALIDATE_BOOLEAN);
@@ -92,11 +92,11 @@ class SurveyController extends Controller
         // Nếu có user_id, kiểm tra từng survey xem user đã submit chưa
         $surveyData = array_map(fn($s) => $s->toArray(), $result['surveys']);
 
-        // Fetch question count and response count for each survey
+        // Lấy số lượng câu hỏi và số lượng phản hồi cho mỗi khảo sát
         try {
             $db = \App\Core\Container::get('db');
             foreach ($surveyData as &$survey) {
-                // Get question count
+                // Lấy số lượng câu hỏi
                 $qStmt = $db->prepare(
                     'SELECT COUNT(*) as count FROM survey_question_map WHERE idKhaoSat = :survey_id'
                 );
@@ -104,7 +104,7 @@ class SurveyController extends Controller
                 $qRow = $qStmt->fetch(PDO::FETCH_ASSOC);
                 $survey['questionCount'] = (int) ($qRow['count'] ?? 0);
 
-                // Get response count (unique submissions)
+                // Lấy số lượng phản hồi (số lần nộp duy nhất)
                 $rStmt = $db->prepare(
                     'SELECT COUNT(*) as count FROM survey_submissions WHERE maKhaoSat = :survey_id'
                 );
@@ -112,7 +112,7 @@ class SurveyController extends Controller
                 $rRow = $rStmt->fetch(PDO::FETCH_ASSOC);
                 $survey['responseCount'] = (int) ($rRow['count'] ?? 0);
 
-                // Check if user completed (only if userId provided)
+                // Kiểm tra nếu user đã hoàn thành (chỉ nếu có userId)
                 if ($userId) {
                     $cStmt = $db->prepare(
                         'SELECT COUNT(*) as count FROM survey_submissions 
@@ -173,7 +173,7 @@ class SurveyController extends Controller
             ], 404);
         }
 
-        // Load questions via mapping table to ensure we respect survey_question_map ordering
+        // Tải câu hỏi qua bảng mapping để đảm bảo thứ tự survey_question_map
         $questions = SurveyQuestionMap::findQuestionsBySurvey($survey->getId());
         $questionCount = SurveyQuestionMap::countBySurvey($survey->getId());
         $surveyData = $survey->toArray();
@@ -195,7 +195,7 @@ class SurveyController extends Controller
     {
         $data = $request->input();
 
-        // If request parsing failed (empty), try raw JSON body as fallback
+        // Nếu phân tích request thất bại (rỗng), thử dùng raw JSON body làm phương án dự phòng
         if (empty($data)) {
             $raw = @file_get_contents('php://input');
             $json = $raw ? json_decode($raw, true) : null;
@@ -206,7 +206,7 @@ class SurveyController extends Controller
             }
         }
 
-        // Normalize incoming keys and provide sensible defaults so frontend payloads are accepted
+        // Chuẩn hóa các key đầu vào và cung cấp giá trị mặc định hợp lý để chấp nhận payload từ frontend
         $data['tieuDe'] = trim($data['tieuDe'] ?? $data['tieu_de'] ?? $data['title'] ?? $request->input('tieuDe') ?? '');
         $data['moTa'] = $data['moTa'] ?? $data['mo_ta'] ?? $data['description'] ?? $request->input('moTa') ?? null;
         $data['loaiKhaoSat'] = $data['loaiKhaoSat'] ?? $data['loai_khao_sat'] ?? $data['type'] ?? $request->input('loaiKhaoSat') ?? null;
@@ -239,7 +239,7 @@ class SurveyController extends Controller
             }
         }
 
-        // Provide safe defaults to avoid validation failure when frontend omits fields
+        // Cung cấp giá trị mặc định an toàn để tránh lỗi validation khi frontend bỏ qua các trường
         if (empty($data['tieuDe'])) {
             $data['tieuDe'] = 'Khảo sát ' . date('YmdHis');
         }
@@ -263,7 +263,7 @@ class SurveyController extends Controller
             ], 422);
         }
 
-        // Log activity
+        // Ghi log hoạt động
         try {
             ActivityLogHelper::logSurveyCreated(
                 (int) $data['maNguoiTao'],
@@ -290,7 +290,7 @@ class SurveyController extends Controller
         try {
             $data = $request->input();
 
-            // 1. Basic Validation
+            // 1. Kiểm tra dữ liệu cơ bản
             if (empty($data['title'])) {
                 return $this->json(['error' => true, 'message' => 'Tiêu đề là bắt buộc.'], 422);
             }
@@ -298,13 +298,13 @@ class SurveyController extends Controller
                 return $this->json(['error' => true, 'message' => 'Loại câu hỏi là bắt buộc.'], 422);
             }
 
-            // 2. Prepare Data
+            // 2. Chuẩn bị dữ liệu
             $userId = (int) ($data['maNguoiTao'] ?? 1);
 
-            // Check if user exists, otherwise find a valid one to avoid FK error
+            // Kiểm tra nếu user tồn tại, nếu không tìm user hợp lệ để tránh lỗi FK
             $user = User::findById($userId);
             if (!$user) {
-                // Fallback: try to find the first user (usually admin)
+                // Dự phòng: thử tìm user đầu tiên (thường là admin)
                 $db = \App\Core\Container::get('db');
                 $stmt = $db->query("SELECT id FROM users LIMIT 1");
                 $fallbackUser = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -326,15 +326,15 @@ class SurveyController extends Controller
                 'thoiLuongDuTinh' => 1
             ];
 
-            // 3. Execution Wrapper
+            // 3. Wrapper thực thi
 
-            // A. Create Survey
+            // A. Tạo khảo sát
             $survey = Survey::create($surveyData);
             if (!$survey) {
                 return $this->json(['error' => true, 'message' => 'Không thể tạo khảo sát (DB Error).'], 500);
             }
 
-            // B. Create Question
+            // B. Tạo câu hỏi
             $questionData = [
                 'noiDungCauHoi' => $data['title'],
                 'loaiCauHoi' => $data['questionType'],
@@ -343,7 +343,7 @@ class SurveyController extends Controller
                 'maKhaoSat' => $survey->getId()
             ];
 
-            // Map frontend types to backend types
+            // Ánh xạ loại câu hỏi từ frontend sang backend
             $typeMap = [
                 'single' => 'single_choice',
                 'multiple' => 'multiple_choice',
@@ -359,10 +359,10 @@ class SurveyController extends Controller
                 return $this->json(['error' => true, 'message' => 'Không thể tạo câu hỏi.'], 500);
             }
 
-            // C. Link Survey & Question
+            // C. Liên kết khảo sát & câu hỏi
             $this->attachQuestionToSurvey($survey->getId(), $question->getId());
 
-            // D. Create Answers
+            // D. Tạo các đáp án
             if (!empty($data['options']) && is_array($data['options'])) {
                 foreach ($data['options'] as $optionText) {
                     if (trim($optionText) === '')
@@ -435,7 +435,7 @@ class SurveyController extends Controller
             ], 500);
         }
 
-        // Reload
+        // Tải lại
         $survey = Survey::find((int) $id);
 
         return $this->json([
@@ -514,7 +514,7 @@ class SurveyController extends Controller
             ], 500);
         }
 
-        // Reload
+        // Tải lại
         $survey = Survey::find((int) $id);
 
         return $this->json([
@@ -559,7 +559,7 @@ class SurveyController extends Controller
             ], 500);
         }
 
-        // Reload
+        // Tải lại
         $survey = Survey::find((int) $id);
 
         return $this->json([
@@ -720,7 +720,7 @@ class SurveyController extends Controller
             ], 500);
         }
 
-        // Reload
+        // Tải lại
         $question = Question::find((int) $id);
 
         return $this->json([

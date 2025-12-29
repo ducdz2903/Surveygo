@@ -10,7 +10,7 @@ use App\Core\Response;
 use App\Models\ActivityLog;
 
 /**
- * Activity Log Controller - View and manage activity logs
+ *  Xem và quản lý activity logs
  * 
  * Admin-only endpoints để xem activity logs của system
  */

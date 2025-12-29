@@ -275,4 +275,51 @@ class Event
     {
         return $this->updatedAt;
     }
+
+    /**
+     * Get event statistics including total, daily growth, and new events
+     * 
+     * @return array Statistics data
+     */
+    public static function getEventStatistics(): array
+    {
+        /** @var PDO $db */
+        $db = Container::get('db');
+
+        // Get total events
+        $totalStmt = $db->query('SELECT COUNT(*) as total FROM events');
+        $totalEvents = (int) $totalStmt->fetch()['total'];
+
+        // Count new events created today
+        $todayStmt = $db->prepare(
+            'SELECT COUNT(*) as count FROM events WHERE DATE(created_at) = CURDATE()'
+        );
+        $todayStmt->execute();
+        $newEventsToday = (int) $todayStmt->fetch()['count'];
+
+        // Count new events created yesterday
+        $yesterdayStmt = $db->prepare(
+            'SELECT COUNT(*) as count FROM events WHERE DATE(created_at) = CURDATE() - INTERVAL 1 DAY'
+        );
+        $yesterdayStmt->execute();
+        $newEventsYesterday = (int) $yesterdayStmt->fetch()['count'];
+
+        // Calculate daily growth percentage
+        $growthPercentage = 0.0;
+        if ($newEventsYesterday > 0) {
+            $growthPercentage = (($newEventsToday - $newEventsYesterday) / $newEventsYesterday) * 100;
+        } elseif ($newEventsToday > 0) {
+            $growthPercentage = 100.0; // If no events yesterday but have events today
+        } elseif ($newEventsYesterday > 0 && $newEventsToday === 0) {
+            $growthPercentage = -100.0; // If had events yesterday but none today
+        }
+
+        return [
+            'total_events' => $totalEvents,
+            'new_events_today' => $newEventsToday,
+            'new_events_yesterday' => $newEventsYesterday,
+            'growth_percentage' => round($growthPercentage, 1),
+            'is_growth_positive' => $growthPercentage >= 0,
+        ];
+    }
 }

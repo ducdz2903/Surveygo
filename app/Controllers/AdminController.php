@@ -81,10 +81,10 @@ class AdminController extends Controller
         $view = new \App\Core\View();
         $data = $this->pageData($request);
 
-        // Fetch top surveys by responses with average ratings
+        // Lấy top khảo sát theo số lượng phản hồi với đánh giá trung bình
         $data['topSurveys'] = \App\Models\Survey::getTopSurveysByResponses(5);
 
-        // Fetch top active users by survey count
+        // Lấy top người dùng hoạt động theo số khảo sát
         $data['topUsers'] = \App\Models\User::getTopActiveUsers(5);
 
         $content = $view->render('pages/admin/reports/reports', $data);
@@ -183,14 +183,14 @@ class AdminController extends Controller
     }
 
     /**
-     * API endpoint to get top surveys by response count
+     * API endpoint để lấy top khảo sát theo số lượng phản hồi
      * GET /api/admin/top-surveys
      */
     public function getTopSurveys(Request $request)
     {
         try {
             $limit = (int) ($request->query('limit') ?? 5);
-            $limit = max(1, min(20, $limit)); // Between 1 and 20
+            $limit = max(1, min(20, $limit)); // Giữa 1 và 20
 
             $topSurveys = \App\Models\Survey::getTopSurveysByResponses($limit);
 
@@ -207,7 +207,7 @@ class AdminController extends Controller
     }
 
     /**
-     * API endpoint to get user statistics
+     * API endpoint để lấy thống kê người dùng
      * GET /api/admin/user-stats
      */
     public function getUserStats(Request $request)
@@ -228,7 +228,7 @@ class AdminController extends Controller
     }
 
     /**
-     * API endpoint to get survey statistics
+     * API endpoint để lấy thống kê khảo sát
      * GET /api/admin/survey-stats
      */
     public function getSurveyStats(Request $request)
@@ -249,7 +249,7 @@ class AdminController extends Controller
     }
 
     /**
-     * API endpoint to get response statistics (survey submissions, feedback, contact messages)
+     * API endpoint để lấy thống kê phản hồi (nộp khảo sát, phản hồi, tin nhắn liên hệ)
      * GET /api/admin/response-stats
      */
     public function getResponseStats(Request $request)
@@ -270,7 +270,7 @@ class AdminController extends Controller
     }
 
     /**
-     * API endpoint to get event statistics
+     * API endpoint để lấy thống kê sự kiện
      * GET /api/admin/event-stats
      */
     public function getEventStats(Request $request)

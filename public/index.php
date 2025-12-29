@@ -220,7 +220,7 @@ $router->post('/api/bank/submit-transfer', [BankController::class, 'submitTransf
 
 // Admin Dashboard Stats API
 $router->get('/api/admin/top-surveys', [AdminController::class, 'getTopSurveys'], [new RoleMiddleware(['admin'])]);
-$router->get('/api/admin/user-stasts', [AdminController::class, 'getUserStats'], [new RoleMiddleware(['admin'])]);
+$router->get('/api/admin/user-stats', [AdminController::class, 'getUserStats'], [new RoleMiddleware(['admin'])]);
 $router->get('/api/admin/survey-stats', [AdminController::class, 'getSurveyStats'], [new RoleMiddleware(['admin'])]);
 $router->get('/api/admin/response-stats', [AdminController::class, 'getResponseStats'], [new RoleMiddleware(['admin'])]);
 $router->get('/api/admin/event-stats', [AdminController::class, 'getEventStats'], [new RoleMiddleware(['admin'])]);
