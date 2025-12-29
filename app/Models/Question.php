@@ -173,7 +173,7 @@ class Question
         }
 
         // Auto-gen maCauHoi nếu chưa có - use microtime for better uniqueness
-        $maCauHoi = $data['maCauHoi'] ?? 'CH-' . substr(uniqid('', true), -8);
+        $maCauHoi = $data['maCauHoi'] ?? 'CH-' . substr(uniqid('', true), -7);
 
         $now = (new \DateTimeImmutable())->format('Y-m-d H:i:s');
 
