@@ -147,10 +147,8 @@ class AuthController extends Controller
             $inviterInvite->incrementInviteCount();
             $inviterInvite->addRewards($rewardAmount);
             
-            // Log activity for inviter only
             $inviterUser = User::findById($inviterInvite->getUserId());
             if ($inviterUser) {
-                // Log for inviter: "Bạn đã mời {new user name}, cộng 500 điểm"
                 ActivityLogHelper::logReferralInviter(
                     $inviterInvite->getUserId(), 
                     $newUserId, 
@@ -158,7 +156,6 @@ class AuthController extends Controller
                     $rewardAmount
                 );
                 
-                // Log for invitee (new user): "Bạn đã đăng ký thông qua mã mời của {inviter name}"
                 ActivityLogHelper::logReferralInvitee(
                     $newUserId,
                     $inviterInvite->getUserId(),

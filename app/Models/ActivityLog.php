@@ -33,8 +33,8 @@ class ActivityLog
             $this->entityType = $attributes['entity_type'] ?? null;
             $this->entityId = isset($attributes['entity_id']) ? (int) $attributes['entity_id'] : null;
             $this->description = $attributes['description'] ?? null;
-            $this->oldValues = isset($attributes['old_values']) && is_string($attributes['old_values']) 
-                ? json_decode($attributes['old_values'], true) 
+            $this->oldValues = isset($attributes['old_values']) && is_string($attributes['old_values'])
+                ? json_decode($attributes['old_values'], true)
                 : ($attributes['old_values'] ?? null);
             $this->newValues = isset($attributes['new_values']) && is_string($attributes['new_values'])
                 ? json_decode($attributes['new_values'], true)
@@ -55,11 +55,11 @@ class ActivityLog
         $query = "
             INSERT INTO {$this->table} 
             (user_id, action, entity_type, entity_id, description, old_values, new_values, created_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
+            VALUES (?, ?, ?, ?, ?, ?, ?, NOW())
         ";
 
         $stmt = $this->db->prepare($query);
-        
+
         return $stmt->execute([
             $userId,
             $action,
