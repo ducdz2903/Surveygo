@@ -18,7 +18,6 @@ class ActivityLog
     private ?string $entityType;
     private ?int $entityId;
     private ?string $description;
-    private ?string $ipAddress;
     private ?string $userAgent;
     private ?array $oldValues;
     private ?array $newValues;
@@ -35,7 +34,6 @@ class ActivityLog
             $this->entityType = $attributes['entity_type'] ?? null;
             $this->entityId = isset($attributes['entity_id']) ? (int) $attributes['entity_id'] : null;
             $this->description = $attributes['description'] ?? null;
-            $this->ipAddress = $attributes['ip_address'] ?? null;
             $this->userAgent = $attributes['user_agent'] ?? null;
             $this->oldValues = isset($attributes['old_values']) && is_string($attributes['old_values']) 
                 ? json_decode($attributes['old_values'], true) 
@@ -55,12 +53,11 @@ class ActivityLog
         $description = $options['description'] ?? null;
         $oldValues = $options['old_values'] ?? null;
         $newValues = $options['new_values'] ?? null;
-        $ipAddress = $options['ip_address'] ?? ($this->getClientIp());
         $userAgent = $options['user_agent'] ?? $_SERVER['HTTP_USER_AGENT'] ?? null;
 
         $query = "
             INSERT INTO {$this->table} 
-            (user_id, action, entity_type, entity_id, description, ip_address, user_agent, old_values, new_values, created_at)
+            (user_id, action, entity_type, entity_id, description, user_agent, old_values, new_values, created_at)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
         ";
 
@@ -72,7 +69,6 @@ class ActivityLog
             $entityType,
             $entityId,
             $description,
-            $ipAddress,
             $userAgent,
             $oldValues ? json_encode($oldValues) : null,
             $newValues ? json_encode($newValues) : null,
@@ -208,11 +204,6 @@ class ActivityLog
         return $this->description;
     }
 
-    public function getIpAddress(): ?string
-    {
-        return $this->ipAddress;
-    }
-
     public function getUserAgent(): ?string
     {
         return $this->userAgent;
@@ -261,12 +252,6 @@ class ActivityLog
     public function setDescription(?string $description): self
     {
         $this->description = $description;
-        return $this;
-    }
-
-    public function setIpAddress(?string $ipAddress): self
-    {
-        $this->ipAddress = $ipAddress;
         return $this;
     }
 
