@@ -12,7 +12,8 @@
                         <div class="points-label">Điểm hiện có</div>
                         <div class="points-value" id="user-points">---</div>
                     </div>
-                    <a href="<?= rtrim($baseUrl, '/') ?>/rewards" class="btn btn-outline-accent flex-shrink-0"> <i class="fas fa-gift me-2"></i>Đổi
+                    <a href="<?= rtrim($baseUrl, '/') ?>/rewards" class="btn btn-outline-accent flex-shrink-0"> <i
+                            class="fas fa-gift me-2"></i>Đổi
                         thưởng ngay
                     </a>
                 </div>
@@ -116,12 +117,12 @@
 </section>
 
 <script>
-    document.addEventListener('DOMContentLoaded', async function() {
+    document.addEventListener('DOMContentLoaded', async function () {
         try {
             // Kiểm tra role từ localStorage
             const userJson = localStorage.getItem('app.user');
             let apiEndpoint = '/api/activity-logs/my?limit=5'; // Default cho user thường
-            
+
             if (userJson) {
                 const user = JSON.parse(userJson);
                 // Nếu là admin, gọi endpoint admin
@@ -132,26 +133,26 @@
 
             const response = await fetch(apiEndpoint);
             const result = await response.json();
-            
+
             if (!result.success || !result.data || result.data.length === 0) {
-                document.getElementById('activity-list').innerHTML = 
+                document.getElementById('activity-list').innerHTML =
                     '<div class="text-center text-muted py-5"><p>Chưa có hoạt động nào.</p></div>';
                 return;
             }
 
             const actionIcons = {
-                'survey_created': { icon: 'fas fa-plus-circle', class: 'activity-icon-success', label: '📋' },
-                'survey_updated': { icon: 'fas fa-edit', class: 'activity-icon-warning', label: '✏️' },
-                'survey_submitted': { icon: 'fas fa-check-circle', class: 'activity-icon-success', label: '✅' },
-                'participated_event': { icon: 'fas fa-calendar-check', class: 'activity-icon-primary', label: '📅' },
-                'reward_redeemed': { icon: 'fas fa-gift', class: 'activity-icon-warning', label: '🎁' },
-                'event_created': { icon: 'fas fa-calendar-plus', class: 'activity-icon-primary', label: '⭐' },
-                'question_created': { icon: 'fas fa-lightbulb', class: 'activity-icon-accent', label: '💡' },
-                'daily_reward_claimed': { icon: 'fas fa-star', class: 'activity-icon-success', label: '⭐' },
-                'redemption_status_changed': { icon: 'fas fa-sync', class: 'activity-icon-warning', label: '🔄' },
-                'profile_updated': { icon: 'fas fa-user', class: 'activity-icon-info', label: '👤' },
-                'referral_invite_success': { icon: 'fas fa-user-plus', class: 'activity-icon-success', label: '👥' },
-                'referral_registered': { icon: 'fas fa-user-check', class: 'activity-icon-primary', label: '✅' },
+                'survey_created': { icon: 'fas fa-plus-circle', color: 'primary' },
+                'survey_updated': { icon: 'fas fa-edit', color: 'warning' },
+                'survey_submitted': { icon: 'fas fa-check-circle', color: 'success' },
+                'participated_event': { icon: 'fas fa-calendar-check', color: 'success' },
+                'reward_redeemed': { icon: 'fas fa-gift', color: 'danger' },
+                'event_created': { icon: 'fas fa-calendar-plus', color: 'primary' },
+                'question_created': { icon: 'fas fa-lightbulb', color: 'warning' },
+                'daily_reward_claimed': { icon: 'fas fa-star', color: 'success' },
+                'redemption_status_changed': { icon: 'fas fa-sync', color: 'warning' },
+                'profile_updated': { icon: 'fas fa-user-edit', color: 'info' },
+                'referral_invite_success': { icon: 'fas fa-user-plus', color: 'success' },
+                'referral_registered': { icon: 'fas fa-user-check', color: 'primary' },
             };
 
             // Hàm dịch action thành tiếng Việt
@@ -176,10 +177,9 @@
             };
 
             let html = result.data.map(activity => {
-                const iconData = actionIcons[activity.action] || { 
-                    icon: 'fas fa-circle', 
-                    class: 'activity-icon-secondary', 
-                    label: '●' 
+                const iconData = actionIcons[activity.action] || {
+                    icon: 'fas fa-circle',
+                    color: 'secondary',
                 };
 
                 const timeDate = new Date(activity.created_at);
@@ -202,14 +202,11 @@
 
                 return `
                     <div class="activity-item">
-                        <div class="activity-icon ${iconData.class}">
+                        <div class="activity-icon bg-${iconData.color} bg-opacity-10 text-${iconData.color}">
                             <i class="${iconData.icon}"></i>
                         </div>
                         <div class="activity-content">
                             <h4>${activity.description || translatedAction}</h4>
-                            <p class="mb-0 small text-muted">
-                                ${activity.entity_type ? activity.entity_type + ' #' + activity.entity_id : 'System'}
-                            </p>
                         </div>
                         <div class="activity-time">${timeStr}</div>
                     </div>
@@ -219,7 +216,7 @@
             document.getElementById('activity-list').innerHTML = html;
         } catch (error) {
             console.error('Lỗi khi tải activity logs:', error);
-            document.getElementById('activity-list').innerHTML = 
+            document.getElementById('activity-list').innerHTML =
                 '<div class="text-center text-danger py-5"><p>Lỗi khi tải hoạt động.</p></div>';
         }
     });
@@ -281,7 +278,7 @@
 
         // Lọc ra những khảo sát chưa hoàn thành (không hiển thị khảo sát đã hoàn thành)
         const incompleteSurveys = surveys.filter(survey => !survey.isCompleted);
-        
+
         // Update count với số lượng khảo sát chưa hoàn thành
         countEl.textContent = `(${incompleteSurveys.length})`;
 
@@ -412,7 +409,7 @@
             const raw = localStorage.getItem('app.user');
             if (!raw) return;
             const user = JSON.parse(raw);
-            
+
             const userPointsEl = document.getElementById('user-points');
             if (userPointsEl && user.id) {
                 // Fetch điểm thực tế từ API
@@ -451,7 +448,7 @@
                     '18h-21h',
                     '21h-24h'
                 ];
-                
+
                 // Lấy dữ liệu từ API
                 async function loadPointsChart() {
                     try {
@@ -461,7 +458,7 @@
                             createChart([0, 0, 0, 0, 0, 0, 0, 0]);
                             return;
                         }
-                        
+
                         const user = JSON.parse(userJson);
                         const response = await fetch(`/api/user-points/hourly-stats?user_id=${user.id}`, {
                             method: 'GET',
@@ -469,9 +466,9 @@
                                 'X-Requested-With': 'XMLHttpRequest'
                             }
                         });
-                        
+
                         const result = await response.json();
-                        
+
                         if (result.success && result.data) {
                             createChart(result.data);
                         } else {
@@ -483,7 +480,7 @@
                         createChart([0, 0, 0, 0, 0, 0, 0, 0]);
                     }
                 }
-                
+
                 function createChart(data) {
                     new Chart(ctxPoints, {
                         type: 'bar',
@@ -506,7 +503,7 @@
                         }
                     });
                 }
-                
+
                 // Gọi hàm load dữ liệu
                 loadPointsChart();
             }
@@ -525,7 +522,7 @@
                     '18h-21h',
                     '21h-24h'
                 ];
-                
+
                 // Lấy dữ liệu từ API
                 async function loadSurveysChart() {
                     try {
@@ -535,7 +532,7 @@
                             createSurveysChart([0, 0, 0, 0, 0, 0, 0, 0]);
                             return;
                         }
-                        
+
                         const user = JSON.parse(userJson);
                         const response = await fetch(`/api/surveys/hourly-stats?user_id=${user.id}`, {
                             method: 'GET',
@@ -543,9 +540,9 @@
                                 'X-Requested-With': 'XMLHttpRequest'
                             }
                         });
-                        
+
                         const result = await response.json();
-                        
+
                         if (result.success && result.data) {
                             createSurveysChart(result.data);
                         } else {
@@ -557,7 +554,7 @@
                         createSurveysChart([0, 0, 0, 0, 0, 0, 0, 0]);
                     }
                 }
-                
+
                 function createSurveysChart(data) {
                     new Chart(ctxSurveys, {
                         type: 'line',
@@ -580,7 +577,7 @@
                         }
                     });
                 }
-                
+
                 // Gọi hàm load dữ liệu
                 loadSurveysChart();
             }
