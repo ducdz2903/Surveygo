@@ -532,38 +532,38 @@ CREATE TABLE IF NOT EXISTS activity_logs (
 
 INSERT IGNORE INTO activity_logs (user_id, action, entity_type, entity_id, description, old_values, new_values, created_at) VALUES
 -- User 1 activities
-(1, 'survey_submitted', 'survey', 1, 'Hoàn thành khảo sát: Khảo sát về thói quen đọc sách', '{"survey_id": 1, "points_earned": 10}', DATE_SUB(NOW(), INTERVAL 5 MINUTE)),
-(1, 'reward_redeemed', 'reward_redemption', 1, 'Đổi thưởng thành công: Rút tiền Banking 20.000đ', '{"reward_id": 1, "points_spent": 2000}', DATE_SUB(NOW(), INTERVAL 30 MINUTE)),
+(1, 'survey_submitted', 'survey', 1, 'Hoàn thành khảo sát: Khảo sát về thói quen đọc sách', NULL, '{"survey_id": 1, "points_earned": 10}', DATE_SUB(NOW(), INTERVAL 5 MINUTE)),
+(1, 'reward_redeemed', 'reward_redemption', 1, 'Đổi thưởng thành công: Rút tiền Banking 20.000đ', NULL, '{"reward_id": 1, "points_spent": 2000}', DATE_SUB(NOW(), INTERVAL 30 MINUTE)),
 
 -- User 2 activities
-(2, 'survey_submitted', 'survey', 2, 'Hoàn thành khảo sát: Khảo sát về sức khỏe cộng đồng', '{"survey_id": 2, "points_earned": 15}', DATE_SUB(NOW(), INTERVAL 90 MINUTE)),
-(2, 'participated_event', 'event', 1, 'Tham gia sự kiện: Sự kiện Khởi động Năm Mới', '{"event_id": 1}', DATE_SUB(NOW(), INTERVAL 2 HOUR)),
+(2, 'survey_submitted', 'survey', 2, 'Hoàn thành khảo sát: Khảo sát về sức khỏe cộng đồng', NULL, '{"survey_id": 2, "points_earned": 15}', DATE_SUB(NOW(), INTERVAL 90 MINUTE)),
+(2, 'participated_event', 'event', 1, 'Tham gia sự kiện: Sự kiện Khởi động Năm Mới', NULL, '{"event_id": 1}', DATE_SUB(NOW(), INTERVAL 2 HOUR)),
 
 -- User 4 activities
-(4, 'survey_submitted', 'survey', 4, 'Hoàn thành khảo sát: Khảo sát về ứng dụng di động', '{"survey_id": 4, "points_earned": 12}', DATE_SUB(NOW(), INTERVAL 260 MINUTE)),
-(4, 'reward_redeemed', 'reward_redemption', 2, 'Đổi thưởng thành công: Ví MoMo 20.000đ', '{"reward_id": 4, "points_spent": 2000}', DATE_SUB(NOW(), INTERVAL 5 HOUR)),
+(4, 'survey_submitted', 'survey', 4, 'Hoàn thành khảo sát: Khảo sát về ứng dụng di động', NULL, '{"survey_id": 4, "points_earned": 12}', DATE_SUB(NOW(), INTERVAL 260 MINUTE)),
+(4, 'reward_redeemed', 'reward_redemption', 2, 'Đổi thưởng thành công: Ví MoMo 20.000đ', NULL, '{"reward_id": 4, "points_spent": 2000}', DATE_SUB(NOW(), INTERVAL 5 HOUR)),
 
 -- User 5 activities
-(5, 'survey_submitted', 'survey', 5, 'Hoàn thành khảo sát: Khảo sát về dịch vụ khách hàng', '{"survey_id": 5, "points_earned": 20}', DATE_SUB(NOW(), INTERVAL 6 HOUR)),
-(5, 'participated_event', 'event', 2, 'Tham gia sự kiện: Hội thảo Sức khỏe Cộng đồng', '{"event_id": 2}', DATE_SUB(NOW(), INTERVAL 8 HOUR)),
+(5, 'survey_submitted', 'survey', 5, 'Hoàn thành khảo sát: Khảo sát về dịch vụ khách hàng', NULL, '{"survey_id": 5, "points_earned": 20}', DATE_SUB(NOW(), INTERVAL 6 HOUR)),
+(5, 'participated_event', 'event', 2, 'Tham gia sự kiện: Hội thảo Sức khỏe Cộng đồng', NULL, '{"event_id": 2}', DATE_SUB(NOW(), INTERVAL 8 HOUR)),
 
 -- User 6 activities
-(6, 'survey_submitted', 'survey', 6, 'Hoàn thành khảo sát: Khảo sát về nhu cầu giáo dục trực tuyến', '{"survey_id": 6, "points_earned": 15}', DATE_SUB(NOW(), INTERVAL 10 HOUR)),
-(6, 'reward_redeemed', 'reward_redemption', 3, 'Đổi thưởng thành công: ShopeePay 50.000đ', '{"reward_id": 6, "points_spent": 5000}', DATE_SUB(NOW(), INTERVAL 12 HOUR)),
+(6, 'survey_submitted', 'survey', 6, 'Hoàn thành khảo sát: Khảo sát về nhu cầu giáo dục trực tuyến', NULL, '{"survey_id": 6, "points_earned": 15}', DATE_SUB(NOW(), INTERVAL 10 HOUR)),
+(6, 'reward_redeemed', 'reward_redemption', 3, 'Đổi thưởng thành công: ShopeePay 50.000đ', NULL, '{"reward_id": 6, "points_spent": 5000}', DATE_SUB(NOW(), INTERVAL 12 HOUR)),
 
 -- User 7 activities
-(7, 'survey_submitted', 'survey', 3, 'Hoàn thành khảo sát: Khảo sát về trang web thương mại điện tử', '{"survey_id": 3, "points_earned": 12}', DATE_SUB(NOW(), INTERVAL 14 HOUR)),
-(7, 'participated_event', 'event', 3, 'Tham gia sự kiện: Workshop về Digital Marketing 2024', '{"event_id": 3}', DATE_SUB(NOW(), INTERVAL 1 DAY)),
+(7, 'survey_submitted', 'survey', 3, 'Hoàn thành khảo sát: Khảo sát về trang web thương mại điện tử', NULL, '{"survey_id": 3, "points_earned": 12}', DATE_SUB(NOW(), INTERVAL 14 HOUR)),
+(7, 'participated_event', 'event', 3, 'Tham gia sự kiện: Workshop về Digital Marketing 2024', NULL, '{"event_id": 3}', DATE_SUB(NOW(), INTERVAL 1 DAY)),
 
 -- Admin 3 activities
-(3, 'survey_created', 'survey', 7, 'Tạo khảo sát mới: Mức độ hài lòng tổng quan', '{"survey_id": 7, "title": "Mức độ hài lòng tổng quan", "status": "pending"}', DATE_SUB(NOW(), INTERVAL 135 MINUTE)),
-(3, 'event_created', 'event', 4, 'Tạo sự kiện mới: Ngày hội Công nghệ', '{"event_id": 4, "title": "Ngày hội Công nghệ", "status": "upcoming"}', DATE_SUB(NOW(), INTERVAL 3 HOUR)),
-(3, 'question_created', 'question', 13, 'Tạo câu hỏi mới: Bạn cảm thấy mức độ hài lòng hiện tại như thế nào?', '{"question_id": 13, "type": "single_choice"}', DATE_SUB(NOW(), INTERVAL 5 HOUR)),
+(3, 'survey_created', 'survey', 7, 'Tạo khảo sát mới: Mức độ hài lòng tổng quan', NULL, '{"survey_id": 7, "title": "Mức độ hài lòng tổng quan", "status": "pending"}', DATE_SUB(NOW(), INTERVAL 135 MINUTE)),
+(3, 'event_created', 'event', 4, 'Tạo sự kiện mới: Ngày hội Công nghệ', NULL, '{"event_id": 4, "title": "Ngày hội Công nghệ", "status": "upcoming"}', DATE_SUB(NOW(), INTERVAL 3 HOUR)),
+(3, 'question_created', 'question', 13, 'Tạo câu hỏi mới: Bạn cảm thấy mức độ hài lòng hiện tại như thế nào?', NULL, '{"question_id": 13, "type": "single_choice"}', DATE_SUB(NOW(), INTERVAL 5 HOUR)),
 
 -- Admin 1 activities
-(1, 'survey_created', 'survey', 8, 'Tạo khảo sát mới: Bạn hay uống cà phê không?', '{"survey_id": 8, "title": "Bạn hay uống cà phê không?", "status": "pending"}', DATE_SUB(NOW(), INTERVAL 7 HOUR)),
-(1, 'event_created', 'event', 1, 'Cập nhật sự kiện: Sự kiện Khởi động Năm Mới', '{"event_id": 1, "participants": 150}', DATE_SUB(NOW(), INTERVAL 26 HOUR)),
-(1, 'question_created', 'question', 19, 'Tạo câu hỏi mới: Bạn thích tổ chức Year End Party trong nhà hay ngoài trời?', '{"question_id": 19, "type": "single_choice"}', DATE_SUB(NOW(), INTERVAL 29 HOUR));
+(1, 'survey_created', 'survey', 8, 'Tạo khảo sát mới: Bạn hay uống cà phê không?', NULL, '{"survey_id": 8, "title": "Bạn hay uống cà phê không?", "status": "pending"}', DATE_SUB(NOW(), INTERVAL 7 HOUR)),
+(1, 'event_created', 'event', 1, 'Cập nhật sự kiện: Sự kiện Khởi động Năm Mới', NULL, '{"event_id": 1, "participants": 150}', DATE_SUB(NOW(), INTERVAL 26 HOUR)),
+(1, 'question_created', 'question', 19, 'Tạo câu hỏi mới: Bạn thích tổ chức Year End Party trong nhà hay ngoài trời?', NULL, '{"question_id": 19, "type": "single_choice"}', DATE_SUB(NOW(), INTERVAL 29 HOUR));
 
 
 -- dữ liệu cho bảng survey_question_map
