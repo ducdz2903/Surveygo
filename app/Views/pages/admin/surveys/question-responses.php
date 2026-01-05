@@ -381,7 +381,7 @@ $__mk = static function (string $base, string $path): string {
     }
 
     #user-list {
-        max-height: 70vh;
+        max-height: 40vh;
         overflow-y: auto;
     }
 
