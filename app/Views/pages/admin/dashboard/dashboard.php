@@ -158,12 +158,12 @@
 <script src="/public/assets/js/admin-mock-data.js"></script>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         // --- 1. Cập nhật thời gian ---
         function updateTime() {
             const now = new Date();
             const timeElement = document.getElementById('current-time');
-            if(timeElement) {
+            if (timeElement) {
                 timeElement.textContent = now.toLocaleString('vi-VN');
             }
         }
@@ -210,17 +210,17 @@
             try {
                 const response = await fetch('/api/admin/user-stats');
                 const result = await response.json();
-                
+
                 if (result.success && result.data) {
                     const stats = result.data;
-                    
+
                     // Hiệu ứng hiển thị tổng số người dùng
                     animateNumber('stat-users', stats.total_users);
-                    
+
                     // Cập nhật hiển thị xu hướng
                     const trendDiv = document.getElementById('user-trend');
                     const growthSpan = document.getElementById('user-growth-percent');
-                    
+
                     if (trendDiv && growthSpan) {
                         // Cập nhật hướng xu hướng
                         if (stats.is_growth_positive) {
@@ -239,25 +239,25 @@
                 // Giữ giá trị mặc định khi có lỗi
             }
         }
-        
+
         loadUserStats();
-        
+
         // --- 3.2. Tải và hiển thị thống kê khảo sát ---
         async function loadSurveyStats() {
             try {
                 const response = await fetch('/api/admin/survey-stats');
                 const result = await response.json();
-                
+
                 if (result.success && result.data) {
                     const stats = result.data;
-                    
+
                     // Hiệu ứng hiển thị tổng số khảo sát
                     animateNumber('stat-surveys', stats.total_surveys);
-                    
+
                     // Cập nhật hiển thị xu hướng
                     const trendDiv = document.getElementById('survey-trend');
                     const growthSpan = document.getElementById('survey-growth-percent');
-                    
+
                     if (trendDiv && growthSpan) {
                         // Cập nhật hướng xu hướng và phần trăm
                         if (stats.is_growth_positive) {
@@ -277,25 +277,25 @@
                 animateNumber('stat-surveys', AdminMockData.stats.totalSurveys);
             }
         }
-        
+
         loadSurveyStats();
-        
+
         // --- 3.3. Tải và hiển thị thống kê phản hồi ---
         async function loadResponseStats() {
             try {
                 const response = await fetch('/api/admin/response-stats');
                 const result = await response.json();
-                
+
                 if (result.success && result.data) {
                     const stats = result.data;
-                    
+
                     // Hiệu ứng hiển thị tổng số phản hồi
                     animateNumber('stat-responses', stats.total_responses);
-                    
+
                     // Cập nhật hiển thị xu hướng
                     const trendDiv = document.getElementById('response-trend');
                     const growthSpan = document.getElementById('response-growth-percent');
-                    
+
                     if (trendDiv && growthSpan) {
                         // Cập nhật hướng xu hướng
                         if (stats.is_growth_positive) {
@@ -315,25 +315,25 @@
                 animateNumber('stat-responses', AdminMockData.stats.totalResponses);
             }
         }
-        
+
         loadResponseStats();
-        
+
         // --- 3.4. Tải và hiển thị thống kê sự kiện ---
         async function loadEventStats() {
             try {
                 const response = await fetch('/api/admin/event-stats');
                 const result = await response.json();
-                
+
                 if (result.success && result.data) {
                     const stats = result.data;
-                    
+
                     // Hiệu ứng hiển thị tổng số sự kiện
                     animateNumber('stat-events', stats.total_events);
-                    
+
                     // Cập nhật hiển thị xu hướng
                     const trendDiv = document.getElementById('event-trend');
                     const growthSpan = document.getElementById('event-growth-percent');
-                    
+
                     if (trendDiv && growthSpan) {
                         // Cập nhật hướng xu hướng
                         if (stats.is_growth_positive) {
@@ -353,7 +353,7 @@
                 animateNumber('stat-events', AdminMockData.stats.totalEvents);
             }
         }
-        
+
         loadEventStats();
 
         // --- 4. Biểu đồ khảo sát ---
@@ -409,7 +409,7 @@
         async function loadActivityLogs() {
             const activityList = document.getElementById('activity-list');
             if (!activityList) return;
-            
+
             // Hàm dịch action thành tiếng Việt
             const translateAction = (action) => {
                 const translations = {
@@ -435,32 +435,36 @@
                 };
                 return translations[action] || action.replace(/_/g, ' ');
             };
-            
+
             try {
                 const response = await fetch('/api/admin/activity-logs?limit=10');
                 const result = await response.json();
-                
+
                 if (result.success && result.data && result.data.length > 0) {
                     // Filter out referral_invite_success
                     const filteredData = result.data.filter(activity => activity.action !== 'referral_invite_success');
-                    
+
                     const actionIcons = {
-                        'survey_submitted': { icon: 'fas fa-check-circle', color: 'success' },
                         'survey_created': { icon: 'fas fa-plus-circle', color: 'primary' },
-                        'event_created': { icon: 'fas fa-calendar-plus', color: 'primary' },
-                        'question_created': { icon: 'fas fa-lightbulb', color: 'warning' },
+                        'survey_updated': { icon: 'fas fa-edit', color: 'warning' },
+                        'survey_submitted': { icon: 'fas fa-check-circle', color: 'success' },
                         'participated_event': { icon: 'fas fa-calendar-check', color: 'success' },
                         'reward_redeemed': { icon: 'fas fa-gift', color: 'danger' },
+                        'event_created': { icon: 'fas fa-calendar-plus', color: 'primary' },
+                        'question_created': { icon: 'fas fa-lightbulb', color: 'warning' },
+                        'daily_reward_claimed': { icon: 'fas fa-star', color: 'success' },
+                        'redemption_status_changed': { icon: 'fas fa-sync', color: 'warning' },
                         'profile_updated': { icon: 'fas fa-user-edit', color: 'info' },
-                        'referral_registered': { icon: 'fas fa-user-check', color: 'primary' }
+                        'referral_invite_success': { icon: 'fas fa-user-plus', color: 'success' },
+                        'referral_registered': { icon: 'fas fa-user-check', color: 'primary' },
                     };
-                    
+
                     activityList.innerHTML = filteredData.slice(0, 5).map(activity => {
                         const iconConfig = actionIcons[activity.action] || { icon: 'fas fa-history', color: 'secondary' };
                         const createdDate = new Date(activity.created_at);
                         const timeText = createdDate.toLocaleString('vi-VN');
                         const translatedAction = translateAction(activity.action);
-                        
+
                         // Custom formatting for referral_registered
                         let displayText;
                         if (activity.action === 'referral_registered' && activity.description) {
@@ -471,7 +475,7 @@
                         } else {
                             displayText = `<strong>${activity.user_name || 'Unknown'}</strong> ${translatedAction}`;
                         }
-                        
+
                         return `
                             <li class="list-group-item border-0 py-3">
                                 <div class="d-flex align-items-start gap-3">
@@ -494,23 +498,23 @@
                 activityList.innerHTML = '<li class="list-group-item text-center text-danger py-4">Lỗi khi tải hoạt động</li>';
             }
         }
-        
+
         loadActivityLogs();
-        
+
         const activityList = document.getElementById('activity-list');
         if (activityList && AdminMockData.activities.length > 0) {
-             activityList.innerHTML = '<li class="list-group-item text-center text-muted">Không có hoạt động nào</li>';
+            activityList.innerHTML = '<li class="list-group-item text-center text-muted">Không có hoạt động nào</li>';
         }
 
         // --- 7. Hiển thị khảo sát hàng đầu ---
         async function loadTopSurveys() {
             const topSurveysContainer = document.getElementById('top-surveys');
             if (!topSurveysContainer) return;
-            
+
             try {
                 const response = await fetch('/api/admin/top-surveys?limit=5');
                 const result = await response.json();
-                
+
                 if (result.success && result.data && result.data.length > 0) {
                     topSurveysContainer.innerHTML = result.data.map((survey, index) => {
                         // Tạo hiển thị đánh giá trung bình nếu có
@@ -518,7 +522,7 @@
                         if (survey.avg_rating && survey.avg_rating > 0) {
                             const fullStars = Math.floor(survey.avg_rating);
                             const hasHalfStar = (survey.avg_rating % 1) >= 0.5;
-                            
+
                             let starsHTML = '';
                             // Ngôi sao đầy đủ
                             for (let i = 0; i < fullStars; i++) {
@@ -533,7 +537,7 @@
                             for (let i = totalStars; i < 5; i++) {
                                 starsHTML += '<i class="far fa-star" style="font-size:0.7rem"></i>';
                             }
-                            
+
                             ratingHTML = `
                                 <span class="ms-2 text-warning">
                                     ${starsHTML}
@@ -541,7 +545,7 @@
                                 </span>
                             `;
                         }
-                        
+
                         return `
                             <div class="d-flex align-items-center justify-content-between mb-3 pb-3 border-bottom last-no-border">
                                 <div class="flex-grow-1">
@@ -561,7 +565,7 @@
                 topSurveysContainer.innerHTML = '<p class="text-center text-danger py-4">Lỗi khi tải dữ liệu</p>';
             }
         }
-        
+
         loadTopSurveys();
     });
 </script>
