@@ -9,11 +9,6 @@ use App\Core\Request;
 use App\Core\Response;
 use App\Models\ActivityLog;
 
-/**
- *  Xem và quản lý activity logs
- * 
- * Admin-only endpoints để xem activity logs của system
- */
 class ActivityLogController extends Controller
 {
     private ActivityLog $activityLogModel;
@@ -23,10 +18,7 @@ class ActivityLogController extends Controller
         $this->activityLogModel = new ActivityLog();
     }
 
-    /**
-     * Lấy tất cả activity logs (admin)
-     * GET /admin/activity-logs
-     */
+    // lấy tất cả activity logs (admin)
     public function index(Request $request)
     {
         $page = (int) ($request->query('page') ?? 1);
@@ -48,10 +40,7 @@ class ActivityLogController extends Controller
         ]);
     }
 
-    /**
-     * Lấy activity logs của user hiện tại
-     * GET /api/activity-logs/my
-     */
+    // lấy activity logs của user hiện tại
     public function getMyLogs(Request $request)
     {
         $userId = $_SESSION['user_id'] ?? null;
@@ -83,10 +72,7 @@ class ActivityLogController extends Controller
         ]);
     }
 
-    /**
-     * Lấy activity logs của user
-     * GET /admin/activity-logs/user/:id
-     */
+    // lấy activity logs của user
     public function getUserLogs(Request $request)
     {
         $userId = (int) $request->getAttribute('id');
@@ -110,10 +96,7 @@ class ActivityLogController extends Controller
         ]);
     }
 
-    /**
-     * Lấy activity logs của một entity
-     * GET /admin/activity-logs/entity/:type/:id
-     */
+    // lấy activity logs của một entity
     public function getEntityLogs(Request $request)
     {
         $entityType = (string) $request->getAttribute('type');
@@ -131,10 +114,7 @@ class ActivityLogController extends Controller
         ]);
     }
 
-    /**
-     * Lấy activity logs theo action
-     * GET /admin/activity-logs/action/:action
-     */
+    // lấy theo action
     public function getActionLogs(Request $request)
     {
         $action = (string) $request->getAttribute('action');
@@ -151,10 +131,6 @@ class ActivityLogController extends Controller
         ]);
     }
 
-    /**
-     * Xóa activity logs cũ
-     * DELETE /admin/activity-logs/cleanup
-     */
     public function cleanup(Request $request)
     {
         $days = (int) ($request->query('days') ?? 90);
@@ -174,10 +150,6 @@ class ActivityLogController extends Controller
         ]);
     }
 
-    /**
-     * Xem activity logs page (HTML view)
-     * GET /admin/activity-logs/view
-     */
     public function viewPage(Request $request)
     {
         $view = new \App\Core\View();
