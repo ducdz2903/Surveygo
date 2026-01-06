@@ -22,6 +22,8 @@ class Survey
     private ?int $maSuKien;
     private string $createdAt;
     private string $updatedAt;
+    private ?string $creatorName;
+
 
     public function __construct(array $attributes)
     {
@@ -39,6 +41,7 @@ class Survey
         $this->maSuKien = isset($attributes['maSuKien']) && $attributes['maSuKien'] !== null ? (int) $attributes['maSuKien'] : null;
         $this->createdAt = $attributes['created_at'] ?? '';
         $this->updatedAt = $attributes['updated_at'] ?? '';
+        $this->creatorName = $attributes['creator_name'] ?? null;
     }
 
     /**
@@ -137,8 +140,8 @@ class Survey
         // Determine sorting based on sortBy parameter
         $sortBy = $filters['sortBy'] ?? 'newest';
         $orderClause = '';
-        $fromClause = 'FROM surveys s';
-        $selectFields = 's.*';
+        $selectFields = 's.*, u.name AS creator_name';
+        $fromClause = 'FROM surveys s LEFT JOIN users u ON u.id = s.maNguoiTao';
         $groupBy = '';
 
         if ($sortBy === 'hot') {
@@ -421,6 +424,7 @@ class Survey
             'questionCount' => SurveyQuestionMap::countBySurvey($this->id),
             'created_at' => $this->createdAt,
             'updated_at' => $this->updatedAt,
+            'creator_name' => $this->creatorName,
         ];
     }
 
