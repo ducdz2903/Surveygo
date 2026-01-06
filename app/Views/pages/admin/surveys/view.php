@@ -257,6 +257,13 @@ $__mk = static function (string $base, string $path): string {
             if (isEditMode) b.classList.remove('d-none');
             else b.classList.add('d-none');
         });
+
+        // toggle status dropdown visibility (admin only)
+        const statusSelect = document.getElementById('survey-status-select');
+        if (statusSelect) {
+            if (isEditMode) statusSelect.classList.remove('d-none');
+            else statusSelect.classList.add('d-none');
+        }
     }
 
     window.addEventListener('load', () => {
@@ -464,7 +471,7 @@ $__mk = static function (string $base, string $path): string {
                 if (!sel) {
                     sel = document.createElement('select');
                     sel.id = 'survey-status-select';
-                    sel.className = 'form-select form-select-sm ms-2 d-inline-block';
+                    sel.className = 'form-select form-select-sm ms-2 d-inline-block d-none'; // hidden by default, shown in edit mode
                     sel.style.minWidth = '150px';
                     const options = [
                         ['draft', 'Nháp'],
