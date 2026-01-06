@@ -125,10 +125,6 @@
     </div>
 </div>
 
-<script src="/public/assets/js/admin-helpers.js"></script>
-<script src="/public/assets/js/modal-helper.js"></script>
-<script src="/public/assets/js/toast-helper.js"></script>
-
 <script>
     const API_BASE = '/api';
     let currentPage = 1;

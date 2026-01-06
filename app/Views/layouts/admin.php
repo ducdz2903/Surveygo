@@ -56,7 +56,8 @@ $baseUrl = $baseUrl ?? '';
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="<?= htmlspecialchars($baseUrl, ENT_QUOTES, 'UTF-8') ?>/public/assets/js/toast-helper.js"></script>
-    <script src="<?= htmlspecialchars($baseUrl, ENT_QUOTES, 'UTF-8') ?>/public/assets/js/admin.js"></script>
+    <script src="<?= htmlspecialchars($baseUrl, ENT_QUOTES, 'UTF-8') ?>/public/assets/js/admin-helper.js"></script>
+    <script src="<?= htmlspecialchars($baseUrl, ENT_QUOTES, 'UTF-8') ?>/public/assets/js/modal-helper.js"></script>
 </body>
 
 </html>
