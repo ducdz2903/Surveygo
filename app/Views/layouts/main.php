@@ -49,7 +49,6 @@ $baseUrl = $baseUrl ?? '';
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="<?= htmlspecialchars(rtrim((string) $baseUrl, '/'), ENT_QUOTES, 'UTF-8') ?>/public/assets/js/toast-helper.js"></script>
-    <script src="<?= htmlspecialchars(rtrim((string) $baseUrl, '/'), ENT_QUOTES, 'UTF-8') ?>/public/assets/js/app.js"></script>
     <?= $scriptsExtra ?? '' ?>
 </body>
 
