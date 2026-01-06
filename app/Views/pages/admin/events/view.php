@@ -328,23 +328,31 @@ $__mk = static function (string $base, string $path): string {
 
                 if (eventStatusSelect) {
                     eventStatusSelect.addEventListener('change', () => {
+                        const previousStatus = eventCurrentStatus; // trạng thái thật
                         const newStatus = eventStatusSelect.value || 'upcoming';
-                        if (originalStatusForConfirm === 'upcoming' && newStatus !== 'upcoming') {
-                            const confirmed = window.confirm(
-                                'Sau khi thay đổi trạng thái khỏi "Sắp diễn ra", bạn sẽ không thể thay đổi được số lượt rút thăm nữa. Bạn có chắc chắn muốn tiếp tục?'
-                            );
-                            if (!confirmed) {
-                                eventStatusSelect.value = originalStatusForConfirm || 'upcoming';
-                                if (eventSpinsInput) {
-                                    eventSpinsInput.disabled = originalStatusForConfirm !== 'upcoming';
-                                }
-                                return;
-                            }
+
+                        if (previousStatus === 'upcoming' && newStatus !== 'upcoming') {
+                            // rollback NGAY
+                            eventStatusSelect.value = previousStatus;
+
+                            ModalHelper.confirm({
+                                title: 'Xác nhận thay đổi trạng thái',
+                                message: 'Khi thay đổi trạng thái sự kiện từ "Sắp diễn ra" sang trạng thái khác, bạn sẽ không thể thêm hoặc gỡ khảo sát khỏi sự kiện này nữa. Bạn có chắc chắn muốn tiếp tục?',
+                                type: 'warning',
+                                confirmText: 'Tiếp tục',
+                                cancelText: 'Hủy',
+                                onConfirm: () => {
+                                    eventStatusSelect.value = newStatus;
+                                    eventSpinsInput.disabled = newStatus !== 'upcoming';
+                                },
+                            });
+
+                            return; 
                         }
-                        if (eventSpinsInput) {
-                            eventSpinsInput.disabled = newStatus !== 'upcoming';
-                        }
+
+                        eventSpinsInput.disabled = newStatus !== 'upcoming';
                     });
+
                 }
             }
         }

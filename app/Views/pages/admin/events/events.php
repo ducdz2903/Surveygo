@@ -110,7 +110,7 @@
                                 <option value="completed">Đã kết thúc</option>
                             </select>
                         </div>
-                        <!-- S? kh?o s�t li�n quan du?c t�nh t? d?ng t? b?ng surveys (maSuKien = eventId), kh�ng c?n nh?p tay -->
+                        <!-- S? kh?o s�t li�n quan du?c t�nh t? d?ng t? b?ng surveys (maSuKien = eventId), kh�ng c?n nh?p tay -->
                     </div>
                 </form>
             </div>
@@ -142,29 +142,44 @@
           const eventStatusField = document.getElementById('event-status');
           const eventSpinsField = document.getElementById('event-spins');
 
-          if (eventStatusField) {
-              eventStatusField.addEventListener('change', function() {
-                  const newStatus = this.value || 'upcoming';
+if (eventStatusField) {
+    eventStatusField.addEventListener('change', function () {
+        const selectedStatus = this.value || 'upcoming';
 
-                  // Nếu đang từ upcoming chuyển sang trạng thái khác thì cảnh báo
-                  if (originalEventStatus === 'upcoming' && newStatus !== 'upcoming') {
-                      const confirmed = window.confirm(
-                          'Sau khi thay đổi trạng thái khỏi \"Sắp diễn ra\", bạn sẽ không thể thay đổi được số lượt rút thăm nữa. Bạn có chắc chắn muốn tiếp tục?'
-                      );
-                      if (!confirmed) {
-                          this.value = originalEventStatus || 'upcoming';
-                          if (eventSpinsField) {
-                              eventSpinsField.disabled = originalEventStatus !== 'upcoming';
-                          }
-                          return;
-                      }
-                  }
+        if (originalEventStatus === 'upcoming' && selectedStatus !== 'upcoming') {
 
-                  if (eventSpinsField) {
-                      eventSpinsField.disabled = newStatus !== 'upcoming';
-                  }
-              });
-          }
+            this.value = originalEventStatus;
+
+            const confirmed = window.confirm(
+                'Sau khi thay đổi trạng thái khỏi "Sắp diễn ra", bạn sẽ không thể thay đổi được số lượt rút thăm nữa. Bạn có chắc chắn muốn tiếp tục?'
+            );
+
+            if (!confirmed) {
+                // Giữ nguyên upcoming
+                if (eventSpinsField) {
+                    eventSpinsField.disabled = false;
+                }
+                return;
+            }
+
+            // ✅ user xác nhận → commit
+            this.value = selectedStatus;
+            originalEventStatus = selectedStatus;
+
+            if (eventSpinsField) {
+                eventSpinsField.disabled = true;
+            }
+            return;
+        }
+
+        // Các trường hợp còn lại
+        originalEventStatus = selectedStatus;
+        if (eventSpinsField) {
+            eventSpinsField.disabled = selectedStatus !== 'upcoming';
+        }
+    });
+}
+
 
         function getInitials(name) {
             if (!name) return 'EV';
