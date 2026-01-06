@@ -18,7 +18,6 @@
             <div class="col-md-2">
                 <select class="form-select" id="status-filter">
                     <option value="">Tất cả</option>
-                    <option value="standalone">Khảo sát riêng 📋</option>
                     <option value="hot">Hot 🔥</option>
                     <option value="new">Chưa hoàn thành ⏳</option>
                     <option value="old">Đã hoàn thành ✅</option>
@@ -76,6 +75,7 @@
         eventCol.innerHTML = '\
                 <select class="form-select" id="event-filter">\
                     <option value=\"\">T\u1ea5t c\u1ea3 s\u1ef1 ki\u1ec7n</option>\
+                    <option value=\"standalone\">Kh\u1ea3o s\u00e1t ri\u00eang 📋</option>\
                 </select>\
             ';
         statusCol.insertAdjacentElement('afterend', eventCol);
@@ -89,7 +89,7 @@
             return;
         }
 
-        select.innerHTML = '<option value=\"\">T\u1ea5t c\u1ea3 s\u1ef1 ki\u1ec7n đã tham gia</option>';
+        select.innerHTML = '<option value=\"\">T\u1ea5t c\u1ea3 s\u1ef1 ki\u1ec7n đã tham gia</option><option value=\"standalone\">Kh\u1ea3o s\u00e1t ri\u00eang 📋</option>';
 
         try {
             const params = new URLSearchParams({ page: 1, limit: 50 });
@@ -284,10 +284,7 @@
         delete filters.isCompleted;
         delete filters.standalone;
 
-        if (value === 'standalone') {
-            // Khảo sát riêng: các khảo sát không có sự kiện (maSuKien là null)
-            filters.standalone = 'true';
-        } else if (value === 'hot') {
+        if (value === 'hot') {
             // Hot: sắp xếp theo số lượng hoàn thành (số lượng người dùng duy nhất)
             filters.sortBy = 'hot';
         } else if (value === 'new') {
@@ -334,11 +331,19 @@
 
             eventFilterEl.addEventListener('change', function (e) {
                 const filters = { ...currentFilters };
-                if (e.target.value) {
-                    filters.maSuKien = e.target.value;
-                } else {
-                    delete filters.maSuKien;
+                const value = e.target.value;
+                
+                // Reset các bộ lọc sự kiện
+                delete filters.maSuKien;
+                delete filters.standalone;
+                
+                if (value === 'standalone') {
+                    // Khảo sát riêng: các khảo sát không có sự kiện (maSuKien là null)
+                    filters.standalone = 'true';
+                } else if (value) {
+                    filters.maSuKien = value;
                 }
+                
                 currentFilters = filters;
                 loadSurveys(1, filters);
             });
