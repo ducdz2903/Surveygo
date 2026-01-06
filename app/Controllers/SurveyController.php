@@ -88,7 +88,6 @@ class SurveyController extends Controller
         }
 
         $result = Survey::paginate($page, $limit, $filters);
-
         // Nếu có user_id, kiểm tra từng survey xem user đã submit chưa
         $surveyData = array_map(fn($s) => $s->toArray(), $result['surveys']);
 

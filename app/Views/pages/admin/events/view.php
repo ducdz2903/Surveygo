@@ -328,23 +328,31 @@ $__mk = static function (string $base, string $path): string {
 
                 if (eventStatusSelect) {
                     eventStatusSelect.addEventListener('change', () => {
+                        const previousStatus = eventCurrentStatus; // trạng thái thật
                         const newStatus = eventStatusSelect.value || 'upcoming';
-                        if (originalStatusForConfirm === 'upcoming' && newStatus !== 'upcoming') {
-                            const confirmed = window.confirm(
-                                'Sau khi thay đổi trạng thái khỏi "Sắp diễn ra", bạn sẽ không thể thay đổi được số lượt rút thăm nữa. Bạn có chắc chắn muốn tiếp tục?'
-                            );
-                            if (!confirmed) {
-                                eventStatusSelect.value = originalStatusForConfirm || 'upcoming';
-                                if (eventSpinsInput) {
-                                    eventSpinsInput.disabled = originalStatusForConfirm !== 'upcoming';
-                                }
-                                return;
-                            }
+
+                        if (previousStatus === 'upcoming' && newStatus !== 'upcoming') {
+                            // rollback NGAY
+                            eventStatusSelect.value = previousStatus;
+
+                            ModalHelper.confirm({
+                                title: 'Xác nhận thay đổi trạng thái',
+                                message: 'Khi thay đổi trạng thái sự kiện từ "Sắp diễn ra" sang trạng thái khác, bạn sẽ không thể thêm hoặc gỡ khảo sát khỏi sự kiện này nữa. Bạn có chắc chắn muốn tiếp tục?',
+                                type: 'warning',
+                                confirmText: 'Tiếp tục',
+                                cancelText: 'Hủy',
+                                onConfirm: () => {
+                                    eventStatusSelect.value = newStatus;
+                                    eventSpinsInput.disabled = newStatus !== 'upcoming';
+                                },
+                            });
+
+                            return; 
                         }
-                        if (eventSpinsInput) {
-                            eventSpinsInput.disabled = newStatus !== 'upcoming';
-                        }
+
+                        eventSpinsInput.disabled = newStatus !== 'upcoming';
                     });
+
                 }
             }
         }
@@ -549,11 +557,8 @@ $__mk = static function (string $base, string $path): string {
                 throw new Error(json.message || res.statusText);
             }
             window.showToast('success', 'Đã gắn khảo sát #' + surveyId + ' vào sự kiện.');
-            // Close modal after successful attach
-            if (surveyLibraryModal) {
-                surveyLibraryModal.hide();
-            }
             loadEventSurveys();
+            loadSurveyLibrary();
         } catch (err) {
             console.error(err);
             window.showToast('error', 'Gắn khảo sát thất bại: ' + err.message);
@@ -582,6 +587,7 @@ $__mk = static function (string $base, string $path): string {
                 }
                 window.showToast('success', 'Đã gỡ khảo sát #' + surveyId + ' khỏi sự kiện.');
                 loadEventSurveys();
+                loadSurveyLibrary();
             } catch (err) {
                 console.error(err);
                 window.showToast('error', 'Gỡ khảo sát thất bại: ' + err.message);
@@ -620,7 +626,7 @@ $__mk = static function (string $base, string $path): string {
             const params = new URLSearchParams({
                 page: 1,
                 limit: 20,
-                trangThai: 'published',
+                trangThai: 'approved',
             });
             if (term) params.set('search', term);
 
@@ -650,25 +656,35 @@ $__mk = static function (string $base, string $path): string {
                     : 'badge bg-secondary-subtle text-secondary border';
                 const statusText = status === 'approved' || status === 'published' ? 'Đã duyệt' : status;
 
+                const attached = Number(s.maSuKien || s.ma_su_kien || s.eventId || 0) === Number(eventId);
+                const canEdit = !!isEventUpcoming;
+
+                let actionBtn = '';
+                if (attached) {
+                    actionBtn = canEdit
+                        ? `<button class="btn btn-sm btn-outline-danger" onclick="detachSurvey(${s.id})"><i class="fas fa-unlink me-1"></i>Gỡ</button>`
+                        : `<button class="btn btn-sm btn-outline-secondary disabled"><i class="fas fa-check me-1"></i>Đã gắn</button>`;
+                } else {
+                    actionBtn = `<button class="btn btn-sm btn-outline-primary" onclick="attachSurveyToEvent(${s.id})"><i class="fas fa-link me-1"></i>Gắn vào</button>`;
+                }
+
                 return `
-                    <tr class="align-middle">
-                        <td><span class="font-monospace text-dark">#${code}</span></td>
-                        <td>
-                            <div class="fw-semibold text-primary">${title}</div>
-                            <div class="small text-muted">
-                                <span class="${badgeCls}">${statusText}</span>
-                            </div>
-                        </td>
-                        <td>
-                            <span class="${badgeCls}">${statusText}</span>
-                        </td>
-                        <td class="text-end pe-3">
-                            <button class="btn btn-sm btn-outline-primary" onclick="attachSurveyToEvent(${s.id})">
-                                <i class="fas fa-link me-1"></i>Gắn vào
-                            </button>
-                        </td>
-                    </tr>
-                `;
+        <tr class="align-middle">
+            <td><span class="font-monospace text-dark">#${code}</span></td>
+            <td>
+                <div class="fw-semibold text-primary">${title}</div>
+                <div class="small text-muted">
+                    <span class="${badgeCls}">${statusText}</span>
+                </div>
+            </td>
+            <td>
+                <span class="${badgeCls}">${statusText}</span>
+            </td>
+            <td class="text-end pe-3">
+                ${actionBtn}
+            </td>
+        </tr>
+    `;
             }).join('');
         } catch (err) {
             console.error(err);

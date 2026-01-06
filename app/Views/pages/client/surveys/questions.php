@@ -288,13 +288,13 @@
     function setRating(questionId, rating) {
         // Cập nhật đối tượng answers
         answers[questionId] = rating;
-        
+
         // Cập nhật input ẩn
         const hiddenInput = document.getElementById(`rating_${questionId}`);
         if (hiddenInput) {
             hiddenInput.value = rating;
         }
-        
+
         // Cập nhật trạng thái hiển thị tất cả các sao
         const container = document.querySelector(`[data-question-id="${questionId}"]`);
         if (container) {
@@ -309,7 +309,7 @@
                     star.classList.add('text-muted');
                 }
             });
-            
+
             // Cập nhật văn bản đánh giá
             const ratingText = document.getElementById(`rating-text-${questionId}`);
             if (ratingText) {
@@ -459,7 +459,7 @@
             modal?.hide();
             setTimeout(() => {
                 // Redirect về quick-poll nếu đây là quick poll, ngược lại về surveys
-                const redirectUrl = surveyData?.isQuickPoll ? '/quick-poll' : '/surveys';
+                const redirectUrl = surveyData?.loaiKhaoSat === 'QuickPoll' ? '/quick-poll' : '/surveys';
                 window.location.href = redirectUrl;
             }, 300);
         });
@@ -513,7 +513,7 @@
 
                 setTimeout(() => {
                     // Redirect về quick-poll nếu đây là quick poll, ngược lại về surveys
-                    const redirectUrl = surveyData?.isQuickPoll ? '/quick-poll' : '/surveys';
+                    const redirectUrl = surveyData?.loaiKhaoSat === 'QuickPoll' ? '/quick-poll' : '/surveys';
                     window.location.href = redirectUrl;
                 }, 500);
             } catch (error) {

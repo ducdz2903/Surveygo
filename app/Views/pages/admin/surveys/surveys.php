@@ -251,7 +251,7 @@
                     </td>
                     <td>
                         <div class="fw-bold text-primary">${s.tieuDe || s.tieu_de || 'Không tiêu đề'}</div>
-                        <div class="small text-muted"><i class="fas fa-user-circle me-1"></i> ${s.maNguoiTao || 'Ẩn danh'}</div>
+                        <div class="small text-muted"><i class="fas fa-user-circle me-1"></i> ${s.creator_name || 'Ẩn danh'}</div>
                     </td>
                     <td>
                         ${s.loaiKhaoSat === 'quickpoll' || s.loaiKhaoSat === 'QuickPoll' || s.loaiKhaoSat === 'quick_poll'

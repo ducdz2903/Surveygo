@@ -125,8 +125,6 @@
     </div>
 </div>
 
-<script src="/public/assets/js/admin-helpers.js"></script>
-
 <script>
     const API_BASE = '/api';
     let currentPage = 1;
@@ -620,85 +618,99 @@
 
     // Hàm thực hiện chuyển khoản tự động
     async function submitBankTransfer(bankName, accountNumber, redemptionId, accountName) {
-        const transferStatusDiv = document.getElementById('transfer-status');
-        const submitBtn = document.getElementById('submit-transfer-btn');
+    const transferStatusDiv = document.getElementById('transfer-status');
+    const submitBtn = document.getElementById('submit-transfer-btn');
 
-        if (!confirm('Bạn có chắc chắn muốn thực hiện chuyển khoản tự động?')) {
-            return;
-        }
+    window.ModalHelper.confirm({
+        title: 'Xác nhận chuyển khoản',
+        message: 'Bạn có chắc chắn muốn thực hiện chuyển khoản tự động không?',
+        type: 'question',
+        confirmText: 'Thực hiện CK',
+        cancelText: 'Hủy',
+        isDangerous: true,
+        onConfirm: async function () {
 
-        // Hiển thị loading
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Đang xử lý...';
-        transferStatusDiv.innerHTML = '<span class="text-info"><i>Đang thực hiện...</i></span>';
+            // Hiển thị loading
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Đang xử lý...';
+            transferStatusDiv.innerHTML = '<span class="text-info"><i>Đang thực hiện...</i></span>';
 
-        // Chuẩn hóa label_text từ bank_name
-        const labelText = bankName ? bankName.toLowerCase() : '';
+            const labelText = bankName ? bankName.toLowerCase() : '';
 
-        try {
-            const response = await fetch('/api/bank/submit-transfer', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
-                body: JSON.stringify({
-                    url_id: null,
-                    label_text: labelText,
-                    number: accountNumber,
-                    headless: true,
-                    timeout_ms: 30000
-                })
-            });
+            try {
+                const response = await fetch('/api/bank/submit-transfer', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({
+                        url_id: null,
+                        label_text: labelText,
+                        number: accountNumber,
+                        headless: true,
+                        timeout_ms: 30000
+                    })
+                });
 
-            const data = await response.json();
+                const data = await response.json();
 
-            // Kiểm tra nếu thành công
-            if (data.success === true) {
-                transferStatusDiv.innerHTML = '<span class="text-success"><strong><i class="fas fa-check-circle me-1"></i>Đã hoàn thành</strong></span>';
-                submitBtn.innerHTML = '<i class="fas fa-check me-1"></i>Đã thực hiện';
-                submitBtn.disabled = true;
-                submitBtn.classList.remove('btn-success');
-                submitBtn.classList.add('btn-secondary');
+                if (data.success === true) {
+                    transferStatusDiv.innerHTML =
+                        '<span class="text-success"><strong><i class="fas fa-check-circle me-1"></i>Đã hoàn thành</strong></span>';
 
-                // Tự động chuyển status dropdown về 'completed'
-                const statusSelect = document.getElementById('status-select');
-                if (statusSelect) {
-                    statusSelect.value = 'completed';
+                    submitBtn.innerHTML = '<i class="fas fa-check me-1"></i>Đã thực hiện';
+                    submitBtn.disabled = true;
+                    submitBtn.classList.remove('btn-success');
+                    submitBtn.classList.add('btn-secondary');
+
+                    const statusSelect = document.getElementById('status-select');
+                    if (statusSelect) statusSelect.value = 'completed';
+
+                    await saveTransferStatusToDb(redemptionId, 'completed');
+
+                    ModalHelper.alert({
+                        title: 'Thành công',
+                        message: 'Chuyển khoản thành công! Trạng thái đã được lưu.',
+                        type: 'success'
+                    });
                 }
+                else {
+                    const errorMsg = data.message || 'Lỗi không xác định';
 
-                // Tự động lưu transfer_status vào database
-                await saveTransferStatusToDb(redemptionId, 'completed');
+                    transferStatusDiv.innerHTML =
+                        `<small class="text-danger"><i class="fas fa-exclamation-circle me-1"></i>${errorMsg}</small>`;
 
-                showToast('success', 'Chuyển khoản thành công! Trạng thái đã được lưu.');
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-paper-plane me-1"></i>Thực hiện CK';
+
+                    ModalHelper.alert({
+                        title: 'Thất bại',
+                        message: errorMsg,
+                        type: 'error'
+                    });
+                }
             }
-            // Kiểm tra nếu có error
-            else if (data.error === true || data.message) {
-                const errorMsg = data.message || 'Lỗi không xác định';
-                transferStatusDiv.innerHTML = `<small class="text-danger"><i class="fas fa-exclamation-circle me-1"></i>${errorMsg}</small>`;
+            catch (error) {
+                console.error('Error submitting transfer:', error);
+
+                transferStatusDiv.innerHTML =
+                    `<small class="text-danger"><i class="fas fa-times-circle me-1"></i>Lỗi: ${error.message}</small>`;
+
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = '<i class="fas fa-paper-plane me-1"></i>Thực hiện CK';
-                showToast('error', errorMsg);
-            }
-            // Trường hợp khác
-            else {
-                transferStatusDiv.innerHTML = '<small class="text-warning"><i class="fas fa-question-circle me-1"></i>Không thành công</small>';
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = '<i class="fas fa-paper-plane me-1"></i>Thực hiện CK';
-                showToast('warning', 'Không thể thực hiện chuyển khoản');
-            }
-        } catch (error) {
-            console.error('Error submitting transfer:', error);
-            transferStatusDiv.innerHTML = `<small class="text-danger"><i class="fas fa-times-circle me-1"></i>Lỗi: ${error.message}</small>`;
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = '<i class="fas fa-paper-plane me-1"></i>Thực hiện CK';
-            showToast('error', 'Lỗi: ' + error.message);
 
-            // Lưu transfer_status failed vào database
-            await saveTransferStatusToDb(redemptionId, 'failed');
+                await saveTransferStatusToDb(redemptionId, 'failed');
+
+                ModalHelper.alert({
+                    title: 'Lỗi hệ thống',
+                    message: error.message,
+                    type: 'error'
+                });
+            }
         }
-    }
-
+    });
+                    }
     // Hàm lưu account_name vào database (tự động gọi khi verify thành công)
     async function saveAccountNameToDb(redemptionId, accountName) {
         try {

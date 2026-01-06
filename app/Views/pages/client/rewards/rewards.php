@@ -46,13 +46,13 @@
                 </button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link" id="giftcard-tab" data-bs-toggle="tab" data-bs-target="#giftcard-rewards" 
+                <button class="nav-link" id="giftcard-tab" data-bs-toggle="tab" data-bs-target="#giftcard-rewards"
                     type="button" role="tab" data-type="giftcard">
                     <i class="fas fa-credit-card me-2"></i>Gift Card
                 </button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link" id="physical-tab" data-bs-toggle="tab" data-bs-target="#physical-rewards" 
+                <button class="nav-link" id="physical-tab" data-bs-toggle="tab" data-bs-target="#physical-rewards"
                     type="button" role="tab" data-type="physical">
                     <i class="fas fa-gift me-2"></i>Quà Tặng
                 </button>
@@ -123,7 +123,7 @@
                 </tbody>
             </table>
         </div>
-        
+
         <!-- Pagination -->
         <div class="col-12 d-flex justify-content-center gap-2 mt-4" id="history-pagination-container">
         </div>
@@ -134,13 +134,15 @@
 <div class="modal fade" id="confirmModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-            <div class="modal-header" style="background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%); color: white; border: none;">
+            <div class="modal-header"
+                style="background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%); color: white; border: none;">
                 <h5 class="modal-title" style="font-weight: 600;">Xác Nhận Đổi Điểm</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <div class="reward-info mb-3 p-3 rounded" style="background: #f8f9fa;">
-                    <p class="mb-2">Bạn muốn đổi <strong id="modal-points">0</strong> điểm để nhận <strong id="modal-value">0</strong></p>
+                    <p class="mb-2">Bạn muốn đổi <strong id="modal-points">0</strong> điểm để nhận <strong
+                            id="modal-value">0</strong></p>
                     <p class="text-muted small mb-0">Điểm của bạn sẽ bị trừ sau khi xác nhận.</p>
                 </div>
 
@@ -153,7 +155,8 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
                 <button type="button" class="btn btn-primary" id="confirmBtn">
-                    <span class="spinner-border spinner-border-sm d-none me-2" id="confirmSpinner" role="status" aria-hidden="true"></span>
+                    <span class="spinner-border spinner-border-sm d-none me-2" id="confirmSpinner" role="status"
+                        aria-hidden="true"></span>
                     Xác Nhận Đổi
                 </button>
             </div>
@@ -165,7 +168,8 @@
 <div class="modal fade" id="giftCardDetailModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content" style="border: none; box-shadow: 0 10px 40px rgba(0,0,0,0.15);">
-            <div class="modal-header" style="background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%); color: white; border: none;">
+            <div class="modal-header"
+                style="background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%); color: white; border: none;">
                 <h5 class="modal-title" style="font-weight: 600; font-size: 1.3rem;">
                     <i class="fas fa-gift me-2"></i>Chi Tiết Thẻ Quà Tặng
                 </h5>
@@ -173,30 +177,43 @@
             </div>
             <div class="modal-body" style="padding: 2rem;">
                 <!-- Gift Card Info Card -->
-                <div style="background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem;">
+                <div
+                    style="background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem;">
                     <div class="row g-3">
                         <div class="col-md-6">
                             <div class="info-group">
-                                <small class="text-muted d-block" style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Tên Thẻ</small>
-                                <p class="mt-2 mb-0" id="gc-name" style="font-size: 1.1rem; font-weight: 600; color: #333;">-</p>
+                                <small class="text-muted d-block"
+                                    style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Tên
+                                    Thẻ</small>
+                                <p class="mt-2 mb-0" id="gc-name"
+                                    style="font-size: 1.1rem; font-weight: 600; color: #333;">-</p>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="info-group">
-                                <small class="text-muted d-block" style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Nhà Cung Cấp</small>
-                                <p class="mt-2 mb-0" id="gc-provider" style="font-size: 1.1rem; font-weight: 600; color: #667eea;">-</p>
+                                <small class="text-muted d-block"
+                                    style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Nhà
+                                    Cung Cấp</small>
+                                <p class="mt-2 mb-0" id="gc-provider"
+                                    style="font-size: 1.1rem; font-weight: 600; color: #667eea;">-</p>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="info-group">
-                                <small class="text-muted d-block" style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Giá Trị</small>
-                                <p class="mt-2 mb-0" id="gc-value" style="font-size: 1.1rem; font-weight: 600; color: #28a745;">-</p>
+                                <small class="text-muted d-block"
+                                    style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Giá
+                                    Trị</small>
+                                <p class="mt-2 mb-0" id="gc-value"
+                                    style="font-size: 1.1rem; font-weight: 600; color: #28a745;">-</p>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="info-group">
-                                <small class="text-muted d-block" style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Hạn Sử Dụng</small>
-                                <p class="mt-2 mb-0" id="gc-expiry" style="font-size: 1.1rem; font-weight: 600; color: #e74c3c;">-</p>
+                                <small class="text-muted d-block"
+                                    style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Hạn
+                                    Sử Dụng</small>
+                                <p class="mt-2 mb-0" id="gc-expiry"
+                                    style="font-size: 1.1rem; font-weight: 600; color: #e74c3c;">-</p>
                             </div>
                         </div>
                     </div>
@@ -204,7 +221,9 @@
 
                 <!-- Mô Tả -->
                 <div class="mb-3">
-                    <small class="text-muted d-block mb-2" style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Mô Tả</small>
+                    <small class="text-muted d-block mb-2"
+                        style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Mô
+                        Tả</small>
                     <p class="mb-0" id="gc-description" style="color: #666; line-height: 1.6;">-</p>
                 </div>
 
@@ -212,8 +231,10 @@
                 <div class="mb-3">
                     <label class="form-label" style="font-weight: 600; margin-bottom: 0.5rem;">Mã Thẻ</label>
                     <div class="input-group">
-                        <input type="text" class="form-control" id="gc-code" readonly style="border-radius: 6px 0 0 6px;">
-                        <button class="btn btn-primary" type="button" id="copyCodeBtn" style="border-radius: 0 6px 6px 0; background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%); border: none;">
+                        <input type="text" class="form-control" id="gc-code" readonly
+                            style="border-radius: 6px 0 0 6px;">
+                        <button class="btn btn-primary" type="button" id="copyCodeBtn"
+                            style="border-radius: 0 6px 6px 0; background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%); border: none;">
                             <i class="fas fa-copy me-1"></i>Copy
                         </button>
                     </div>
@@ -222,12 +243,15 @@
                 <!-- Số Serial Section -->
                 <div class="mb-3">
                     <label class="form-label" style="font-weight: 600; margin-bottom: 0.5rem;">Số Serial</label>
-                    <input type="text" class="form-control" id="gc-serial" readonly style="border-radius: 6px; background: #f8f9fa;">
+                    <input type="text" class="form-control" id="gc-serial" readonly
+                        style="border-radius: 6px; background: #f8f9fa;">
                 </div>
             </div>
             <div class="modal-footer" style="border-top: 1px solid #504242ff; padding: 1rem 2rem;">
-                <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="border-radius: 6px; border: 1px solid #ddd;">Đóng</button>
-                <button type="button" class="btn btn-primary" id="confirmGiftCardBtn" style="border-radius: 6px; background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%); border: none; padding: 0.6rem 1.5rem;">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal"
+                    style="border-radius: 6px; border: 1px solid #ddd;">Đóng</button>
+                <button type="button" class="btn btn-primary" id="confirmGiftCardBtn"
+                    style="border-radius: 6px; background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%); border: none; padding: 0.6rem 1.5rem;">
                     <i class="fas fa-check me-2"></i>Xác Nhận Đã Nhận
                 </button>
             </div>
@@ -313,36 +337,36 @@
                 'X-Requested-With': 'XMLHttpRequest'
             }
         })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success && data.data) {
-                userBalance = data.data.balance || 0;
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.data) {
+                    userBalance = data.data.balance || 0;
 
-                // Render vào card
-                document.getElementById('total-points').textContent = userBalance.toLocaleString('vi-VN');
-                document.getElementById('total-points-stat').textContent = userBalance.toLocaleString('vi-VN');
-                
-                // Cập nhật localStorage để đồng bộ
-                try {
-                    const raw = localStorage.getItem('app.user');
-                    if (raw) {
-                        const user = JSON.parse(raw);
-                        user.points = userBalance;
-                        localStorage.setItem('app.user', JSON.stringify(user));
+                    // Render vào card
+                    document.getElementById('total-points').textContent = userBalance.toLocaleString('vi-VN');
+                    document.getElementById('total-points-stat').textContent = userBalance.toLocaleString('vi-VN');
+
+                    // Cập nhật localStorage để đồng bộ
+                    try {
+                        const raw = localStorage.getItem('app.user');
+                        if (raw) {
+                            const user = JSON.parse(raw);
+                            user.points = userBalance;
+                            localStorage.setItem('app.user', JSON.stringify(user));
+                        }
+                    } catch (e) {
+                        console.error('Error updating localStorage:', e);
                     }
-                } catch (e) {
-                    console.error('Error updating localStorage:', e);
+                } else {
+                    // Fallback: lấy từ localStorage
+                    loadUserPoints();
                 }
-            } else {
+            })
+            .catch(error => {
+                console.error('Error loading user points from API:', error);
                 // Fallback: lấy từ localStorage
                 loadUserPoints();
-            }
-        })
-        .catch(error => {
-            console.error('Error loading user points from API:', error);
-            // Fallback: lấy từ localStorage
-            loadUserPoints();
-        });
+            });
     }
 
     function loadUserPoints() {
@@ -394,7 +418,7 @@
                 if (!Array.isArray(data)) {
                     data = [];
                 }
-                
+
                 // Lưu cache
                 allRewardsData[type] = data;
                 renderRewardsList(type, page, data);
@@ -432,7 +456,7 @@
 
         // Hiển thị dữ liệu
         let html = paginatedData.map(reward => createRewardCard(reward)).join('');
-        
+
         if (totalPages > 1) {
             html += `
                 <div class="col-12 d-flex justify-content-center gap-2 mt-4">
@@ -442,7 +466,7 @@
                 </div>
             `;
         }
-        
+
         // Set HTML once
         container.innerHTML = html;
 
@@ -461,7 +485,7 @@
         const icon = rewardTypeIcons[reward.type] || '<i class="fas fa-gift"></i>';
         const cardClass = rewardTypeClasses[reward.type] || 'reward-card--card';
         const buttonClass = rewardTypeButtons[reward.type] || 'btn-primary';
-        
+
         let rewardName = reward.name;
         let rewardDesc = reward.description || 'Phần thưởng hấp dẫn';
         let displayValue = reward.value ? `${(reward.value / 1000).toLocaleString('vi-VN')} đ` : reward.name;
@@ -478,7 +502,7 @@
                     <p class="reward-desc">${rewardDesc}</p>
                     ${reward.type === 'physical' && reward.stock !== null ? `
                         <small class="text-muted d-block mb-2">Kho: <strong>${reward.stock}</strong></small>`
-                    : ''}
+                : ''}
                     <button class="btn ${buttonClass} w-100 reward-btn" 
                         data-reward-id="${reward.id}"
                         data-points="${reward.point_cost}" 
@@ -617,12 +641,12 @@
         if (type === 'cash') {
             const bankName = document.getElementById('bankName')?.value;
             const accountNumber = document.getElementById('accountNumber')?.value;
-            
+
             if (!bankName || !accountNumber) {
                 showToast('warning', 'Vui lòng chọn ngân hàng và nhập số tài khoản');
                 return;
             }
-            
+
             if (bankName) postData.bank_name = bankName;
             if (accountNumber) postData.account_number = accountNumber;
         } else if (type === 'physical') {
@@ -659,57 +683,59 @@
             },
             body: JSON.stringify(postData)
         })
-        .then(response => response.json())
-        .then(data => {
-            spinner.classList.add('d-none');
-            confirmBtn.disabled = false;
+            .then(response => response.json())
+            .then(data => {
+                spinner.classList.add('d-none');
+                confirmBtn.disabled = false;
 
-            if (data.success) {
-                // Cập nhật số điểm
-                if (data.data && data.data.user_balance !== undefined) {
-                    userBalance = data.data.user_balance;
-                    
-                    document.getElementById('total-points').textContent = userBalance.toLocaleString('vi-VN');
-                    document.getElementById('total-points-stat').textContent = userBalance.toLocaleString('vi-VN');
-                    
-                    // Lưu vào localStorage
-                    const raw = localStorage.getItem('app.user');
-                    if (raw) {
-                        const user = JSON.parse(raw);
-                        user.points = userBalance;
-                        localStorage.setItem('app.user', JSON.stringify(user));
+                if (data.success) {
+                    // Cập nhật số điểm
+                    if (data.data && data.data.user_balance !== undefined) {
+                        userBalance = data.data.user_balance;
+
+                        document.getElementById('total-points').textContent = userBalance.toLocaleString('vi-VN');
+                        document.getElementById('total-points-stat').textContent = userBalance.toLocaleString('vi-VN');
+
+                        // Lưu vào localStorage
+                        const raw = localStorage.getItem('app.user');
+                        if (raw) {
+                            const user = JSON.parse(raw);
+                            user.points = userBalance;
+                            localStorage.setItem('app.user', JSON.stringify(user));
+                        }
                     }
-                }
 
-                // Close confirm modal
-                const confirmModal = bootstrap.Modal.getInstance(document.getElementById('confirmModal'));
-                if (confirmModal) {
-                    confirmModal.hide();
-                }
+                    // Close confirm modal
+                    const confirmModal = bootstrap.Modal.getInstance(document.getElementById('confirmModal'));
+                    if (confirmModal) {
+                        confirmModal.hide();
+                    }
 
-                // Nếu là giftcard, hiển thị chi tiết gift card
-                if (type === 'giftcard') {
-                    setTimeout(() => {
-                        showGiftCardDetails(rewardId, points, type);
-                    }, 300);
+                    // Nếu là giftcard, hiển thị chi tiết gift card
+                    if (type === 'giftcard') {
+                        setTimeout(() => {
+                            showGiftCardDetails(rewardId, points, type);
+                        }, 300);
+                    } else {
+                        showToast('success', 'Đổi điểm thành công! Vui lòng chờ xác nhận.');
+                        // Reload rewards list
+                        const activeTab = document.querySelector('.rewards-tabs .nav-link.active');
+                        if (activeTab) {
+                            loadRewards(activeTab.dataset.type);
+                        }
+                        // Reload redemption history to show new request
+                        loadRedemptionHistory();
+                    }
                 } else {
-                    showToast('success', 'Đổi điểm thành công! Vui lòng chờ xác nhận.');
-                    // Reload rewards list
-                    const activeTab = document.querySelector('.rewards-tabs .nav-link.active');
-                    if (activeTab) {
-                        loadRewards(activeTab.dataset.type);
-                    }
+                    showToast('error', data.message || 'Lỗi đổi điểm');
                 }
-            } else {
-                showToast('error', data.message || 'Lỗi đổi điểm');
-            }
-        })
-        .catch(error => {
-            console.error('Error redeeming reward:', error);
-            spinner.classList.add('d-none');
-            confirmBtn.disabled = false;
-            showToast('error', 'Lỗi: ' + error.message);
-        });
+            })
+            .catch(error => {
+                console.error('Error redeeming reward:', error);
+                spinner.classList.add('d-none');
+                confirmBtn.disabled = false;
+                showToast('error', 'Lỗi: ' + error.message);
+            });
     }
 
     // ====== Gift Card Modal Functions ======
@@ -719,74 +745,74 @@
 
         // Gọi API lấy chi tiết gift card
         const apiUrl = `${API_BASE}/rewards/giftcard/details?reward_id=${rewardId}`;
-        
+
         fetch(apiUrl, {
             headers: {
                 'X-Requested-With': 'XMLHttpRequest'
             }
         })
-        .then(response => {
-            return response.json();
-        })
-        .then(data => {
-            showGiftCardLoading(false);
-
-            if (data.success && data.data) {
-                const giftcard = data.data;
-
-                // Điền dữ liệu vào modal
-                document.getElementById('gc-name').textContent = giftcard.name || '-';
-                document.getElementById('gc-provider').textContent = giftcard.provider ? formatProvider(giftcard.provider) : '-';
-                document.getElementById('gc-value').textContent = giftcard.value ? formatCurrency(giftcard.value) : '-';
-                document.getElementById('gc-code').value = giftcard.code || '-';
-                document.getElementById('gc-serial').value = giftcard.serial || '-';
-                document.getElementById('gc-expiry').textContent = giftcard.expiry_date ? formatDate(giftcard.expiry_date) : '-';
-                document.getElementById('gc-description').textContent = giftcard.description || '-';
-
-                // Lưu rewardId để dùng khi confirm
-                document.getElementById('confirmGiftCardBtn').dataset.rewardId = rewardId;
-                document.getElementById('confirmGiftCardBtn').dataset.points = points;
-
-                // Close confirm modal, open gift card detail modal
-                const confirmModal = bootstrap.Modal.getInstance(document.getElementById('confirmModal'));
-                if (confirmModal) {
-                    confirmModal.hide();
-                }
-
-                // Mở modal chi tiết sau khi modal confirm đóng
-                setTimeout(() => {
-                    const detailModal = new bootstrap.Modal(document.getElementById('giftCardDetailModal'));
-                    detailModal.show();
-
-                    // Xử lý copy code button
-                    document.getElementById('copyCodeBtn').onclick = function() {
-                        const code = document.getElementById('gc-code').value;
-                        navigator.clipboard.writeText(code).then(() => {
-                            showToast('success', 'Đã copy mã thẻ!');
-                        }).catch(err => {
-                            console.error('Error copying:', err);
-                        });
-                    };
-
-                    // Xử lý confirm button
-                    const confirmBtn = document.getElementById('confirmGiftCardBtn');
-                    const newConfirmBtn = confirmBtn.cloneNode(true);
-                    confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
-
-                    newConfirmBtn.addEventListener('click', function() {
-                        confirmGiftCardRedemption(rewardId, points);
-                    });
-                }, 200);
-            } else {
-                showToast('error', data.message || 'Không thể tải chi tiết thẻ');
+            .then(response => {
+                return response.json();
+            })
+            .then(data => {
                 showGiftCardLoading(false);
-            }
-        })
-        .catch(error => {
-            console.error('Error loading gift card details:', error);
-            showToast('error', 'Lỗi: ' + error.message);
-            showGiftCardLoading(false);
-        });
+
+                if (data.success && data.data) {
+                    const giftcard = data.data;
+
+                    // Điền dữ liệu vào modal
+                    document.getElementById('gc-name').textContent = giftcard.name || '-';
+                    document.getElementById('gc-provider').textContent = giftcard.provider ? formatProvider(giftcard.provider) : '-';
+                    document.getElementById('gc-value').textContent = giftcard.value ? formatCurrency(giftcard.value) : '-';
+                    document.getElementById('gc-code').value = giftcard.code || '-';
+                    document.getElementById('gc-serial').value = giftcard.serial || '-';
+                    document.getElementById('gc-expiry').textContent = giftcard.expiry_date ? formatDate(giftcard.expiry_date) : '-';
+                    document.getElementById('gc-description').textContent = giftcard.description || '-';
+
+                    // Lưu rewardId để dùng khi confirm
+                    document.getElementById('confirmGiftCardBtn').dataset.rewardId = rewardId;
+                    document.getElementById('confirmGiftCardBtn').dataset.points = points;
+
+                    // Close confirm modal, open gift card detail modal
+                    const confirmModal = bootstrap.Modal.getInstance(document.getElementById('confirmModal'));
+                    if (confirmModal) {
+                        confirmModal.hide();
+                    }
+
+                    // Mở modal chi tiết sau khi modal confirm đóng
+                    setTimeout(() => {
+                        const detailModal = new bootstrap.Modal(document.getElementById('giftCardDetailModal'));
+                        detailModal.show();
+
+                        // Xử lý copy code button
+                        document.getElementById('copyCodeBtn').onclick = function () {
+                            const code = document.getElementById('gc-code').value;
+                            navigator.clipboard.writeText(code).then(() => {
+                                showToast('success', 'Đã copy mã thẻ!');
+                            }).catch(err => {
+                                console.error('Error copying:', err);
+                            });
+                        };
+
+                        // Xử lý confirm button
+                        const confirmBtn = document.getElementById('confirmGiftCardBtn');
+                        const newConfirmBtn = confirmBtn.cloneNode(true);
+                        confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+
+                        newConfirmBtn.addEventListener('click', function () {
+                            confirmGiftCardRedemption(rewardId, points);
+                        });
+                    }, 200);
+                } else {
+                    showToast('error', data.message || 'Không thể tải chi tiết thẻ');
+                    showGiftCardLoading(false);
+                }
+            })
+            .catch(error => {
+                console.error('Error loading gift card details:', error);
+                showToast('error', 'Lỗi: ' + error.message);
+                showGiftCardLoading(false);
+            });
     }
 
     function showGiftCardLoading(show) {
@@ -826,6 +852,10 @@
         if (activeTab) {
             loadRewards(activeTab.dataset.type);
         }
+        // Reload redemption history to show new request
+        loadRedemptionHistory();
+
+        showToast('success', 'Đổi điểm thành công! Vui lòng chờ xác nhận.');
     }
 
     // ====== Load Redemption History ======
@@ -833,7 +863,7 @@
 
     function loadRedemptionHistory(page = 1) {
         const tableBody = document.getElementById('history-table-body');
-        
+
         // Lấy user_id từ localStorage
         let userId = null;
         try {
@@ -854,38 +884,38 @@
             `;
             return;
         }
-        
+
         fetch(`${API_BASE}/redemptions/my?user_id=${userId}&page=${page}&limit=10`, {
             headers: {
                 'X-Requested-With': 'XMLHttpRequest'
             }
         })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success && Array.isArray(data.data) && data.data.length > 0) {
-                const html = data.data.map(redemption => {
-                    const date = new Date(redemption.created_at);
-                    const dateStr = date.toLocaleDateString('vi-VN');
-                    
-                    // Xác định loại reward từ type
-                    const typeName = getRedemptionTypeName(redemption.type, redemption.provider);
-                    const typeColor = getRedemptionTypeColor(redemption.type);
-                    
-                    // Xác định trạng thái
-                    const statusBadge = getStatusBadge(redemption.status);
-                    
-                    // Lấy điểm tiêu từ point_cost
-                    const points = redemption.point_cost ? redemption.point_cost.toLocaleString('vi-VN') : '-';
-                    
-                    // Lấy giá trị từ value - nếu là physical thì lấy tên quà tặng
-                    let value = '-';
-                    if (redemption.type === 'physical' && redemption.name) {
-                        value = redemption.name;
-                    } else if (redemption.value) {
-                        value = formatValue(redemption.value);
-                    }
-                    
-                    return `
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && Array.isArray(data.data) && data.data.length > 0) {
+                    const html = data.data.map(redemption => {
+                        const date = new Date(redemption.created_at);
+                        const dateStr = date.toLocaleDateString('vi-VN');
+
+                        // Xác định loại reward từ type
+                        const typeName = getRedemptionTypeName(redemption.type, redemption.provider);
+                        const typeColor = getRedemptionTypeColor(redemption.type);
+
+                        // Xác định trạng thái
+                        const statusBadge = getStatusBadge(redemption.status);
+
+                        // Lấy điểm tiêu từ point_cost
+                        const points = redemption.point_cost ? redemption.point_cost.toLocaleString('vi-VN') : '-';
+
+                        // Lấy giá trị từ value - nếu là physical thì lấy tên quà tặng
+                        let value = '-';
+                        if (redemption.type === 'physical' && redemption.name) {
+                            value = redemption.name;
+                        } else if (redemption.value) {
+                            value = formatValue(redemption.value);
+                        }
+
+                        return `
                         <tr>
                             <td>${dateStr}</td>
                             <td><span class="badge ${typeColor}">${typeName}</span></td>
@@ -894,37 +924,37 @@
                             <td>${statusBadge}</td>
                         </tr>
                     `;
-                }).join('');
-                
-                tableBody.innerHTML = html;
-                
-                // Render pagination
-                console.log('Pagination data:', data.pagination);
-                if (data.pagination) {
-                    renderHistoryPagination(data.pagination);
-                }
-            } else {
-                tableBody.innerHTML = `
+                    }).join('');
+
+                    tableBody.innerHTML = html;
+
+                    // Render pagination
+                    console.log('Pagination data:', data.pagination);
+                    if (data.pagination) {
+                        renderHistoryPagination(data.pagination);
+                    }
+                } else {
+                    tableBody.innerHTML = `
                     <tr>
                         <td colspan="5" class="text-center text-muted">Chưa có lịch sử đổi điểm</td>
                     </tr>
                 `;
-                document.getElementById('history-pagination').innerHTML = '';
-            }
-        })
-        .catch(error => {
-            console.error('Error loading history:', error);
-            tableBody.innerHTML = `
+                    document.getElementById('history-pagination').innerHTML = '';
+                }
+            })
+            .catch(error => {
+                console.error('Error loading history:', error);
+                tableBody.innerHTML = `
                 <tr>
                     <td colspan="5" class="text-center text-danger">Lỗi tải lịch sử</td>
                 </tr>
             `;
-        });
+            });
     }
 
     function renderHistoryPagination(pagination) {
         const container = document.getElementById('history-pagination-container');
-        
+
         if (!pagination || pagination.pages <= 1) {
             container.innerHTML = '';
             return;
@@ -932,22 +962,22 @@
 
         const currentPage = pagination.page;
         const totalPages = pagination.pages;
-        
+
         let html = '';
-        
+
         // Nút "Trước"
         if (currentPage > 1) {
             html += `<button class="btn btn-sm btn-outline-primary" onclick="loadRedemptionHistory(${currentPage - 1})">← Trước</button>`;
         }
-        
+
         // Hiển thị trang hiện tại / tổng trang
         html += `<span class="btn btn-sm btn-light disabled">Trang ${currentPage}/${totalPages}</span>`;
-        
+
         // Nút "Tiếp"
         if (currentPage < totalPages) {
             html += `<button class="btn btn-sm btn-outline-primary" onclick="loadRedemptionHistory(${currentPage + 1})">Tiếp →</button>`;
         }
-        
+
         container.innerHTML = html;
     }
 
