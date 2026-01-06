@@ -126,6 +126,8 @@
 </div>
 
 <script src="/public/assets/js/admin-helpers.js"></script>
+<script src="/public/assets/js/modal-helper.js"></script>
+<script src="/public/assets/js/toast-helper.js"></script>
 
 <script>
     const API_BASE = '/api';
@@ -623,7 +625,7 @@
     const transferStatusDiv = document.getElementById('transfer-status');
     const submitBtn = document.getElementById('submit-transfer-btn');
 
-    ModalHelper.confirm({
+    window.ModalHelper.confirm({
         title: 'Xác nhận chuyển khoản',
         message: 'Bạn có chắc chắn muốn thực hiện chuyển khoản tự động không?',
         type: 'question',
